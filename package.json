@@ -71,6 +71,6 @@
     "coverage": "istanbul cover _mocha --require babelhook test/both test/node -- -u exports -R spec && open coverage/lcov-report/index.html",
     "coveralls": "istanbul cover _mocha --require babelhook test/both test/node --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
   },
-  "main": "./dist/index",
+  "main": "index.js",
   "license": "MIT"
 }
