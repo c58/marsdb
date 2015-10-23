@@ -1187,9 +1187,7 @@ var CursorObservable = (function (_Cursor) {
     value: function observe(listener) {
       var _this = this;
 
-      // Debounce listener a little for update propagation
-      // when joins updated
-      listener = debounce(listener, 0, 0);
+      listener = this._prepareListener(listener);
       this.on('update', listener);
 
       // Make new wrapper for make possible to observe
@@ -1267,6 +1265,13 @@ var CursorObservable = (function (_Cursor) {
       if (insertedInResult) {
         return this.update();
       }
+    }
+  }, {
+    key: '_prepareListener',
+    value: function _prepareListener(listener) {
+      // Debounce listener a little for update propagation
+      // when joins updated
+      return debounce(listener, 0, 0);
     }
   }]);
 
