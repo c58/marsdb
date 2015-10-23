@@ -6,7 +6,7 @@ Object.defineProperty(exports, '__esModule', {
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+var _get = function get(_x2, _x3, _x4) { var _again = true; _function: while (_again) { var object = _x2, property = _x3, receiver = _x4; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x2 = parent; _x3 = property; _x4 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
 exports.debounce = debounce;
 
@@ -47,25 +47,55 @@ var CursorObservable = (function (_Cursor) {
    * @return {Promise}
    */
 
+  /**
+   * Change a batch size of updater.
+   * Btach size is a number of changes must be happen
+   * in debounce interval to force execute debounced
+   * function (update a result, in our case)
+   *
+   * @param  {Number} batchSize
+   * @return {CursorObservable}
+   */
+
   _createClass(CursorObservable, [{
     key: 'batchSize',
     value: function batchSize(_batchSize) {
       this.update.updateBatchSize(_batchSize);
       return this;
     }
+
+    /**
+     * Change debounce wait time of the updater
+     * @param  {Number} waitTime
+     * @return {CursorObservable}
+     */
   }, {
     key: 'debounce',
     value: function debounce(waitTime) {
       this.update.updateWait(waitTime);
       return this;
     }
+
+    /**
+     * Observe changes of the cursor.
+     * It returns a Stopper – Promise with `stop` function.
+     * It is been resolved when first result of cursor is ready and
+     * after first observe listener call.
+     *
+     * @param  {Function}
+     * @return {Stopper}
+     */
   }, {
     key: 'observe',
     value: function observe(listener) {
       var _this = this;
 
       // Listen for changes of the cursor
-      this.on('update', listener);
+      this._observing = true;
+      this._haveListeners = this._haveListeners || !!listener;
+      if (listener) {
+        this.on('update', listener);
+      }
 
       // Make new wrapper for make possible to observe
       // multiple times (for removeListener)
@@ -76,15 +106,22 @@ var CursorObservable = (function (_Cursor) {
       this.db.on('update', updateWrapper);
       this.db.on('remove', updateWrapper);
 
-      var firstUpdatePromise = this.update();
+      var firstUpdatePromise = this.update(true);
       var stopper = function () {
-        _this.removeListener('update', listener);
         _this.db.removeListener('insert', updateWrapper);
         _this.db.removeListener('update', updateWrapper);
         _this.db.removeListener('remove', updateWrapper);
+        if (listener) {
+          _this.removeListener('update', listener);
+        }
       };
       var createStoppablePromise = function (currPromise) {
+        // __onceUpdate is used when we do not need to know
+        // a new result of a cursor, but just need to know
+        // absout some changes happen. Used in observable joins.
         return {
+          __haveListeners: _this._haveListeners, // must be false
+          __onceJustUpdated: _this.once.bind(_this, 'justUpdated'),
           stop: stopper,
           then: function (successFn, failFn) {
             return createStoppablePromise(currPromise.then(successFn, failFn));
@@ -94,19 +131,37 @@ var CursorObservable = (function (_Cursor) {
 
       return createStoppablePromise(firstUpdatePromise);
     }
+
+    /**
+     * Update a cursor result. Debounced function,
+     * return a Promise that resolved when cursor
+     * is updated.
+     * @return {Promise}
+     */
   }, {
     key: 'update',
     value: function update() {
       var _this2 = this;
 
-      return this.exec().then(function (result) {
-        _this2._latestResult = result;
-        _this2._latestIds = new Set(result.map(function (x) {
-          return x._id;
-        }));
-        _this2.emit('update', result);
-        return result;
-      });
+      var firstRun = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
+
+      if (!this._haveListeners && !firstRun) {
+        // Fast path for just notifying about some changes
+        // happen when no listeners to `observe` provided
+        // and it's not a first run (initial data).
+        // It's used in observable joins
+        this.emit('justUpdated', null, firstRun);
+        return Promise.resolve();
+      } else {
+        return this.exec().then(function (result) {
+          _this2._latestResult = result;
+          _this2._latestIds = new Set(result.map(function (x) {
+            return x._id;
+          }));
+          _this2.emit('update', result, firstRun);
+          return result;
+        });
+      }
     }
 
     // TODO improve performance, we should be smarter

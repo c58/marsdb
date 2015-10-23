@@ -24,7 +24,35 @@ var AngularCursorObservable = (function (_CursorObservable) {
     this.$q = db.$q;
   }
 
+  /**
+   * Stop observing given cursor, if passed and
+   * observing.
+   * It might be useful when you need to replace
+   * previously created request with another one
+   * (with different query, for example).
+   *
+   * @param  {CursorObservable} cursor
+   */
+
   _createClass(AngularCursorObservable, [{
+    key: 'destroy',
+    value: function destroy(cursor) {
+      if (cursor && cursor._prevStopper) {
+        cursor._prevStopper.stop();
+      }
+    }
+
+    /**
+     * Original `observe` with one additional argument.
+     * Second argument, if passed, a $scope for tracking
+     * $destroy event and stopping observing when event
+     * emited.
+     *
+     * @param  {Function} fn
+     * @param  {Scope}   $scope
+     * @return {Stooper}
+     */
+  }, {
     key: 'observe',
     value: function observe(fn, $scope) {
       var stopper = _get(Object.getPrototypeOf(AngularCursorObservable.prototype), 'observe', this).call(this, fn);
@@ -33,6 +61,8 @@ var AngularCursorObservable = (function (_CursorObservable) {
           stopper.stop();
         });
       }
+
+      this._prevStopper = stopper;
       return stopper;
     }
   }, {

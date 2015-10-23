@@ -783,6 +783,7 @@ var PIPELINE_TYPE = (0, _keymirror2['default'])({
   Filter: null,
   Sort: null,
   Map: null,
+  Aggregate: null,
   Reduce: null,
   Join: null
 });
@@ -794,11 +795,23 @@ var PIPELINE_PROCESSORS = (_PIPELINE_PROCESSORS = {}, _defineProperty(_PIPELINE_
   return docs.sort(pipeObj.value);
 }), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.Map, function (docs, pipeObj) {
   return docs.map(pipeObj.value);
+}), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.Aggregate, function (docs, pipeObj) {
+  return pipeObj.value(docs);
 }), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.Reduce, function (docs, pipeObj) {
   return docs.reduce(pipeObj.value, pipeObj.args[0]);
-}), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.Join, function (docs, pipeObj) {
+}), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.Join, function (docs, pipeObj, cursor) {
   return Promise.all(docs.map(function (x) {
-    return pipeObj.value(x);
+    var res = pipeObj.value(x);
+
+    if (cursor._observing && res && res.__onceJustUpdated) {
+      (0, _invariant2['default'])(!res.__haveListeners, 'joins(...): for using observable joins `observe` must be called without arguments');
+      res.__onceJustUpdated(function () {
+        res.stop();
+        cursor.update();
+      });
+    }
+
+    return res;
   }));
 }), _PIPELINE_PROCESSORS);
 
@@ -894,7 +907,10 @@ var Cursor = (function (_EventEmitter) {
   }, {
     key: 'aggregate',
     value: function aggregate(aggrFn) {
-      return this.map(aggrFn);
+      (0, _invariant2['default'])(typeof aggrFn === 'function', 'aggregate(...): aggregator must be a function');
+
+      this.addPipeline(PIPELINE_TYPE.Aggregate, aggrFn);
+      return this;
     }
   }, {
     key: 'join',
@@ -932,7 +948,7 @@ var Cursor = (function (_EventEmitter) {
       if (!pipeObj) {
         return Promise.resolve(docs);
       } else {
-        return Promise.resolve(PIPELINE_PROCESSORS[pipeObj.type](docs, pipeObj)).then(function (result) {
+        return Promise.resolve(PIPELINE_PROCESSORS[pipeObj.type](docs, pipeObj, this)).then(function (result) {
           return _this.processPipeline(result, i + 1);
         });
       }
@@ -1054,15 +1070,15 @@ var _createClass = (function () {
   };
 })();
 
-var _get = function get(_x, _x2, _x3) {
+var _get = function get(_x2, _x3, _x4) {
   var _again = true;_function: while (_again) {
-    var object = _x,
-        property = _x2,
-        receiver = _x3;desc = parent = getter = undefined;_again = false;if (object === null) object = Function.prototype;var desc = Object.getOwnPropertyDescriptor(object, property);if (desc === undefined) {
+    var object = _x2,
+        property = _x3,
+        receiver = _x4;desc = parent = getter = undefined;_again = false;if (object === null) object = Function.prototype;var desc = Object.getOwnPropertyDescriptor(object, property);if (desc === undefined) {
       var parent = Object.getPrototypeOf(object);if (parent === null) {
         return undefined;
       } else {
-        _x = parent;_x2 = property;_x3 = receiver;_again = true;continue _function;
+        _x2 = parent;_x3 = property;_x4 = receiver;_again = true;continue _function;
       }
     } else if ('value' in desc) {
       return desc.value;
@@ -1123,25 +1139,55 @@ var CursorObservable = (function (_Cursor) {
    * @return {Promise}
    */
 
+  /**
+   * Change a batch size of updater.
+   * Btach size is a number of changes must be happen
+   * in debounce interval to force execute debounced
+   * function (update a result, in our case)
+   *
+   * @param  {Number} batchSize
+   * @return {CursorObservable}
+   */
+
   _createClass(CursorObservable, [{
     key: 'batchSize',
     value: function batchSize(_batchSize) {
       this.update.updateBatchSize(_batchSize);
       return this;
     }
+
+    /**
+     * Change debounce wait time of the updater
+     * @param  {Number} waitTime
+     * @return {CursorObservable}
+     */
   }, {
     key: 'debounce',
     value: function debounce(waitTime) {
       this.update.updateWait(waitTime);
       return this;
     }
+
+    /**
+     * Observe changes of the cursor.
+     * It returns a Stopper – Promise with `stop` function.
+     * It is been resolved when first result of cursor is ready and
+     * after first observe listener call.
+     *
+     * @param  {Function}
+     * @return {Stopper}
+     */
   }, {
     key: 'observe',
     value: function observe(listener) {
       var _this = this;
 
       // Listen for changes of the cursor
-      this.on('update', listener);
+      this._observing = true;
+      this._haveListeners = this._haveListeners || !!listener;
+      if (listener) {
+        this.on('update', listener);
+      }
 
       // Make new wrapper for make possible to observe
       // multiple times (for removeListener)
@@ -1152,15 +1198,22 @@ var CursorObservable = (function (_Cursor) {
       this.db.on('update', updateWrapper);
       this.db.on('remove', updateWrapper);
 
-      var firstUpdatePromise = this.update();
+      var firstUpdatePromise = this.update(true);
       var stopper = function stopper() {
-        _this.removeListener('update', listener);
         _this.db.removeListener('insert', updateWrapper);
         _this.db.removeListener('update', updateWrapper);
         _this.db.removeListener('remove', updateWrapper);
+        if (listener) {
+          _this.removeListener('update', listener);
+        }
       };
       var createStoppablePromise = function createStoppablePromise(currPromise) {
+        // __onceUpdate is used when we do not need to know
+        // a new result of a cursor, but just need to know
+        // absout some changes happen. Used in observable joins.
         return {
+          __haveListeners: _this._haveListeners, // must be false
+          __onceJustUpdated: _this.once.bind(_this, 'justUpdated'),
           stop: stopper,
           then: function then(successFn, failFn) {
             return createStoppablePromise(currPromise.then(successFn, failFn));
@@ -1170,19 +1223,37 @@ var CursorObservable = (function (_Cursor) {
 
       return createStoppablePromise(firstUpdatePromise);
     }
+
+    /**
+     * Update a cursor result. Debounced function,
+     * return a Promise that resolved when cursor
+     * is updated.
+     * @return {Promise}
+     */
   }, {
     key: 'update',
     value: function update() {
       var _this2 = this;
 
-      return this.exec().then(function (result) {
-        _this2._latestResult = result;
-        _this2._latestIds = new Set(result.map(function (x) {
-          return x._id;
-        }));
-        _this2.emit('update', result);
-        return result;
-      });
+      var firstRun = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
+
+      if (!this._haveListeners && !firstRun) {
+        // Fast path for just notifying about some changes
+        // happen when no listeners to `observe` provided
+        // and it's not a first run (initial data).
+        // It's used in observable joins
+        this.emit('justUpdated', null, firstRun);
+        return Promise.resolve();
+      } else {
+        return this.exec().then(function (result) {
+          _this2._latestResult = result;
+          _this2._latestIds = new Set(result.map(function (x) {
+            return x._id;
+          }));
+          _this2.emit('update', result, firstRun);
+          return result;
+        });
+      }
     }
 
     // TODO improve performance, we should be smarter

@@ -51,6 +51,7 @@ var PIPELINE_TYPE = (0, _keymirror2['default'])({
   Filter: null,
   Sort: null,
   Map: null,
+  Aggregate: null,
   Reduce: null,
   Join: null
 });
@@ -62,11 +63,23 @@ var PIPELINE_PROCESSORS = (_PIPELINE_PROCESSORS = {}, _defineProperty(_PIPELINE_
   return docs.sort(pipeObj.value);
 }), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.Map, function (docs, pipeObj) {
   return docs.map(pipeObj.value);
+}), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.Aggregate, function (docs, pipeObj) {
+  return pipeObj.value(docs);
 }), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.Reduce, function (docs, pipeObj) {
   return docs.reduce(pipeObj.value, pipeObj.args[0]);
-}), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.Join, function (docs, pipeObj) {
+}), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.Join, function (docs, pipeObj, cursor) {
   return Promise.all(docs.map(function (x) {
-    return pipeObj.value(x);
+    var res = pipeObj.value(x);
+
+    if (cursor._observing && res && res.__onceJustUpdated) {
+      (0, _invariant2['default'])(!res.__haveListeners, 'joins(...): for using observable joins `observe` must be called without arguments');
+      res.__onceJustUpdated(function () {
+        res.stop();
+        cursor.update();
+      });
+    }
+
+    return res;
   }));
 }), _PIPELINE_PROCESSORS);
 
@@ -162,7 +175,10 @@ var Cursor = (function (_EventEmitter) {
   }, {
     key: 'aggregate',
     value: function aggregate(aggrFn) {
-      return this.map(aggrFn);
+      (0, _invariant2['default'])(typeof aggrFn === 'function', 'aggregate(...): aggregator must be a function');
+
+      this.addPipeline(PIPELINE_TYPE.Aggregate, aggrFn);
+      return this;
     }
   }, {
     key: 'join',
@@ -200,7 +216,7 @@ var Cursor = (function (_EventEmitter) {
       if (!pipeObj) {
         return Promise.resolve(docs);
       } else {
-        return Promise.resolve(PIPELINE_PROCESSORS[pipeObj.type](docs, pipeObj)).then(function (result) {
+        return Promise.resolve(PIPELINE_PROCESSORS[pipeObj.type](docs, pipeObj, this)).then(function (result) {
           return _this.processPipeline(result, i + 1);
         });
       }

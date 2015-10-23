@@ -263,15 +263,11 @@ describe('Cursor', () => {
   describe('#aggregate', function () {
     it('should aggregate by a function', function () {
       const cursor = new Cursor(db);
-      cursor.find().sort({b: 1}).aggregate(d => {
-        return {b: d.b * 2};
+      cursor.find().sort({b: 1}).aggregate(docs => {
+        return docs.length;
       });
       return cursor.exec().then((docs) => {
-        docs.should.have.length(7);
-        docs[0].should.not.have.ownProperty('a');
-        docs[1].should.not.have.ownProperty('a');
-        docs[0].b.should.be.equals(2);
-        docs[1].b.should.be.equals(4);
+        docs.should.be.equals(7);
       });
     });
 
