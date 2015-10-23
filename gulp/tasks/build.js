@@ -17,7 +17,7 @@ gulp.task('build', [
   'build:browser',
   'build:browser:angular',
   'build:browser:localStorage',
-  'build:browser:localForage',
+  //'build:browser:localForage',
   'build:browser:min',
   'build:browser:tests',
   'build:browser:polyfills',

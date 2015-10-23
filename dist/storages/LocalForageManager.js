@@ -36,7 +36,9 @@ var LocalForageManager = (function (_StorageManager) {
     _classCallCheck(this, LocalForageManager);
 
     _get(Object.getPrototypeOf(LocalForageManager.prototype), 'constructor', this).call(this, db, options);
-    this.forage = (0, _localforage2['default'])(db.modelName);
+    this.forage = _localforage2['default'].createInstance({
+      name: db.modelName
+    });
   }
 
   _createClass(LocalForageManager, [{
