@@ -22,6 +22,10 @@ var _lodashCollectionEach = require('lodash/collection/each');
 
 var _lodashCollectionEach2 = _interopRequireDefault(_lodashCollectionEach);
 
+var _lodashLangIsObject = require('lodash/lang/isObject');
+
+var _lodashLangIsObject2 = _interopRequireDefault(_lodashLangIsObject);
+
 var _eventemitter3 = require('eventemitter3');
 
 var _eventemitter32 = _interopRequireDefault(_eventemitter3);
@@ -70,16 +74,17 @@ var PIPELINE_PROCESSORS = (_PIPELINE_PROCESSORS = {}, _defineProperty(_PIPELINE_
 }), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.Join, function (docs, pipeObj, cursor) {
   return Promise.all(docs.map(function (x) {
     var res = pipeObj.value(x);
-
-    if (cursor._observing && res && res.__onceJustUpdated) {
-      (0, _invariant2['default'])(!res.__haveListeners, 'joins(...): for using observable joins `observe` must be called without arguments');
-      res.__onceJustUpdated(function () {
-        res.stop();
-        cursor.update();
+    if ((0, _lodashLangIsObject2['default'])(res) && res.then) {
+      if (res.parent) {
+        res.parent(cursor);
+        cursor.once('stopped', res.stop);
+      }
+      return res.then(function () {
+        return x;
       });
+    } else {
+      return x;
     }
-
-    return res;
   }));
 }), _PIPELINE_PROCESSORS);
 

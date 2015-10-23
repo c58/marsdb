@@ -754,6 +754,10 @@ var _lodashCollectionEach = require('lodash/collection/each');
 
 var _lodashCollectionEach2 = _interopRequireDefault(_lodashCollectionEach);
 
+var _lodashLangIsObject = require('lodash/lang/isObject');
+
+var _lodashLangIsObject2 = _interopRequireDefault(_lodashLangIsObject);
+
 var _eventemitter3 = require('eventemitter3');
 
 var _eventemitter32 = _interopRequireDefault(_eventemitter3);
@@ -802,16 +806,17 @@ var PIPELINE_PROCESSORS = (_PIPELINE_PROCESSORS = {}, _defineProperty(_PIPELINE_
 }), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.Join, function (docs, pipeObj, cursor) {
   return Promise.all(docs.map(function (x) {
     var res = pipeObj.value(x);
-
-    if (cursor._observing && res && res.__onceJustUpdated) {
-      (0, _invariant2['default'])(!res.__haveListeners, 'joins(...): for using observable joins `observe` must be called without arguments');
-      res.__onceJustUpdated(function () {
-        res.stop();
-        cursor.update();
+    if ((0, _lodashLangIsObject2['default'])(res) && res.then) {
+      if (res.parent) {
+        res.parent(cursor);
+        cursor.once('stopped', res.stop);
+      }
+      return res.then(function () {
+        return x;
       });
+    } else {
+      return x;
     }
-
-    return res;
   }));
 }), _PIPELINE_PROCESSORS);
 
@@ -1053,7 +1058,7 @@ var Cursor = (function (_EventEmitter) {
 exports.Cursor = Cursor;
 exports['default'] = Cursor;
 
-},{"./DocumentMatcher":7,"./DocumentRetriver":9,"./DocumentSorter":10,"eventemitter3":19,"invariant":21,"keymirror":22,"lodash/collection/each":27}],5:[function(require,module,exports){
+},{"./DocumentMatcher":7,"./DocumentRetriver":9,"./DocumentSorter":10,"eventemitter3":19,"invariant":21,"keymirror":22,"lodash/collection/each":27,"lodash/lang/isObject":94}],5:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -1182,12 +1187,10 @@ var CursorObservable = (function (_Cursor) {
     value: function observe(listener) {
       var _this = this;
 
-      // Listen for changes of the cursor
-      this._observing = true;
-      this._haveListeners = this._haveListeners || !!listener;
-      if (listener) {
-        this.on('update', listener);
-      }
+      // Debounce listener a little for update propagation
+      // when joins updated
+      listener = debounce(listener, 0, 0);
+      this.on('update', listener);
 
       // Make new wrapper for make possible to observe
       // multiple times (for removeListener)
@@ -1203,17 +1206,15 @@ var CursorObservable = (function (_Cursor) {
         _this.db.removeListener('insert', updateWrapper);
         _this.db.removeListener('update', updateWrapper);
         _this.db.removeListener('remove', updateWrapper);
-        if (listener) {
-          _this.removeListener('update', listener);
-        }
+        _this.removeListener('update', listener);
+        _this.emit('stopped');
+      };
+      var parentSetter = function parentSetter(cursor) {
+        _this._parentCursor = cursor;
       };
       var createStoppablePromise = function createStoppablePromise(currPromise) {
-        // __onceUpdate is used when we do not need to know
-        // a new result of a cursor, but just need to know
-        // absout some changes happen. Used in observable joins.
         return {
-          __haveListeners: _this._haveListeners, // must be false
-          __onceJustUpdated: _this.once.bind(_this, 'justUpdated'),
+          parent: parentSetter,
           stop: stopper,
           then: function then(successFn, failFn) {
             return createStoppablePromise(currPromise.then(successFn, failFn));
@@ -1237,23 +1238,20 @@ var CursorObservable = (function (_Cursor) {
 
       var firstRun = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
 
-      if (!this._haveListeners && !firstRun) {
-        // Fast path for just notifying about some changes
-        // happen when no listeners to `observe` provided
-        // and it's not a first run (initial data).
-        // It's used in observable joins
-        this.emit('justUpdated', null, firstRun);
-        return Promise.resolve();
-      } else {
-        return this.exec().then(function (result) {
-          _this2._latestResult = result;
-          _this2._latestIds = new Set(result.map(function (x) {
-            return x._id;
-          }));
-          _this2.emit('update', result, firstRun);
-          return result;
-        });
-      }
+      return this.exec().then(function (result) {
+        _this2._latestResult = result;
+        _this2._latestIds = new Set(result.map(function (x) {
+          return x._id;
+        }));
+        _this2.emit('update', result, firstRun);
+
+        if (_this2._parentCursor && !firstRun) {
+          var parentResult = _this2._parentCursor._latestResult;
+          _this2._parentCursor.emit('update', parentResult, false);
+        }
+
+        return result;
+      });
     }
 
     // TODO improve performance, we should be smarter

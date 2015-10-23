@@ -40,6 +40,7 @@ var AngularCursorObservable = (function (_CursorObservable) {
       if (cursor && cursor._prevStopper) {
         cursor._prevStopper.stop();
       }
+      return this;
     }
 
     /**
