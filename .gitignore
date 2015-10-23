@@ -22,5 +22,6 @@ browser-version/src
 browser-version/node_modules
 build/browser_tests.js
 
+*.sublime-workspace
 *.swp
 *~
