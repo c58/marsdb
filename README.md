@@ -110,6 +110,7 @@ const stopper = posts.find({tags: {$in: [‘marsdb’, ‘is’, ‘awesome’]}
     // (after `observer` callback)
   });
 ```
+
 ### Find with joins
 ```javascript
 const users = new Collection(‘users’);
