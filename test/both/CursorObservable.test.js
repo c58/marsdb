@@ -103,23 +103,23 @@ describe('CursorObservable', () => {
       var calls = 0;
       db.find({$or: [{f: 1}, {f: 2}]})
         .join((doc) => {
-          return db.find({b: 30}).observe().then(res => {
+          return db.find({b: 30}).observe(res => {
             doc.joined = res;
-            return doc;
           });
-        }).observe(res => {
+        }).observe(result => {
           if (calls === 0) {
-            expect(res).to.be.an('array');
-            res.should.have.length(2);
-            expect(res[0].joined).to.have.length(0);
-            expect(res[1].joined).to.have.length(0);
-            db.insert({b: 30});
-            calls += 1;
-          } else if (calls === 1) {
-            expect(res[0].joined).to.have.length(1);
-            expect(res[1].joined).to.have.length(1);
+            expect(result).to.be.an('array');
+            result.should.have.length(2);
+            expect(result[0].joined).to.have.length(0);
+            expect(result[1].joined).to.have.length(0);
+            calls++;
+          } else {
+            expect(result[0].joined).to.have.length(1);
+            expect(result[1].joined).to.have.length(1);
             done();
           }
+        }).then(() => {
+          return db.insert({b: 30});
         });
     });
   });

@@ -23,7 +23,7 @@ You can use it in any JS environment (Browser, Electron, NW.js, Node.js).
 * **Flexible pipeline** – map, reduce, custom sorting function, filtering. All with a sexy JS interface (no ugly mongo’s aggregation language)
 * **Persistence API** – all collections can be stored (and restored) with any kind of storage (in-memory, LocalStorage, LevelUP, etc)
 * **Observable queries** - live queries just like in Meteor, but with simplier interface
-* **Joinable cursor** – joins is simple, joins is observable (live)
+* **Reactive joins** – out of the box
 
 ## Examples
 ### Using with Angular 1.x
@@ -118,25 +118,27 @@ const posts = new Collection(‘posts’);
 posts.find()
   .join(doc => {
     // Return a Promise for waiting of the result.
-    // Calling `observe` makes result of root query depends
-    // on chnages of results of this query. So, when author
-    // object changed root result is updated (yeah!)
-    return users.findOne(doc.authorId).observe().then(user => {
+    return users.findOne(doc.authorId).then(user => {
       doc.authorObj = user;
-      return doc;
+      // any return is ignored
+    });
+  })
+  .join(doc => {
+    // For reactive join you must invoke `observe` instead `then`
+    // That's it!
+    return users.findOne(doc.authorId).observe(user => {
+      doc.authorObj = user;
     });
   })
   .join(doc => {
     // Also any other “join” mutations supported
     doc.another = _cached_data_by_post[doc._id];
-
-    // You need to return a document, bacause it's
-    // a pipeline operation
-    return doc;
   })
   .observe((posts) => {
-    // do somethin wiht posts with authors
-  });
+    // do something with posts with authors
+    // invoked any time when posts changed
+    // (and when observed joins changed too)
+  })
 ```
 ### Inserting
 ```javascript
