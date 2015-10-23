@@ -1,0 +1,76 @@
+{
+  "name": "marsdb",
+  "version": "0.3.1",
+  "author": {
+    "name": "Artem Artemev",
+    "email": "art@studytime.me"
+  },
+  "contributors": [
+    "Artem Artemev"
+  ],
+  "description": "MarsDB is a lightweight client-side MongoDB-like database, Promise based, written in ES6",
+  "keywords": [
+    "database",
+    "datastore",
+    "embedded",
+    "levelup",
+    "mongoose",
+    "linvodb3",
+    "nedb"
+  ],
+  "homepage": "https://github.com/c58/marsdb",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:c58/marsdb.git"
+  },
+  "dependencies": {
+    "async": "1.4.2",
+    "core-js": "^1.2.2",
+    "eventemitter3": "1.1.1",
+    "geojson-utils": "^1.1.0",
+    "invariant": "^2.1.1",
+    "keymirror": "^0.1.1",
+    "lodash": "3.10.x"
+  },
+  "devDependencies": {
+    "angular": "^1.4.7",
+    "angular-mocks": "^1.4.7",
+    "babel": "^5.8.23",
+    "babel-eslint": "^4.1.1",
+    "babelify": "^6.3.0",
+    "brfs": "^1.4.1",
+    "browserify": "^11.2.0",
+    "bulk-require": "^0.2.1",
+    "bulkify": "^1.1.1",
+    "chai": "^3.2.0",
+    "chai-as-promised": "^5.1.0",
+    "coveralls": "^2.11.4",
+    "del": "^2.0.2",
+    "envify": "^3.4.0",
+    "fbjs-scripts": "^0.2.2",
+    "gulp": "^3.9.0",
+    "gulp-babel": "^5.2.1",
+    "gulp-eslint": "^1.0.0",
+    "gulp-if": "^2.0.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-uglify": "^1.4.2",
+    "istanbul": "^0.4.0",
+    "localforage": "^1.3.0",
+    "mocha": "^2.3.2",
+    "mocha-lcov-reporter": "^1.0.0",
+    "mocha-phantomjs": "^4.0.1",
+    "require-dir": "^0.3.0",
+    "run-sequence": "^1.1.2",
+    "vinyl-buffer": "^1.0.0",
+    "vinyl-source-stream": "^1.1.0"
+  },
+  "scripts": {
+    "test_some": "mocha --require babelhook --reporter spec --timeout 10000",
+    "test_browser": "gulp build:browser:tests && mocha-phantomjs --reporter spec browser_tests.html",
+    "test": "mocha --require babelhook --reporter spec --timeout 10000 test/both test/node",
+    "coverage": "istanbul cover _mocha --require babelhook test/both test/node -- -u exports -R spec && open coverage/lcov-report/index.html",
+    "coveralls": "istanbul cover _mocha --require babelhook test/both test/node --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
+  },
+  "main": "./dist/index",
+  "license": "MIT"
+}

@@ -1,0 +1,1919 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"Doc",
+				"Document"
+			],
+			[
+				"Coll",
+				"CollectionIndex"
+			],
+			[
+				"defa",
+				"default	(index.js)"
+			],
+			[
+				"Lca",
+				"LocalStorageManager"
+			],
+			[
+				"Mars",
+				"Mars	(build.js)"
+			],
+			[
+				"Local",
+				"LocalStorage"
+			],
+			[
+				"Loc",
+				"LocalStorage"
+			],
+			[
+				"Cur",
+				"CursorObservable"
+			],
+			[
+				"hex",
+				"hexString	(Random.js)"
+			],
+			[
+				"create",
+				"createdAt"
+			],
+			[
+				"remo",
+				"removed"
+			],
+			[
+				"new",
+				"newItem"
+			],
+			[
+				"obse",
+				"observe	(README.md)"
+			],
+			[
+				"to",
+				"todoColl"
+			],
+			[
+				"fun",
+				"function	(Cursor.js)"
+			],
+			[
+				"node",
+				"node_modules	(bower.json)"
+			],
+			[
+				"Loca",
+				"LocalStorageManager"
+			],
+			[
+				"Curs",
+				"CursorObservable"
+			],
+			[
+				"stop",
+				"stopper"
+			],
+			[
+				"time",
+				"timeout	setTimeout function"
+			],
+			[
+				"obser",
+				"observe	(CursorObservable.js)"
+			],
+			[
+				"Ma",
+				"MarsDB"
+			],
+			[
+				"ber",
+				"beforeeach	Before Each"
+			],
+			[
+				"root",
+				"$rootScope	AngularJS"
+			],
+			[
+				"func",
+				"function"
+			],
+			[
+				"promi",
+				"promise	(CursorObservable.js)"
+			],
+			[
+				"use",
+				"users"
+			],
+			[
+				"coll",
+				"collection	(Cursor.js)"
+			],
+			[
+				"cont",
+				"controller	AngularJS"
+			],
+			[
+				"Cu",
+				"Cursor"
+			],
+			[
+				"Angu",
+				"AngularIntegration	(AngularIntegration.test.js)"
+			],
+			[
+				"res",
+				"resolve	(Cursor.js)"
+			],
+			[
+				"defaul",
+				"default	(AngularCursorObservable.js)"
+			],
+			[
+				"angula",
+				"angular	(index.js)"
+			],
+			[
+				"befo",
+				"before	Before"
+			],
+			[
+				"af",
+				"after	After"
+			],
+			[
+				"afte",
+				"aftereach	After Each"
+			],
+			[
+				"entry",
+				"entryPolyfills	(config.js)"
+			],
+			[
+				"brow",
+				"browser"
+			],
+			[
+				"angu",
+				"angular	(index.js)"
+			],
+			[
+				"stora",
+				"storageManager"
+			],
+			[
+				"default",
+				"defaultStorageManager"
+			],
+			[
+				"find",
+				"findOne"
+			],
+			[
+				"Angul",
+				"AngularCursorObservable"
+			],
+			[
+				"Angula",
+				"AngularCursorObservable	(AngularCursorObservable.js)"
+			],
+			[
+				"model",
+				"modelName"
+			],
+			[
+				"arg",
+				"args"
+			],
+			[
+				"inser",
+				"insertAll	(Collection.js)"
+			],
+			[
+				"Angular",
+				"AngularCollection	(AngularCollection.js)"
+			],
+			[
+				"resol",
+				"resolvedClass"
+			],
+			[
+				"class",
+				"className"
+			],
+			[
+				"cons",
+				"constructor	(DocumentModifier.js)"
+			],
+			[
+				"exte",
+				"extends	(Collection.js)"
+			],
+			[
+				"mars",
+				"marsResolver"
+			],
+			[
+				"requ",
+				"require	(DocumentModifier.js)"
+			],
+			[
+				"update",
+				"updated"
+			],
+			[
+				"modifie",
+				"modified	(Collection.js)"
+			],
+			[
+				"storage",
+				"storage"
+			],
+			[
+				"des",
+				"destroy	(LocalStorageManager.js)"
+			],
+			[
+				"storag",
+				"storage"
+			],
+			[
+				"item",
+				"items"
+			],
+			[
+				"con",
+				"concurrency"
+			],
+			[
+				"Promi",
+				"PromiseQueue"
+			],
+			[
+				"Promise",
+				"PromiseQueue	(StorageManager.js)"
+			],
+			[
+				"before",
+				"beforeeach	Before Each"
+			],
+			[
+				"Pr",
+				"Promise"
+			],
+			[
+				"Pro",
+				"PromiseQueue"
+			],
+			[
+				"Pri",
+				"PromiseQueue"
+			],
+			[
+				"next",
+				"nextTick"
+			],
+			[
+				"Index",
+				"IndexManager	(IndexManager.js)"
+			],
+			[
+				"L",
+				"LocalStorage	(LocalStorageManager.js)"
+			],
+			[
+				"babel",
+				"babelify	(build.js)"
+			],
+			[
+				"buil",
+				"build	(build.js)"
+			],
+			[
+				"bundle",
+				"bundleName	(config.js)"
+			],
+			[
+				"ke",
+				"key"
+			],
+			[
+				"key",
+				"keys"
+			],
+			[
+				"_queu",
+				"_queueOperation"
+			],
+			[
+				"Obj",
+				"ObjectRetriver"
+			],
+			[
+				"Object",
+				"ObjectRetriver	(ObjectRetriver.js)"
+			],
+			[
+				"local",
+				"localStorage"
+			],
+			[
+				"defaultO",
+				"defaultIdGenerator"
+			],
+			[
+				"mana",
+				"managerClass"
+			],
+			[
+				"delete",
+				"deletePromise"
+			],
+			[
+				"de",
+				"default"
+			],
+			[
+				"Docume",
+				"DocumentMatcher"
+			],
+			[
+				"sti",
+				"stringify"
+			],
+			[
+				"doc",
+				"doc1"
+			],
+			[
+				"correc",
+				"corerctly"
+			],
+			[
+				"sorts",
+				"sorts"
+			],
+			[
+				"desc",
+				"describe	Describe"
+			],
+			[
+				"does",
+				"doesMatch"
+			],
+			[
+				"equa",
+				"equals	(DocumentModifier.js)"
+			],
+			[
+				"the",
+				"then"
+			],
+			[
+				"modifi",
+				"modifier"
+			],
+			[
+				"matc",
+				"match"
+			],
+			[
+				"resul",
+				"results"
+			],
+			[
+				"_modi",
+				"_modifyDocument"
+			],
+			[
+				"docume",
+				"documentMatches"
+			],
+			[
+				"match",
+				"match"
+			],
+			[
+				"selector",
+				"selectorIds"
+			],
+			[
+				"Docum",
+				"Document	(Document.test.js)"
+			],
+			[
+				"selec",
+				"selectorIsId	(Cursor.js)"
+			],
+			[
+				"Documen",
+				"DocumentMatcher"
+			],
+			[
+				"Document",
+				"DocumentMatcher	(Cursor.js)"
+			],
+			[
+				"modi",
+				"modifiedDoc"
+			],
+			[
+				"ids",
+				"ids"
+			],
+			[
+				"limite",
+				"limitedResult"
+			],
+			[
+				"mat",
+				"match"
+			],
+			[
+				"with",
+				"withFastLimit"
+			],
+			[
+				"retri",
+				"retriver"
+			],
+			[
+				"Docu",
+				"Document	(CursorObservable.js)"
+			],
+			[
+				"document",
+				"documentMatches	(DocumentMatcher.test.js)"
+			],
+			[
+				"retrive",
+				"retriver"
+			],
+			[
+				"ensure",
+				"ensureIndex"
+			],
+			[
+				"sort",
+				"sortObj"
+			],
+			[
+				"Docue",
+				"DocumentMatcher"
+			],
+			[
+				"modif",
+				"modifiedDoc"
+			],
+			[
+				"modified",
+				"modifiedDoc"
+			],
+			[
+				"Mongo",
+				"MongoTypeComp	(Document.js)"
+			],
+			[
+				"isNu",
+				"isNumericKey"
+			],
+			[
+				"Mon",
+				"MongoTypeComp"
+			],
+			[
+				"part",
+				"part"
+			],
+			[
+				"filed",
+				"fieldName"
+			],
+			[
+				"depth",
+				"depth"
+			],
+			[
+				"dept",
+				"depth"
+			],
+			[
+				"nested",
+				"nestedRrsult"
+			],
+			[
+				"lo",
+				"lock"
+			],
+			[
+				"matcher",
+				"matcher"
+			]
+		]
+	},
+	"buffers":
+	[
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 169.0,
+		"last_filter": "push",
+		"selected_items":
+		[
+			[
+				"push",
+				"Git: Push Current Branch"
+			],
+			[
+				"commi",
+				"Git: Commit"
+			],
+			[
+				"ad",
+				"Git: Add..."
+			],
+			[
+				"tag",
+				"Git: New Tag"
+			],
+			[
+				"Push",
+				"Git: Push Current Branch"
+			],
+			[
+				"add",
+				"Git: Add..."
+			],
+			[
+				"com",
+				"Git: Commit"
+			],
+			[
+				"comm",
+				"Git: Commit"
+			],
+			[
+				"a",
+				"Git: Add..."
+			],
+			[
+				"Pull",
+				"Git: Pull Current Branch"
+			],
+			[
+				"merge",
+				"Git: Merge Branch"
+			],
+			[
+				"mer",
+				"Git: Merge Branch"
+			],
+			[
+				"pull",
+				"Git: Pull Current Branch"
+			],
+			[
+				"fet",
+				"Git: Fetch"
+			],
+			[
+				"change",
+				"Git: Change Branch"
+			],
+			[
+				"sta",
+				"Git: Stash Pop"
+			],
+			[
+				"chan",
+				"Git: Change Branch"
+			],
+			[
+				"stas",
+				"Git: Stash Changes"
+			],
+			[
+				"new",
+				"Git: New Branch"
+			],
+			[
+				"comit",
+				"Git: Commit"
+			],
+			[
+				"comi",
+				"Git: Commit"
+			],
+			[
+				"chang",
+				"Git: Change Branch"
+			],
+			[
+				"stash cha",
+				"Git: Stash Changes"
+			],
+			[
+				"pull c",
+				"Git: Pull Current Branch"
+			],
+			[
+				"pul",
+				"Git: Pull Using Rebase"
+			],
+			[
+				"pu",
+				"Git: Push Current Branch"
+			],
+			[
+				"commit",
+				"Git: Commit"
+			],
+			[
+				"update",
+				"Package Control: Upgrade/Overwrite All Packages"
+			],
+			[
+				"pull ",
+				"Git: Pull Current Branch"
+			],
+			[
+				"pus",
+				"Git: Push Current Branch"
+			],
+			[
+				"ush",
+				"Git: Push Current Branch"
+			],
+			[
+				"upda",
+				"Package Control: Upgrade/Overwrite All Packages"
+			],
+			[
+				"ins",
+				"Package Control: Install Package"
+			],
+			[
+				"ena",
+				"Package Control: Enable Package"
+			],
+			[
+				"insta",
+				"Package Control: Install Package"
+			],
+			[
+				"disa",
+				"Package Control: Disable Package"
+			],
+			[
+				"enab",
+				"Package Control: Enable Package"
+			],
+			[
+				"instal",
+				"Package Control: Install Package"
+			],
+			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				"gi",
+				"Package Control: Install Package"
+			],
+			[
+				"coffee",
+				"Set Syntax: CoffeeScript"
+			],
+			[
+				"java",
+				"Set Syntax: JavaScript (Babel)"
+			],
+			[
+				"js",
+				"Set Syntax: JavaScript (Babel)"
+			],
+			[
+				"rese",
+				"Git: Reset (hard) HEAD"
+			],
+			[
+				"co",
+				"Git: Commit"
+			],
+			[
+				"reset",
+				"Git: Reset (hard) HEAD"
+			],
+			[
+				"dif",
+				"Git: Diff Current File"
+			],
+			[
+				"stash",
+				"Git: Stash Pop"
+			],
+			[
+				"Pus",
+				"Git: Push Current Branch"
+			],
+			[
+				"git push",
+				"Git: Push Current Branch"
+			],
+			[
+				"puh",
+				"Git: Push Current Branch"
+			],
+			[
+				"cha",
+				"Git: Change Branch"
+			],
+			[
+				"diff",
+				"Git: Diff Current File"
+			],
+			[
+				"comim",
+				"Git: Commit"
+			],
+			[
+				"puush",
+				"Git: Push Current Branch"
+			],
+			[
+				"Diff",
+				"Git: Diff Current File"
+			],
+			[
+				"git pus",
+				"Git: Push Current Branch"
+			],
+			[
+				"reser",
+				"Git: Reset (unstage) Current File"
+			],
+			[
+				"cjs",
+				"Set Syntax: JavaScript (JSX)"
+			],
+			[
+				"cjsx",
+				"Set Syntax: JavaScript (JSX)"
+			],
+			[
+				"ass",
+				"Set Syntax: Shell Script (Bash)"
+			],
+			[
+				"json",
+				"Pretty JSON: Format (Pretty Print) JSON"
+			],
+			[
+				"pre",
+				"Pretty JSON: Format (Pretty Print) JSON"
+			],
+			[
+				"pret",
+				"Pretty JSON: Format (Pretty Print) JSON"
+			],
+			[
+				"reso",
+				"PackageResourceViewer: Open Resource"
+			],
+			[
+				"packa d",
+				"Package Control: Disable Package"
+			],
+			[
+				"git pul",
+				"Git: Pull Current Branch"
+			],
+			[
+				"git bra",
+				"Git: Change Branch"
+			],
+			[
+				"git",
+				"Git: Fetch"
+			],
+			[
+				"pac in",
+				"Package Control: Install Package"
+			],
+			[
+				"packa ins",
+				"Package Control: Install Package"
+			],
+			[
+				"set css",
+				"Set Syntax: CSS"
+			],
+			[
+				"css ",
+				"Set Syntax: CSS"
+			],
+			[
+				"git dif",
+				"Git: Diff Current File"
+			],
+			[
+				"git add",
+				"Git: Add..."
+			],
+			[
+				"prv",
+				"PackageResourceViewer: Open Resource"
+			],
+			[
+				"inst",
+				"Package Control: Install Package"
+			],
+			[
+				"c",
+				"Git: Commit"
+			],
+			[
+				"git co",
+				"Git: Commit"
+			],
+			[
+				"check",
+				"Git: Checkout Tag"
+			],
+			[
+				"aomm",
+				"Git: Amend Commit"
+			],
+			[
+				"git pu",
+				"Git: Push Current Branch"
+			],
+			[
+				"git commi",
+				"Git: Commit"
+			]
+		],
+		"width": 538.0
+	},
+	"console":
+	{
+		"height": 126.0,
+		"history":
+		[
+			"import urllib.request,os,hashlib; h = '7183a2d3e96f11eeadd761d777e62404' + 'e330c659d4bb41d3bdf022e94cab3cd0'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://sublime.wbond.net/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by)"
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/Users/c58/Development/marsdb/lib",
+		"/Users/c58/Development/marsdb/lib/storages"
+	],
+	"file_history":
+	[
+		"/Users/c58/Development/marsdb/lib/storages/LocalForageManager.js",
+		"/Users/c58/Development/marsdb/marsdb.sublime-project",
+		"/Users/c58/Development/marsdb/index.js",
+		"/Users/c58/Development/marsdb/lib/Cursor.js",
+		"/Users/c58/Development/marsdb/gulp/tasks/build.js",
+		"/Users/c58/Development/marsdb/polyfills.js",
+		"/Users/c58/Development/marsdb/gulp/config.js",
+		"/Users/c58/Development/marsdb/browser_tests.js",
+		"/Users/c58/Development/marsdb/example/angular.html",
+		"/Users/c58/Development/marsdb/package.json",
+		"/Users/c58/Development/marsdb/lib/CollectionIndex.js",
+		"/Users/c58/Development/marsdb/lib/Collection.js",
+		"/Users/c58/Development/marsdb/lib/angular/AngularCollection.js",
+		"/Users/c58/Development/marsdb/lib/angular/AngularCursorObservable.js",
+		"/Users/c58/Development/marsdb/lib/CursorObservable.js",
+		"/Users/c58/Development/marsdb/bower.json",
+		"/Users/c58/Development/marsdb/README.md",
+		"/Users/c58/Development/marsdb/test/both/Cursor.test.js",
+		"/Users/c58/Development/marsdb/lib/angular/requireUniversal.js",
+		"/Users/c58/Development/marsdb/lib/IndexManager.js",
+		"/Users/c58/Development/marsdb/test/experemental/Index.test.js",
+		"/Users/c58/Development/marsdb/lib/Random.js",
+		"/Users/c58/Development/marsdb/browser.js",
+		"/Users/c58/Development/marsdb/test/browser/AngularIntegration.test.js",
+		"/Users/c58/Development/marsdb/lib/angular/index.js",
+		"/Users/c58/Development/marsdb/lib/angular/angular.js",
+		"/Users/c58/Development/marsdb/lib/angular/AngularCursor.js",
+		"/Users/c58/Development/marsdb/lib/DocumentModifier.js",
+		"/Users/c58/Development/marsdb/lib/angular/marsResolver.js",
+		"/Users/c58/Development/marsdb/lib/StorageManager.js",
+		"/Users/c58/Development/marsdb/lib/experemental/IndexMatcher.js",
+		"/Users/c58/Development/marsdb/lib/storages/LocalStorageManager.js",
+		"/Users/c58/Development/marsdb/test/browser/LocalStorageManager.test.js",
+		"/Users/c58/Development/marsdb/lib/PromiseQueue.js",
+		"/Users/c58/Development/marsdb/browser_polyfills.js",
+		"/Users/c58/Development/marsdb/test/both/EJSON.test.js",
+		"/Users/c58/Development/marsdb/test/both/ObjectRetriver.test.js",
+		"/Users/c58/Development/marsdb/test/both/StorageManager.test.js",
+		"/Users/c58/Development/marsdb/test/both/Document.test.js",
+		"/Users/c58/Development/marsdb/test/both/DocumentMatcher.test.js",
+		"/Users/c58/Development/marsdb/test/both/DocumentModifier.test.js",
+		"/Users/c58/Development/marsdb/test/both/DocumentSorter.test.js",
+		"/Users/c58/Development/marsdb/test/both/Base64.test.js",
+		"/Users/c58/Development/marsdb/test/both/Collection.test.js",
+		"/Users/c58/Development/marsdb/test/both/CursorObservable.test.js",
+		"/Users/c58/Development/marsdb/.gitignore",
+		"/Users/c58/Development/marsdb/.travis.yml",
+		"/Users/c58/Development/marsdb/test/node/.gitkeep",
+		"/Users/c58/Development/marsdb/lib/Document.js",
+		"/Users/c58/Development/marsdb/lib/EJSON.js",
+		"/Users/c58/Development/marsdb/gulp/tasks/clean.js",
+		"/Users/c58/Development/marsdb/gulp/tasks/release.js",
+		"/Users/c58/Development/marsdb/browser_tests.html",
+		"/Users/c58/Development/marsdb/lib/storages/IndexDBStorageManager.js",
+		"/Users/c58/Development/marsdb/test/Collection.test.js",
+		"/Users/c58/Development/marsdb/lib/ObjectRetriver.js",
+		"/Users/c58/Development/marsdb/test/ObjectRetriver.test.js",
+		"/Users/c58/Development/marsdb/lib/Index.js",
+		"/Users/c58/Development/marsdb/test/DocumentMatcher.test.js",
+		"/Users/c58/Development/marsdb/test/Model.test.js",
+		"/Users/c58/Development/marsdb/test/DocumentSorter.test.js",
+		"/Users/c58/Development/marsdb/test/DocumentModifier.test.js",
+		"/Users/c58/Development/marsdb/lib/DocumentSorter.js",
+		"/Users/c58/Development/marsdb/lib/experemental/BPlusTree.js",
+		"/Users/c58/Development/marsdb/lib/DocumentMatcher.js",
+		"/Users/c58/Development/marsdb/test/Cursor.test.js",
+		"/Users/c58/Development/marsdb/test/CursorObservable.test.js",
+		"/Users/c58/Development/marsdb/test/experemental/IndexManager.test.js",
+		"/Users/c58/Development/marsdb/test/experemental/IndexMatcher.test.js",
+		"/Users/c58/Development/marsdb/LICENSE",
+		"/Users/c58/Development/marsdb/test/Document.test.js",
+		"/Users/c58/Development/marsdb/lib/Model.js",
+		"/Users/c58/Development/marsdb/lib/DocumentProjection.js",
+		"/Users/c58/Development/marsdb/babelhook.js",
+		"/Users/c58/Development/marsdb/test/IndexMatcher.test.js",
+		"/Users/c58/Development/marsdb/lib/IndexMatcher.js",
+		"/Users/c58/Development/marsdb/test/MatchingTests.js",
+		"/Users/c58/Development/marsdb/lib/Utils.js",
+		"/Users/c58/Development/marsdb/lib/BPlusTree.js",
+		"/Users/c58/Development/marsdb/lib/GeoJSON.js",
+		"/Users/c58/Development/marsdb/test/BPlusTree.test.js",
+		"/Users/c58/Development/marsdb/test/Index.test.js",
+		"/Users/c58/Development/marsdb/lib/ObjectMatcher.js",
+		"/Users/c58/Development/marsdb/lib/Base64.js",
+		"/Users/c58/Development/marsdb/test/ObjectMatcher.test.js",
+		"/Users/c58/Development/marsdb/test/EJSON.test.js",
+		"/Users/c58/Development/marsdb/test/Base64.test.js",
+		"/Users/c58/Development/marsdb/lib/IndexUnique.js",
+		"/Users/c58/Development/studytime-app/src/landing/entry.js",
+		"/Users/c58/Development/studytime-app/src/landing/components/Root.js",
+		"/Users/c58/Development/studytime-app/webpack.config.js",
+		"/Users/c58/Development/studytime-app/src/landing/components/Index.js",
+		"/Users/c58/Development/studytime-app/gulp/tasks/dist.js",
+		"/Users/c58/Development/studytime-app/config.xml",
+		"/Users/c58/Development/studytime-app/src/landing/routes.js",
+		"/Users/c58/Development/studytime-app/src/landing/data.js",
+		"/Users/c58/Development/studytime-app/gulp/tasks/landing.js",
+		"/Users/c58/Development/studytime-app/src/landing/includs.js",
+		"/Users/c58/Development/studytime-app/package.json",
+		"/Users/c58/Development/studytime-app/wrap-loader.js",
+		"/Users/c58/Development/studytime-server/package.json",
+		"/Users/c58/Development/studytime-server/server.sublime-project",
+		"/Users/c58/Development/studytime-server/gulp/tasks/deploy.js",
+		"/Users/c58/Development/studytime-server/gulp/tasks/dist.js",
+		"/Users/c58/Development/studytime-server/.gitignore",
+		"/Users/c58/Development/studytime-app/onsen-app.sublime-project",
+		"/Users/c58/Development/marsdb/utils/debounce.js",
+		"/Users/c58/Development/marsdb/.istanbul.yml",
+		"/Users/c58/Development/studytime-server/packages/utils/package.js",
+		"/Users/c58/Development/studytime-server/packages/utils/utils.js",
+		"/Users/c58/Development/studytime-server/server/publishers/classesByGroup.js",
+		"/Users/c58/Development/studytime-server/server/methods/searchPlaces.js",
+		"/Users/c58/Development/studytime-server/packages/pusher/pusher-utils.js",
+		"/Users/c58/Development/studytime-server/server/methods/saveUserProfile.js",
+		"/Users/c58/Development/studytime-server/server/publishers/groupByFaculty.js",
+		"/Users/c58/Development/studytime-server/server/publishers/facultyByUni.js",
+		"/Users/c58/Development/studytime-server/server/publishers/universityAll.js",
+		"/Users/c58/Development/studytime-server/server/collections/users.js",
+		"/Users/c58/Development/studytime-server/packages/pic-serv/pic-serv.js",
+		"/Users/c58/Development/studytime-server/packages/ical-export/ical-export.js",
+		"/Users/c58/Development/studytime-server/server/config/accounts.js",
+		"/Users/c58/Development/studytime-server/server/publishers/userData.js",
+		"/Users/c58/Development/studytime-server/server/collections/university.js",
+		"/Users/c58/Development/studytime-server/server/collections/subject.js",
+		"/Users/c58/Development/studytime-server/.meteor/platforms",
+		"/Users/c58/Development/studytime-server/packages/accounts-facebook/facebook-utils.js",
+		"/Users/c58/Development/studytime-server/packages/accounts-facebook/facebook-oauth.js",
+		"/Users/c58/Development/studytime-server/packages/accounts-facebook/facebook.js"
+	],
+	"find":
+	{
+		"height": 28.0
+	},
+	"find_in_files":
+	{
+		"height": 106.0,
+		"where_history":
+		[
+			"<project>",
+			"<project>/gulp",
+			"<project>",
+			"/Users/c58/Development/studytime/src/app",
+			"<project>",
+			"<current_file>",
+			"<file>",
+			"<project>",
+			""
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": true,
+		"find_history":
+		[
+			"process.",
+			"process",
+			"\"",
+			"./Index",
+			" Index(",
+			"Index",
+			"polyfills",
+			"this.$q.all",
+			"Colelction",
+			"update",
+			"_each",
+			"opera",
+			"_doBuildIndex",
+			"const db = new StorageManager();",
+			"promise",
+			"Number.isNaN",
+			"Number.",
+			"for (",
+			"for(",
+			"for ( ",
+			"for( ",
+			"Object.keys",
+			"Object.",
+			" of ",
+			"for (",
+			"gutil",
+			"ObjectRetriver",
+			"loaded(",
+			"Model",
+			"function (",
+			"\"",
+			"function (",
+			"\"",
+			"_every",
+			"function (",
+			"\"",
+			"Minimongo",
+			"function (",
+			"\"",
+			"date2",
+			"date1",
+			"longBinary2",
+			"longBinary1",
+			"shortBinary",
+			"$not",
+			"LOGICAL_OPERATORS",
+			"oldDocs",
+			"newDocs",
+			"DocumentModifier",
+			"selectorIsId",
+			"selectorIsIdPerhapsAsObject",
+			"findModTarget",
+			"Minimongo.Matcher",
+			"persist",
+			"new DocumentModifier({}).execModify(",
+			"Object.keys(",
+			"Utils.",
+			"isFini",
+			"hasGeoQuery",
+			"self.",
+			"isVal",
+			"Document",
+			"ObjectRetriver",
+			"ensureMatcherSorter",
+			"ensureNotExecuting",
+			"checkNotExecuting",
+			"Document",
+			"'keyMirror'",
+			"fast",
+			"keyMirror",
+			"Document",
+			"MinimongoError(",
+			"_.",
+			"_.each",
+			"Minimongo.Sorter",
+			"LocalCollection._f.",
+			"isNumericKey",
+			"isOperatorObject",
+			"isIndexable",
+			"isPlainObject",
+			"isArray",
+			"selectorIsId",
+			"regexpElementMatcher",
+			"equalityElementMatcher",
+			"expandArraysInBranches",
+			"ELEMENT_OPERATORS",
+			"MongoTypeComp",
+			"isNumericKey",
+			"isOperatorObject",
+			"isIndexable",
+			"isPlainObject",
+			"isArray",
+			"selectorIsId",
+			"assert.equal",
+			"test.",
+			"self",
+			"_.",
+			"assert_ordering",
+			"ObjectID",
+			"Minimongo.Matcher",
+			"Minimongo.Sorter",
+			"EJSON",
+			"_.",
+			"isEqual",
+			"MongoID",
+			"isOperatorObject",
+			"$lt",
+			"Minimongo.Matcher",
+			"MinimongoTest.",
+			"MinimongoTest",
+			"makeLookupFunction",
+			"assert.equal",
+			"test.",
+			"_each",
+			"LocalCollection",
+			"Object.keys",
+			"Object.",
+			"Utils",
+			"isFinite",
+			"Utils.",
+			"_forE",
+			"_",
+			"_.",
+			".some",
+			"_.",
+			"LocalCollection._f.",
+			"_removeDollarOperators",
+			"Utils.is"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"'",
+			" CollectionIndex(",
+			"this.$q.resolve",
+			"Collection",
+			"const db = new Collection('test').storage;",
+			"_.keys",
+			"_keys",
+			"DocumentRetriver",
+			"Collection",
+			"function(",
+			"'",
+			"function(",
+			"'",
+			"function(",
+			"'",
+			"function(",
+			"'",
+			"DocumentModifier(",
+			"_keys(",
+			"_ensureMatcherSorter",
+			"_ensureNotExecuting",
+			"ensureNotExecuting",
+			"'keymirror'",
+			"new Error(",
+			"_",
+			"DocumentSorter",
+			"MongoTypeComp.",
+			"assert.deepEqual",
+			"assert.",
+			"_",
+			"DocumentMatcher",
+			"DocumentSorter",
+			"DocumentMatcher",
+			"",
+			"assert.deepEqual",
+			"assert.",
+			"_keys",
+			"_",
+			"MongoTypeComp.",
+			"isValidDocument",
+			"new DocumentMatcher({}).execQuery(",
+			"getDotValue(",
+			"new DocumentModifier({}).execModify(",
+			"new DocumentMatcher({}).execModify(",
+			"this.updateQuery",
+			"compareThings",
+			"Utils",
+			"_stepBackward",
+			"_stepForward",
+			"_getUniqueKeysArray",
+			"it('should match tests from minimongo', function () {\n       return nomatch",
+			"});\n     });",
+			"it('should match tests from minimongo', function () {\n       return match(",
+			"it('should match tests from minimongo', function () {\n  return match(",
+			"it('should match tests from minimongo', function () {\n      return match(",
+			"}),",
+			"IndexMatcher",
+			"execCompareQuery",
+			"execLogicalQuery",
+			"execSortQuery",
+			"execQuery",
+			"execCompareMatcher",
+			"execLogicalMatcher",
+			"Utils.isArray",
+			"EJSON.equals",
+			"EJSON.parse",
+			"EJSON.stringify",
+			"isValidDocument(",
+			"'",
+			"except(",
+			"Document.",
+			"search(",
+			"getBetweenBounds",
+			"delete",
+			"insert",
+			"utils.",
+			"this.",
+			"delete",
+			"insert",
+			"'",
+			"batchSize",
+			"'server'",
+			"'",
+			".group",
+			".place",
+			"st-chooser",
+			"customMessageRenderer.",
+			"getRoomsById",
+			"makeChangesChildren",
+			"RECEIVE_USER_OBJECT",
+			"\"",
+			"_getHandlerEncodedContext",
+			"_getHandlerRawContext",
+			"Popovers",
+			"Locations",
+			"Pages",
+			"PageLocations",
+			"TimetableChangesStore",
+			": \"",
+			"",
+			"hidePopover",
+			"\"/images",
+			"TouchEventPlugin",
+			"'common/constants/CommonConstants'",
+			"'app/constants/AppConstants'",
+			"'app/dispatcher/AppDispatcher'",
+			"depend(",
+			"timetableByGroup",
+			"timetableByUser",
+			"timetableByHome",
+			"groupCreatorData",
+			"removeAttachmentFromMessage",
+			"acceptUploadedChatAttachment",
+			"UploadingTarget",
+			"UploadingFile",
+			"getUploadingFiles",
+			"target",
+			"UPLOAD_START",
+			"app/stores/UserStore",
+			"common/stores/UserStore",
+			"UPLOAD_ATTACHMENTS",
+			"RECEIVE_CHAT",
+			"ChatStore",
+			"PopoversList",
+			"_getNextState",
+			"_restoreScroll",
+			"_saveScroll",
+			"_cleanupBody"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"sheets":
+			[
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 28.0
+	},
+	"input":
+	{
+		"height": 38.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "",
+	"project": "marsdb.sublime-project",
+	"replace":
+	{
+		"height": 52.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"obje",
+				"Lib/ObjectMatcher.js"
+			],
+			[
+				"user",
+				"Server/publishers/userData.js"
+			],
+			[
+				"userd",
+				"Server/publishers/userData.js"
+			],
+			[
+				"menu",
+				"Views/app/menu.html"
+			],
+			[
+				"userse",
+				"Application/services/UserService.js"
+			],
+			[
+				"root",
+				"Application/controllers/RootController.js"
+			],
+			[
+				"nav",
+				"Styles/app-components/nav.styl"
+			],
+			[
+				"timet",
+				"Styles/app-components/timetable.styl"
+			],
+			[
+				"timeta",
+				"Application/services/TimetableService.js"
+			],
+			[
+				"fro",
+				"Styles/app-components/form.styl"
+			],
+			[
+				"time",
+				"Styles/app-components/timetable.styl"
+			],
+			[
+				"ddp",
+				"Application/services/mars/DDP.js"
+			],
+			[
+				"profi",
+				"Styles/app-components/profile.styl"
+			],
+			[
+				"dist",
+				"Gulp/tasks/dist.js"
+			],
+			[
+				"list",
+				"Views/app/selector/list.html"
+			],
+			[
+				"form",
+				"Styles/app-components/form.styl"
+			],
+			[
+				"profil",
+				"Styles/app-components/profile.styl"
+			],
+			[
+				"i18n",
+				"Application/filters/i18n.js"
+			],
+			[
+				"event",
+				"Application/controllers/EventEditorController.js"
+			],
+			[
+				"var",
+				"Styles/onsen-theme-vars.styl"
+			],
+			[
+				"i18",
+				"Application/filters/i18n.js"
+			],
+			[
+				"i1",
+				"Application/filters/i18n.js"
+			],
+			[
+				"sele",
+				"Styles/app-components/selector.styl"
+			],
+			[
+				"locationac",
+				"Application/actions/LocationActionCreators.coffee"
+			],
+			[
+				"oau",
+				"Application/services/oauth/OAuth.js"
+			],
+			[
+				"load",
+				"Styles/app-components/loading.styl"
+			],
+			[
+				"cho",
+				"Styles/app-components/chooser.styl"
+			],
+			[
+				"choose",
+				"Application/controllers/ChooserController.js"
+			],
+			[
+				"editorc",
+				"Application/controllers/EventEditorController.js"
+			],
+			[
+				"place",
+				"Application/services/PlaceService.js"
+			],
+			[
+				"select",
+				"Views/app/selector/list.html"
+			],
+			[
+				"selec",
+				"Styles/app-components/selector.styl"
+			],
+			[
+				"chooser",
+				"Application/controllers/ChooserController.js"
+			],
+			[
+				"choo",
+				"Application/services/ChooserService.js"
+			],
+			[
+				"con",
+				"Application/constants.js"
+			],
+			[
+				"edi",
+				"Views/app/editor/editor.html"
+			],
+			[
+				"chooser.",
+				"Views/app/chooser/chooser.html"
+			],
+			[
+				"popo",
+				"Common/components/Popovers.js"
+			],
+			[
+				"one",
+				"Packages/onetimeout/onetimeout.coffee"
+			],
+			[
+				"cachere",
+				"Common/util/CachableReactiveStore.js"
+			],
+			[
+				"cachare",
+				"Common/util/CachableReactiveStore.js"
+			],
+			[
+				"bro",
+				"Blackhole/tasks/browserify.coffee"
+			],
+			[
+				"chatbo",
+				"Application/components/pages/body/ChatBody.js"
+			],
+			[
+				"timer",
+				"Application/components/pages/timetable/TimetableTimer.js"
+			],
+			[
+				"userna",
+				"Publishers/userNavigationObjects.js"
+			],
+			[
+				"timegr",
+				"Application/components/pages/header/TimetableGroupNavigation.js"
+			],
+			[
+				"basi",
+				"Application/components/pages/header/BasicTimetableNavigation.js"
+			],
+			[
+				"tinav",
+				"Application/components/pages/header/TimetableUserNavigation.js"
+			],
+			[
+				"chatinp",
+				"Common/components/ChatInput.coffee"
+			],
+			[
+				"server",
+				"Packages/react-meteor/server.coffee"
+			],
+			[
+				"loca",
+				"Common/stores/LocationStore.coffee"
+			],
+			[
+				"timetatime",
+				"Application/components/pages/timetable/TimetableTimer.js"
+			],
+			[
+				"timetanas",
+				"Styles/app/pages/TimetableNavigation.styl"
+			],
+			[
+				"chatna",
+				"Application/components/pages/header/ChatNavigation.js"
+			],
+			[
+				"chatcom",
+				"Common/components/ChatComponent.coffee"
+			],
+			[
+				"chatbod",
+				"Application/components/pages/body/ChatBody.js"
+			],
+			[
+				"app",
+				"Styles/app/pages/AppPage.styl"
+			],
+			[
+				"lis",
+				"Styles/common/List.styl"
+			],
+			[
+				"chatb",
+				"Styles/app/pages/ChatBody.styl"
+			],
+			[
+				"chatin",
+				"Common/components/ChatInput.coffee"
+			],
+			[
+				"chatme",
+				"Styles/common/ChatMessage.styl"
+			],
+			[
+				"timenav",
+				"Styles/app/pages/TimetableNavigation.styl"
+			],
+			[
+				"timetabtime",
+				"Application/components/pages/timetable/TimetableTimer.js"
+			],
+			[
+				"timetabletime",
+				"Styles/app/pages/TimetableTimer.styl"
+			],
+			[
+				"timenavsty",
+				"Styles/app/pages/TimetableNavigation.styl"
+			],
+			[
+				"eventdetail",
+				"Styles/app/modals/EventDetailsModal.styl"
+			],
+			[
+				"eventd",
+				"Application/components/modals/EventDetailsModal.coffee"
+			],
+			[
+				"eventin",
+				"Application/components/modals/event-details/EventInfo.coffee"
+			],
+			[
+				"button",
+				"Styles/common/Button.styl"
+			],
+			[
+				"timetableti",
+				"Styles/app/pages/TimetableTime.styl"
+			],
+			[
+				"modeevent",
+				"Models/event.coffee"
+			],
+			[
+				"timetati",
+				"Application/components/pages/timetable/TimetableTimer.js"
+			],
+			[
+				"basic",
+				"Application/components/pages/body/BasicTimetableBody.js"
+			],
+			[
+				"timegri",
+				"Application/components/pages/timetable/TimetableGrid.coffee"
+			],
+			[
+				"cacha",
+				"Common/util/CachableReactiveStore.js"
+			],
+			[
+				"po",
+				"Common/components/Popovers.js"
+			],
+			[
+				"timetableg",
+				"Application/components/pages/header/TimetableGroupNavigation.js"
+			],
+			[
+				"tiemchang",
+				"Application/stores/TimetableChangesStore.coffee"
+			],
+			[
+				"timetauser",
+				"Application/components/pages/header/TimetableUserNavigation.js"
+			],
+			[
+				"changse",
+				"Application/stores/TimetableChangesStore.coffee"
+			],
+			[
+				"timetas",
+				"Application/stores/TimetableStore.coffee"
+			],
+			[
+				"timetablena",
+				"Application/components/pages/header/BasicTimetableNavigation.js"
+			],
+			[
+				"leftsto",
+				"Application/stores/LeftNavigationStore.js"
+			],
+			[
+				"locationa",
+				"Application/actions/LocationActionCreators.coffee"
+			],
+			[
+				"apppa",
+				"Application/components/pages/AppPage.coffee"
+			],
+			[
+				"leftnapa",
+				"Styles/app/pages/LeftNavigationPanel.styl"
+			],
+			[
+				"left",
+				"Application/components/pages/panel/LeftNavigationPanel.js"
+			],
+			[
+				"input",
+				"Common/components/ChatInput.coffee"
+			],
+			[
+				"timetablegroupn",
+				"Application/components/pages/header/TimetableGroupNavigation.js"
+			],
+			[
+				"timetable",
+				"Application/components/pages/body/TimetableGroupBody.js"
+			],
+			[
+				"main",
+				"Application/main.coffee"
+			],
+			[
+				"mixin",
+				"Styles/mixins.styl"
+			],
+			[
+				"leftnai",
+				"Application/components/pages/panel/LeftNavigationItem.js"
+			],
+			[
+				"timetablgri",
+				"Application/components/pages/timetable/TimetableGrid.coffee"
+			],
+			[
+				"basictime",
+				"Application/components/pages/body/BasicTimetableBody.js"
+			],
+			[
+				"chatst",
+				"Common/stores/ChatStore.coffee"
+			],
+			[
+				"appnav",
+				"Styles/app/pages/AppNavigation.styl"
+			],
+			[
+				"userpi",
+				"Styles/common/UserPic.styl"
+			],
+			[
+				"leftnap",
+				"Application/components/pages/panel/LeftNavigationPanel.js"
+			],
+			[
+				"chatsto",
+				"Common/stores/ChatStore.coffee"
+			],
+			[
+				"leftnavpa",
+				"Application/components/pages/panel/LeftNavigationPanel.js"
+			],
+			[
+				"userv",
+				"Application/util/UserViewUpdateMixin.js"
+			],
+			[
+				"chatup",
+				"Styles/common/ChatUploadingFile.styl"
+			],
+			[
+				"chatfile",
+				"Common/components/ChatUploadingFile.coffee"
+			],
+			[
+				"sapp.",
+				"Styles/app.styl"
+			],
+			[
+				"varia",
+				"Styles/app/variables.styl"
+			],
+			[
+				"packa",
+				"_root/package.json"
+			],
+			[
+				"message",
+				"Allows/messageInsertAllow.coffee"
+			],
+			[
+				"pa",
+				"_root/package.json"
+			],
+			[
+				"chatmes",
+				"Common/components/ChatMessage.coffee"
+			],
+			[
+				"appna",
+				"Application/components/pages/header/AppNavigation.coffee"
+			],
+			[
+				"leftnav",
+				"Application/components/pages/panel/LeftNavigationPanel.js"
+			],
+			[
+				"popovers",
+				"Common/components/Popovers.js"
+			],
+			[
+				"eventsu",
+				"Application/components/modals/event-editor/EventSubjectFormField.coffee"
+			],
+			[
+				"eventtie",
+				"Application/components/modals/event-editor/EventTimeFormField.coffee"
+			],
+			[
+				"uservi",
+				"Application/util/UserViewUpdateMixin.js"
+			],
+			[
+				"usevi",
+				"Application/util/UserViewUpdateMixin.js"
+			],
+			[
+				"eventst",
+				"Application/stores/EventStore.coffee"
+			],
+			[
+				"chatmess",
+				"Publishers/chatMessagesByRoomId.coffee"
+			],
+			[
+				"usersto",
+				"Application/stores/UserStore.coffee"
+			],
+			[
+				"chatco",
+				"Common/components/ChatComponent.coffee"
+			],
+			[
+				"chatl",
+				"Common/components/ChatList.coffee"
+			],
+			[
+				"bastimeta",
+				"Application/components/pages/body/BasicTimetableBody.js"
+			],
+			[
+				"userup",
+				"Application/util/UserViewUpdateMixin.js"
+			],
+			[
+				"chats",
+				"Common/stores/ChatStore.coffee"
+			],
+			[
+				"leftna",
+				"Application/components/pages/panel/LeftNavigationPanel.js"
+			],
+			[
+				"stormi",
+				"Common/util/StoreMixin.js"
+			],
+			[
+				"confi",
+				"Blackhole/config.coffee"
+			]
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 500.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 380.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 225.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

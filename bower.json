@@ -1,0 +1,36 @@
+{
+  "name": "marsdb",
+  "description": "MarsDB is a lightweight client-side MongoDB-like database, Promise based, written in ES6",
+  "main": "index.js",
+  "authors": [
+    "Artem Artemev"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "mongo",
+    "minimongo",
+    "embedded",
+    "levelup",
+    "localstorage",
+    "db",
+    "database",
+    "meteor"
+  ],
+  "homepage": "https://github.com/c58/marsdb",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:c58/marsdb.git"
+  },
+  "moduleType": [
+    "amd",
+    "globals",
+    "node"
+  ],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
