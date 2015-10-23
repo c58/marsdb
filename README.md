@@ -21,9 +21,9 @@ You can use it in any JS environment (Browser, Electron, NW.js, Node.js).
 * **Carefully written on ES6**
 * **Supports many of MongoDB query/modify operations** – thanks to Meteor’s minimongo
 * **Flexible pipeline** – map, reduce, custom sorting function, filtering. All with a sexy JS interface (no ugly mongo’s aggregation language)
-* **Joinable cursor** – joining one object with another can’t be simplier
 * **Persistence API** – all collections can be stored (and restored) with any kind of storage (in-memory, LocalStorage, LevelUP, etc)
-* **Live queries** - just like in Meteor, but with simplier interface
+* **Observable queries** - live queries just like in Meteor, but with simplier interface
+* **Joinable cursor** – joins is simple, joins is observable (live)
 
 ## Examples
 ### Using with Angular 1.x
@@ -111,14 +111,16 @@ const stopper = posts.find({tags: {$in: [‘marsdb’, ‘is’, ‘awesome’]}
   });
 ```
 ### Find with joins
-Joined objects is not obervable yet.
 ```javascript
 const users = new Collection(‘users’);
 const posts = new Collection(‘posts’);
 posts.find()
   .join(doc => {
-    // Return a Promise for waiting of the result
-    return users.findOne(doc.authorId).then(user => {
+    // Return a Promise for waiting of the result.
+    // Calling `observe` makes result of root query depends
+    // on chnages of results of this query. So, when author
+    // object changed root result is updated (yeah!)
+    return users.findOne(doc.authorId).observe().then(user => {
       doc.authorObj = user;
       return doc;
     });
@@ -130,6 +132,9 @@ posts.find()
     // You need to return a document, bacause it's
     // a pipeline operation
     return doc;
+  })
+  .observe((posts) => {
+    // do somethin wiht posts with authors
   });
 ```
 ### Inserting
