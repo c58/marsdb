@@ -56,7 +56,19 @@ var AngularCursorObservable = (function (_CursorObservable) {
   }, {
     key: 'observe',
     value: function observe(fn, $scope) {
-      var stopper = _get(Object.getPrototypeOf(AngularCursorObservable.prototype), 'observe', this).call(this, fn);
+      var _this = this;
+
+      var wrappedFn = function () {
+        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+          args[_key] = arguments[_key];
+        }
+
+        _this.$q(function (resolve) {
+          resolve(fn.apply(undefined, args));
+        });
+      };
+
+      var stopper = _get(Object.getPrototypeOf(AngularCursorObservable.prototype), 'observe', this).call(this, wrappedFn);
       if ($scope) {
         $scope.$on('$destroy', function () {
           stopper.stop();
@@ -69,8 +81,8 @@ var AngularCursorObservable = (function (_CursorObservable) {
   }, {
     key: 'exec',
     value: function exec() {
-      for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-        args[_key] = arguments[_key];
+      for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+        args[_key2] = arguments[_key2];
       }
 
       return this.$q.resolve(_get(Object.getPrototypeOf(AngularCursorObservable.prototype), 'exec', this).apply(this, args));
@@ -78,8 +90,8 @@ var AngularCursorObservable = (function (_CursorObservable) {
   }, {
     key: 'ids',
     value: function ids() {
-      for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-        args[_key2] = arguments[_key2];
+      for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+        args[_key3] = arguments[_key3];
       }
 
       return this.$q.resolve(_get(Object.getPrototypeOf(AngularCursorObservable.prototype), 'ids', this).apply(this, args));
@@ -87,8 +99,8 @@ var AngularCursorObservable = (function (_CursorObservable) {
   }, {
     key: 'update',
     value: function update() {
-      for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
-        args[_key3] = arguments[_key3];
+      for (var _len4 = arguments.length, args = Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+        args[_key4] = arguments[_key4];
       }
 
       return this.$q.resolve(_get(Object.getPrototypeOf(AngularCursorObservable.prototype), 'update', this).apply(this, args));
