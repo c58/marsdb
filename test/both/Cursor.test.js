@@ -279,14 +279,13 @@ describe('Cursor', () => {
 
 
 
-  describe('#join', function () {
+  describe('#joinEach', function () {
     it('should join by function with promises', function () {
       const cursor = new Cursor(db);
       cursor.find().sort({b: 1}).join(d => {
         const cursor2 = new Cursor(db);
         return cursor2.find({g: d.g}).exec().then((result) => {
           d.groupObjs = result;
-          return d;
         });
       });
       return cursor.exec().then((docs) => {
@@ -303,6 +302,27 @@ describe('Cursor', () => {
     });
   });
 
+
+  describe('#joinAll', function () {
+    it('should join by function with promises', function () {
+      return db.find({b: {$in: [1,2,3]}}).sort(['b']).joinAll(docs => {
+        docs.should.have.length(3);
+        return db.find({g: docs[0].g}).exec().then((result) => {
+          docs.forEach(d => d.groupObjs = result);
+        });
+      }).exec().then((docs) => {
+        docs.should.have.length(3);
+        docs[0].groupObjs.should.have.length(4);
+        docs[1].groupObjs.should.have.length(4);
+        docs[2].groupObjs.should.have.length(4);
+      });
+    });
+
+    it('should throw an error if join is not a function', function () {
+      const cursor = new Cursor(db);
+      (() => cursor.joinAll(123)).should.throw(Error);
+    });
+  });
 
 
   describe('#ids', function () {
