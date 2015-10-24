@@ -6,7 +6,7 @@ Object.defineProperty(exports, '__esModule', {
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var _get = function get(_x2, _x3, _x4) { var _again = true; _function: while (_again) { var object = _x2, property = _x3, receiver = _x4; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x2 = parent; _x3 = property; _x4 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+var _get = function get(_x3, _x4, _x5) { var _again = true; _function: while (_again) { var object = _x3, property = _x4, receiver = _x5; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x3 = parent; _x4 = property; _x5 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
 
 exports.debounce = debounce;
 
@@ -102,7 +102,6 @@ var CursorObservable = (function (_Cursor) {
       this.db.on('update', updateWrapper);
       this.db.on('remove', updateWrapper);
 
-      var firstUpdatePromise = this.update(true);
       var stopper = function () {
         _this.db.removeListener('insert', updateWrapper);
         _this.db.removeListener('update', updateWrapper);
@@ -110,9 +109,11 @@ var CursorObservable = (function (_Cursor) {
         _this.removeListener('update', listener);
         _this.emit('stopped');
       };
+
       var parentSetter = function (cursor) {
         _this._parentCursor = cursor;
       };
+
       var createStoppablePromise = function (currPromise) {
         return {
           parent: parentSetter,
@@ -123,6 +124,7 @@ var CursorObservable = (function (_Cursor) {
         };
       };
 
+      var firstUpdatePromise = this.update(true);
       return createStoppablePromise(firstUpdatePromise);
     }
 
@@ -144,20 +146,25 @@ var CursorObservable = (function (_Cursor) {
         _this2._latestIds = new Set(result.map(function (x) {
           return x._id;
         }));
-        _this2.emit('update', result, firstRun);
-
-        if (_this2._parentCursor && !firstRun) {
-          var parentResult = _this2._parentCursor._latestResult;
-          _this2._parentCursor.emit('update', parentResult, false);
-        }
-
+        _this2._propagateUpdate(firstRun);
         return result;
       });
     }
 
-    // TODO improve performance, we should be smarter
-    //      and don't emit fully request update in many
-    //      cases
+    /**
+     * Consider to update a query by given newDoc and oldDoc,
+     * received form insert/udpate/remove oparation.
+     * Should make a decision as smart as possible.
+     * (Don't update a cursor if it does not change a result
+     * of a cursor)
+     *
+     * TODO improve performance, we should be smarter
+     *      and don't emit fully request update in many
+     *      cases
+     *
+     * @param  {Object} newDoc
+     * @param  {Object} oldDoc
+     */
   }, {
     key: 'maybeUpdate',
     value: function maybeUpdate(newDoc, oldDoc) {
@@ -169,12 +176,36 @@ var CursorObservable = (function (_Cursor) {
         return this.update();
       }
     }
+
+    /**
+     * Preapare a listener of updates. By default it just debounce
+     * it a little for no useless updates when update propagated
+     * from children cursors.
+     * @param  {Function} listener
+     * @return {Promise}
+     */
   }, {
     key: '_prepareListener',
     value: function _prepareListener(listener) {
       // Debounce listener a little for update propagation
       // when joins updated
       return debounce(listener, 0, 0);
+    }
+
+    /**
+     * Emits an update event with current result of a cursor
+     * and call this method on parent cursor if it exists
+     * and if it is not first run of update.
+     */
+  }, {
+    key: '_propagateUpdate',
+    value: function _propagateUpdate() {
+      var firstRun = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
+
+      this.emit('update', this._latestResult, firstRun);
+      if (!firstRun && this._parentCursor && this._parentCursor._propagateUpdate) {
+        this._parentCursor._propagateUpdate(false);
+      }
     }
   }]);
 

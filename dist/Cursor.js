@@ -26,6 +26,10 @@ var _lodashLangIsObject = require('lodash/lang/isObject');
 
 var _lodashLangIsObject2 = _interopRequireDefault(_lodashLangIsObject);
 
+var _lodashLangToArray = require('lodash/lang/toArray');
+
+var _lodashLangToArray2 = _interopRequireDefault(_lodashLangToArray);
+
 var _eventemitter3 = require('eventemitter3');
 
 var _eventemitter32 = _interopRequireDefault(_eventemitter3);
@@ -57,7 +61,9 @@ var PIPELINE_TYPE = (0, _keymirror2['default'])({
   Map: null,
   Aggregate: null,
   Reduce: null,
-  Join: null
+  Join: null,
+  JoinEach: null,
+  JoinAll: null
 });
 
 exports.PIPELINE_TYPE = PIPELINE_TYPE;
@@ -72,20 +78,24 @@ var PIPELINE_PROCESSORS = (_PIPELINE_PROCESSORS = {}, _defineProperty(_PIPELINE_
 }), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.Reduce, function (docs, pipeObj) {
   return docs.reduce(pipeObj.value, pipeObj.args[0]);
 }), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.Join, function (docs, pipeObj, cursor) {
-  return Promise.all(docs.map(function (x) {
-    var res = pipeObj.value(x);
-    if ((0, _lodashLangIsObject2['default'])(res) && res.then) {
-      if (res.parent) {
-        res.parent(cursor);
-        cursor.once('stopped', res.stop);
-      }
-      return res.then(function () {
-        return x;
-      });
-    } else {
-      return x;
-    }
+  return PIPELINE_PROCESSORS[PIPELINE_TYPE.JoinEach](docs, pipeObj, cursor);
+}), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.JoinEach, function (docs, pipeObj, cursor) {
+  return Promise.all((0, _lodashLangToArray2['default'])(docs).map(function (x) {
+    return PIPELINE_PROCESSORS[PIPELINE_TYPE.JoinAll](x, pipeObj, cursor);
   }));
+}), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.JoinAll, function (docs, pipeObj, cursor) {
+  var res = pipeObj.value(docs);
+  if ((0, _lodashLangIsObject2['default'])(res) && res.then) {
+    if (res.parent) {
+      res.parent(cursor);
+      cursor.once('stopped', res.stop);
+    }
+    return res.then(function () {
+      return docs;
+    });
+  } else {
+    return docs;
+  }
 }), _PIPELINE_PROCESSORS);
 
 exports.PIPELINE_PROCESSORS = PIPELINE_PROCESSORS;
@@ -188,9 +198,22 @@ var Cursor = (function (_EventEmitter) {
   }, {
     key: 'join',
     value: function join(joinFn) {
-      (0, _invariant2['default'])(typeof joinFn === 'function', 'join(...): argument must be a function');
+      return this.joinEach(joinFn);
+    }
+  }, {
+    key: 'joinEach',
+    value: function joinEach(joinFn) {
+      (0, _invariant2['default'])(typeof joinFn === 'function', 'joinEach(...): argument must be a function');
 
-      this.addPipeline(PIPELINE_TYPE.Join, joinFn);
+      this.addPipeline(PIPELINE_TYPE.JoinEach, joinFn);
+      return this;
+    }
+  }, {
+    key: 'joinAll',
+    value: function joinAll(joinFn) {
+      (0, _invariant2['default'])(typeof joinFn === 'function', 'joinAll(...): argument must be a function');
+
+      this.addPipeline(PIPELINE_TYPE.JoinAll, joinFn);
       return this;
     }
   }, {

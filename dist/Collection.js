@@ -243,7 +243,7 @@ var Collection = (function (_EventEmitter) {
 
       // Fire sync event
       if (!options.quiet) {
-        this.emit('sync:update', query, options);
+        this.emit('sync:update', query, modifier, options);
       }
 
       // Update locally
