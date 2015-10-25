@@ -212,6 +212,7 @@ describe('CursorObservable', () => {
         return db.update({f: 20}, {$set: {f: 2}});
       });
     });
+
   });
 
 

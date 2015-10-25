@@ -1136,9 +1136,17 @@ function _inherits(subClass, superClass) {
   }subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } });if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
 }
 
+var _lodashCollectionSize = require('lodash/collection/size');
+
+var _lodashCollectionSize2 = _interopRequireDefault(_lodashCollectionSize);
+
 var _Cursor2 = require('./Cursor');
 
 var _Cursor3 = _interopRequireDefault(_Cursor2);
+
+var _EJSON = require('./EJSON');
+
+var _EJSON2 = _interopRequireDefault(_EJSON);
 
 /**
  * Observable cursor is used for making request auto-updatable
@@ -1278,9 +1286,8 @@ var CursorObservable = (function (_Cursor) {
      * (Don't update a cursor if it does not change a result
      * of a cursor)
      *
-     * TODO improve performance, we should be smarter
-     *      and don't emit fully request update in many
-     *      cases
+     * TODO we should update _latestResult by hands in some cases
+     *      without a calling of `update` method
      *
      * @param  {Object} newDoc
      * @param  {Object} oldDoc
@@ -1288,9 +1295,20 @@ var CursorObservable = (function (_Cursor) {
   }, {
     key: 'maybeUpdate',
     value: function maybeUpdate(newDoc, oldDoc) {
+      // When it's remove operation we just check
+      // that it's in our latest result ids list
       var removedFromResult = !newDoc && oldDoc && (!this._latestIds || this._latestIds.has(oldDoc._id));
 
-      var insertedInResult = removedFromResult || newDoc && this._matcher.documentMatches(newDoc).result;
+      // When it's an update operation we check three things
+      // 1. Is a new doc or old doc matched by a query?
+      // 2. Is a new doc has different number of fields then an old doc?
+      // 3. Is a new doc has a greater updatedAt time then an old doc?
+      // 4. Is a new doc not equals to an old doc?
+      var updatedInResult = removedFromResult || newDoc && oldDoc && (this._matcher.documentMatches(newDoc).result || this._matcher.documentMatches(oldDoc).result) && ((0, _lodashCollectionSize2['default'])(newDoc) !== (0, _lodashCollectionSize2['default'])(oldDoc) || newDoc.updatedAt && (!oldDoc.updatedAt || oldDoc.updatedAt && newDoc.updatedAt > oldDoc.updatedAt) || !_EJSON2['default'].equals(newDoc, oldDoc));
+
+      // When it's an insert operation we just check
+      // it's match a query
+      var insertedInResult = updatedInResult || newDoc && !oldDoc && this._matcher.documentMatches(newDoc).result;
 
       if (insertedInResult) {
         return this.update();
@@ -1396,7 +1414,7 @@ function debounce(func, wait, batchSize) {
 
 exports['default'] = CursorObservable;
 
-},{"./Cursor":4}],6:[function(require,module,exports){
+},{"./Cursor":4,"./EJSON":11,"lodash/collection/size":33}],6:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {

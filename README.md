@@ -9,7 +9,7 @@ MarsDB
 [![Dependency Status](https://david-dm.org/c58/marsdb.svg)](https://david-dm.org/c58/marsdb)
 
 MarsDB is a lightweight client-side database.
-It based on a Meteor’s `minimongo` mathing/modifying implementation. It carefully written on `ES6`, usess `modular lodash`, have a `Promise` based interface and may be backed with any storage implementation (LevelUP, LocalStorage, IndexedDB, etc). For now implemented only LocalStorage and [LocalForage](https://github.com/mozilla/localForage) storage managers. It also supports `observable` cursors.
+It's based on a Meteor’s `minimongo` matching/modifying implementation. It's carefully written on `ES6`, usess `modular lodash`, have a `Promise` based interface and may be backed with any storage implementation (LevelUP, LocalStorage, IndexedDB, etc). For now implemented only LocalStorage and [LocalForage](https://github.com/mozilla/localForage) storage managers. It's also supports `observable` cursors.
 
 MarsDB supports any kind of find/update/remove operations that Meteor’s minimongo does. So, go to the Meteor docs for supported query/modifier operations.
 
@@ -19,7 +19,7 @@ You can use it in any JS environment (Browser, Electron, NW.js, Node.js).
 
 * **Promise based API**
 * **Carefully written on ES6**
-* **Supports many of MongoDB query/modify operations** – thanks to Meteor’s minimongo
+* **Supports many of MongoDB query/modify operations** – thanks to a Meteor’s minimongo
 * **Flexible pipeline** – map, reduce, custom sorting function, filtering. All with a sexy JS interface (no ugly mongo’s aggregation language)
 * **Persistence API** – all collections can be stored (and restored) with any kind of storage (in-memory, LocalStorage, LevelUP, etc)
 * **Observable queries** - live queries just like in Meteor, but with simplier interface

@@ -296,6 +296,23 @@ describe('Cursor', () => {
       });
     });
 
+    it('should not change object in a storage', function () {
+      return db.find().sort({b: 1}).join(d => {
+        return db.find({g: d.g}).then((result) => {
+          d.groupObjs = result;
+        });
+      }).then((docs) => {
+        docs.should.have.length(7);
+        docs[0].groupObjs.should.have.length(4);
+        docs[1].groupObjs.should.have.length(4);
+        docs[6].groupObjs.should.have.length(3);
+        return db.find().sort({b: 1});
+      }).then((docs) => {
+        docs.should.have.length(7);
+        docs[0].should.not.have.ownProperty('groupObjs');
+      });
+    });
+
     it('should throw an error if join is not a function', function () {
       const cursor = new Cursor(db);
       (() => cursor.join(123)).should.throw(Error);
