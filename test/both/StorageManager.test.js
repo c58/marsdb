@@ -17,6 +17,35 @@ describe('StorageManager', () => {
     });
   });
 
+  it('should clone object when getting', () => {
+    const db = new StorageManager();
+    return db.persist('a', {_id: 'a', a: 1}).then(() => {
+      return db.get('a');
+    }).then(doc => {
+      doc.a = 2;
+      return db.get('a');
+    }).then(doc => {
+      doc.a.should.be.equal(1);
+    });
+  });
+
+  it('should clone objects when streaming', (done) => {
+    const db = new StorageManager();
+    db.persist('a', {_id: 'a', a: 1}).then(() => {
+      db.createReadStream()
+        .on('data', (doc) => doc.value.a = 2)
+        .on('end', () => {
+          db.createReadStream()
+            .on('data', (doc) => {
+              doc.value.a.should.be.equal(1);
+            })
+            .on('end', () => {
+              done();
+            })
+        })
+    });
+  });
+
   it('should be a able to persist with replace by id', () => {
     const db = new StorageManager();
     return db.persist('a', {_id: 'a', a: 1}).then(() => {
