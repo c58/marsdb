@@ -18,13 +18,17 @@ var _lodashFunctionDefer = require('lodash/function/defer');
 
 var _lodashFunctionDefer2 = _interopRequireDefault(_lodashFunctionDefer);
 
+var _eventemitter3 = require('eventemitter3');
+
+var _eventemitter32 = _interopRequireDefault(_eventemitter3);
+
 var _PromiseQueue = require('./PromiseQueue');
 
 var _PromiseQueue2 = _interopRequireDefault(_PromiseQueue);
 
-var _eventemitter3 = require('eventemitter3');
+var _EJSON = require('./EJSON');
 
-var _eventemitter32 = _interopRequireDefault(_eventemitter3);
+var _EJSON2 = _interopRequireDefault(_EJSON);
 
 /**
  * Manager for dealing with backend storage
@@ -76,7 +80,7 @@ var StorageManager = (function () {
       var _this3 = this;
 
       return this._loadedPromise.then(function () {
-        _this3._storage[key] = value;
+        _this3._storage[key] = _EJSON2['default'].clone(value);
       });
     }
   }, {
@@ -94,7 +98,7 @@ var StorageManager = (function () {
       var _this5 = this;
 
       return this._loadedPromise.then(function () {
-        return _this5._storage[key];
+        return _EJSON2['default'].clone(_this5._storage[key]);
       });
     }
   }, {
@@ -106,7 +110,7 @@ var StorageManager = (function () {
       (0, _lodashFunctionDefer2['default'])(function () {
         _this6._loadedPromise.then(function () {
           (0, _lodashObjectKeys2['default'])(_this6._storage).forEach(function (k) {
-            emitter.emit('data', { value: _this6._storage[k] });
+            emitter.emit('data', { value: _EJSON2['default'].clone(_this6._storage[k]) });
           });
           emitter.emit('end');
         });
