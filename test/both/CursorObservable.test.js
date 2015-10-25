@@ -122,7 +122,98 @@ describe('CursorObservable', () => {
           return db.insert({b: 30});
         });
     });
+
+    it('should not update a cursor when updated dcc does not match a query', function (done) {
+      var calls = 0;
+      db.find({$or: [{f: 1}, {f: 2}]}).observe(result => {
+        if (calls === 0) {
+          expect(result).to.be.an('array');
+          result.should.have.length(2);
+          calls++;
+        } else {
+          done(new Error('Called when document does not match query'));
+        }
+      }).then(() => {
+        return db.update({f: 3}, {$set: {some: 'field'}});
+      }).then(() => {
+        setTimeout(() => {done()}, 40);
+      });
+    });
+
+    it('should not update a cursor when updated doc is equals to an old doc', function (done) {
+      var calls = 0;
+      db.find({$or: [{f: 1}, {f: 2}]}).observe(result => {
+        if (calls === 0) {
+          expect(result).to.be.an('array');
+          result.should.have.length(2);
+          calls++;
+        } else {
+          done(new Error('Called when an updated doc is equals to an old doc'));
+        }
+      }).then(() => {
+        return db.update({f: 1}, {$set: {b: 1}});
+      }).then(() => {
+        setTimeout(() => {done()}, 40);
+      });
+    });
+
+    it('should update a cursor when updatedAt is different', function (done) {
+      var calls = 0;
+
+      db.update({f: 1}, {$set: {updatedAt: new Date(0)}}).then(() => {
+        return db.find({$or: [{f: 1}, {f: 2}]}).observe(result => {
+          if (calls === 0) {
+            expect(result).to.be.an('array');
+            result.should.have.length(2);
+            calls++;
+          } else {
+            result[0].updatedAt.should.not.be.deep.equals(new Date(0));
+            result[0].updatedAt.should.be.deep.equals(new Date(1));
+            done();
+          }
+        }).then(() => {
+          return db.update({f: 1}, {$set: {updatedAt: new Date(1)}});
+        });
+      });
+    });
+
+    it('should not update a cursor when updatedAt is equals', function (done) {
+      var calls = 0;
+
+      db.update({f: 1}, {$set: {updatedAt: new Date(0)}}).then(() => {
+        return db.find({$or: [{f: 1}, {f: 2}]}).observe(result => {
+          if (calls === 0) {
+            expect(result).to.be.an('array');
+            result.should.have.length(2);
+            calls++;
+          } else {
+            done(new Error());
+          }
+        }).then(() => {
+          return db.update({f: 1}, {$set: {updatedAt: new Date(0)}});
+        }).then(() => {
+          setTimeout(() => {done()}, 40);
+        });
+      });
+    });
+
+    it('should update when not matching old doc will match by update', function (done) {
+      var calls = 0;
+      db.find({$or: [{f: 1}, {f: 2}]}).observe(result => {
+        if (calls === 0) {
+          expect(result).to.be.an('array');
+          result.should.have.length(2);
+          calls++;
+        } else {
+          result.should.have.length(3);
+          done();
+        }
+      }).then(() => {
+        return db.update({f: 20}, {$set: {f: 2}});
+      });
+    });
   });
+
 
   describe('#debounce', function () {
     it('should change debounce wait time', function (done) {
