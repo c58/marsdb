@@ -1,0 +1,268 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Marsdb by c58</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+    <meta name="viewport" content="width=device-width">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Marsdb</h1>
+        <p>MarsDB is a Promise based lightweight database with MongoDB query syntax, written on ES6</p>
+
+        <p class="view"><a href="https://github.com/c58/marsdb">View the Project on GitHub <small>c58/marsdb</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/c58/marsdb/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/c58/marsdb/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/c58/marsdb">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <div><img src="https://static.studytime.me/marsdb.png"></div>
+
+<h1>
+<a id="marsdb" class="anchor" href="#marsdb" aria-hidden="true"><span class="octicon octicon-link"></span></a>MarsDB</h1>
+
+<p><a href="https://travis-ci.org/c58/marsdb"><img src="https://travis-ci.org/c58/marsdb.svg?branch=master" alt="Build Status"></a>
+<a href="https://www.npmjs.com/package/marsdb"><img src="https://badge.fury.io/js/marsdb.svg" alt="npm version"></a>
+<a href="https://coveralls.io/github/c58/marsdb?branch=master"><img src="https://coveralls.io/repos/c58/marsdb/badge.svg?branch=master&amp;service=github" alt="Coverage Status"></a>
+<a href="https://david-dm.org/c58/marsdb"><img src="https://david-dm.org/c58/marsdb.svg" alt="Dependency Status"></a></p>
+
+<p>MarsDB is a lightweight client-side database.
+It's based on a Meteor’s <code>minimongo</code> matching/modifying implementation. It's carefully written on <code>ES6</code>, usess <code>modular lodash</code>, have a <code>Promise</code> based interface and may be backed with any storage implementation (LevelUP, LocalStorage, IndexedDB, etc). For now implemented only LocalStorage and <a href="https://github.com/mozilla/localForage">LocalForage</a> storage managers. It's also supports <code>observable</code> cursors.</p>
+
+<p>MarsDB supports any kind of find/update/remove operations that Meteor’s minimongo does. So, go to the Meteor docs for supported query/modifier operations.</p>
+
+<p>You can use it in any JS environment (Browser, Electron, NW.js, Node.js).</p>
+
+<h2>
+<a id="features" class="anchor" href="#features" aria-hidden="true"><span class="octicon octicon-link"></span></a>Features</h2>
+
+<ul>
+<li><strong>Promise based API</strong></li>
+<li><strong>Carefully written on ES6</strong></li>
+<li>
+<strong>Supports many of MongoDB query/modify operations</strong> – thanks to a Meteor’s minimongo</li>
+<li>
+<strong>Flexible pipeline</strong> – map, reduce, custom sorting function, filtering. All with a sexy JS interface (no ugly mongo’s aggregation language)</li>
+<li>
+<strong>Persistence API</strong> – all collections can be stored (and restored) with any kind of storage (in-memory, LocalStorage, LevelUP, etc)</li>
+<li>
+<strong>Observable queries</strong> - live queries just like in Meteor, but with simplier interface</li>
+<li>
+<strong>Reactive joins</strong> – out of the box</li>
+</ul>
+
+<h2>
+<a id="examples" class="anchor" href="#examples" aria-hidden="true"><span class="octicon octicon-link"></span></a>Examples</h2>
+
+<h3>
+<a id="using-with-angular-1x" class="anchor" href="#using-with-angular-1x" aria-hidden="true"><span class="octicon octicon-link"></span></a>Using with Angular 1.x</h3>
+
+<p>Include <code>marsdb.angular.js</code> after <code>marsdb.min.js</code> and <code>angular.js</code> in your <code>&lt;head&gt;</code>. Then add a <code>MarsDB</code> dependency in your module. That's it. Now you can use <code>$collection</code> factory. For example:</p>
+
+<div class="highlight highlight-source-js"><pre>angular.module(‘app’, [‘MarsDB’])
+    .controller(<span class="pl-k">function</span>(<span class="pl-smi">$scope</span>, <span class="pl-smi">$collection</span>) {
+        <span class="pl-k">const</span> <span class="pl-c1">posts</span> <span class="pl-k">=</span> $collection(‘posts’);
+
+        <span class="pl-c">// All methods in $collection returns a $q promise</span>
+        <span class="pl-c">// So you don’t need to manually call $digest</span>
+        posts.<span class="pl-c1">find</span>({authorId<span class="pl-k">:</span> <span class="pl-c1">123</span>}).observe((<span class="pl-smi">docs</span>) <span class="pl-k">=&gt;</span> {
+            $scope.posts <span class="pl-k">=</span> docs;
+        }, $scope).then(() <span class="pl-k">=&gt;</span> {
+            $scope.loaded <span class="pl-k">=</span> <span class="pl-c1">true</span>;
+        });
+
+        <span class="pl-c">// $scope at last argument needed for auto-binding</span>
+        <span class="pl-c">// to a “$destroy” event of the scope for stop</span>
+        <span class="pl-c">// observing changes. You can call it manually and</span>
+        <span class="pl-c">// don’t pass last argument.</span>
+    });</pre></div>
+
+<p>You also can use MarsDB within browserify environment. Just <code>require(‘marsdb/dist/angular’)</code> and MarsDB module will be added to the angular. Angular must be defined in a <code>window</code> or must be available as a module <code>require(‘angular’)</code>.</p>
+
+<h3>
+<a id="using-within-non-es6-environment" class="anchor" href="#using-within-non-es6-environment" aria-hidden="true"><span class="octicon octicon-link"></span></a>Using within non-ES6 environment</h3>
+
+<p>The <code>./dist</code> folder contains already compiled to a ES5 code, but some polyfills needed. For using in a browser you must to include <code>marsdb.polyfills.js</code> before <code>marsdb.min.js</code>. In node.js you need to <code>require(‘marsdb/polyfills’)</code>.
+It sets in a window/global: Promise, Set and Symbol.</p>
+
+<h3>
+<a id="create-a-collection" class="anchor" href="#create-a-collection" aria-hidden="true"><span class="octicon octicon-link"></span></a>Create a collection</h3>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">import</span> <span class="pl-smi">Collection</span> <span class="pl-k">from</span> ‘marsdb’;
+<span class="pl-k">import</span> <span class="pl-smi">LocalStorageManager</span> <span class="pl-k">from</span> <span class="pl-s"><span class="pl-pds">'</span>marsdb/lib/LocalStorageManager<span class="pl-pds">'</span></span>;
+
+<span class="pl-c">// Setup different id generator and storage managers</span>
+<span class="pl-c">// Default storage is in-memory</span>
+Collection.defaultStorageManager(LocalStorageManager);
+Collection.defaultIdGenerator(() <span class="pl-k">=&gt;</span> {
+  <span class="pl-k">return</span> {
+    value<span class="pl-k">:</span> <span class="pl-c1">Math</span>.<span class="pl-c1">random</span>(),
+    seed<span class="pl-k">:</span> <span class="pl-c1">0</span>,
+  };
+});
+
+<span class="pl-k">const</span> <span class="pl-c1">users</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">Collection</span>(‘users’);</pre></div>
+
+<h3>
+<a id="find-a-documents" class="anchor" href="#find-a-documents" aria-hidden="true"><span class="octicon octicon-link"></span></a>Find a documents</h3>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">const</span> <span class="pl-c1">posts</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">Collection</span>(‘posts’);
+posts.<span class="pl-c1">find</span>({author<span class="pl-k">:</span> ‘Bob’})
+  .<span class="pl-c1">sort</span>([‘createdAt’])
+  .then(docs <span class="pl-k">=&gt;</span> {
+    <span class="pl-c">// do something with docs</span>
+  });</pre></div>
+
+<h3>
+<a id="find-with-pipeline-map-reduce-filter" class="anchor" href="#find-with-pipeline-map-reduce-filter" aria-hidden="true"><span class="octicon octicon-link"></span></a>Find with pipeline (map, reduce, filter)</h3>
+
+<p>An order of pipeline methods invokation is important. Next pipeline operation gives as argument a result of a previous operation.</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">const</span> <span class="pl-c1">posts</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">Collection</span>(‘posts’);
+posts.<span class="pl-c1">find</span>()
+  .limit(<span class="pl-c1">10</span>)
+  .sortFunc((<span class="pl-smi">a</span>, <span class="pl-smi">b</span>) <span class="pl-k">=&gt;</span> a <span class="pl-k">-</span> b <span class="pl-k">+</span> <span class="pl-c1">10</span>)
+  .filter(doc <span class="pl-k">=&gt;</span> Matsh.<span class="pl-c1">sqrt</span>(doc.comment.<span class="pl-c1">length</span>) <span class="pl-k">&gt;</span> <span class="pl-c1">1.5</span>)
+  .map(doc <span class="pl-k">=&gt;</span> doc.comments.<span class="pl-c1">length</span>)
+  .reduce((<span class="pl-smi">acum</span>, <span class="pl-smi">val</span>) <span class="pl-k">=&gt;</span> acum <span class="pl-k">+</span> val)
+  .then(result <span class="pl-k">=&gt;</span> {
+    <span class="pl-c">// result is a sum of coutn of comments</span>
+    <span class="pl-c">// in all found posts</span>
+  });</pre></div>
+
+<h3>
+<a id="find-with-observing-changes" class="anchor" href="#find-with-observing-changes" aria-hidden="true"><span class="octicon octicon-link"></span></a>Find with observing changes</h3>
+
+<p>Observable cursor returned only by a <code>find</code> method of a collection. Updates of the cursor is batched and debounced (default batch size is <code>20</code> and debounce time is <code>1000 / 15</code> ms). You can change the paramters by <code>batchSize</code> and <code>debounce</code> methods of an observable cursor (methods is chained).</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">const</span> <span class="pl-c1">posts</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">Collection</span>(‘posts’);
+<span class="pl-k">const</span> <span class="pl-c1">stopper</span> <span class="pl-k">=</span> posts.<span class="pl-c1">find</span>({tags<span class="pl-k">:</span> {$in<span class="pl-k">:</span> [‘marsdb’, ‘is’, ‘awesome’]}})
+  .observe(docs <span class="pl-k">=&gt;</span> {
+    <span class="pl-c">// invoked on every result change</span>
+    <span class="pl-c">// (on initial result too)</span>
+    stopper.<span class="pl-c1">stop</span>(); <span class="pl-c">// stops observing</span>
+  }).then(docs <span class="pl-k">=&gt;</span> {
+    <span class="pl-c">// invoked once on initial result</span>
+    <span class="pl-c">// (after `observer` callback)</span>
+  });</pre></div>
+
+<h3>
+<a id="find-with-joins" class="anchor" href="#find-with-joins" aria-hidden="true"><span class="octicon octicon-link"></span></a>Find with joins</h3>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">const</span> <span class="pl-c1">users</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">Collection</span>(‘users’);
+<span class="pl-k">const</span> <span class="pl-c1">posts</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">Collection</span>(‘posts’);
+posts.<span class="pl-c1">find</span>()
+  .<span class="pl-c1">join</span>(doc <span class="pl-k">=&gt;</span> {
+    <span class="pl-c">// Return a Promise for waiting of the result.</span>
+    <span class="pl-k">return</span> users.findOne(doc.authorId).then(user <span class="pl-k">=&gt;</span> {
+      doc.authorObj <span class="pl-k">=</span> user;
+      <span class="pl-c">// any return is ignored</span>
+    });
+  })
+  .<span class="pl-c1">join</span>(doc <span class="pl-k">=&gt;</span> {
+    <span class="pl-c">// For reactive join you must invoke `observe` instead `then`</span>
+    <span class="pl-c">// That's it!</span>
+    <span class="pl-k">return</span> users.findOne(doc.authorId).observe(user <span class="pl-k">=&gt;</span> {
+      doc.authorObj <span class="pl-k">=</span> user;
+    });
+  })
+  .<span class="pl-c1">join</span>(doc <span class="pl-k">=&gt;</span> {
+    <span class="pl-c">// Also any other “join” mutations supported</span>
+    doc.another <span class="pl-k">=</span> _cached_data_by_post[doc._id];
+  })
+  .observe((<span class="pl-smi">posts</span>) <span class="pl-k">=&gt;</span> {
+    <span class="pl-c">// do something with posts with authors</span>
+    <span class="pl-c">// invoked any time when posts changed</span>
+    <span class="pl-c">// (and when observed joins changed too)</span>
+  })</pre></div>
+
+<h3>
+<a id="inserting" class="anchor" href="#inserting" aria-hidden="true"><span class="octicon octicon-link"></span></a>Inserting</h3>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">const</span> <span class="pl-c1">posts</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">Collection</span>(‘posts’);
+posts.insert({text<span class="pl-k">:</span> ‘MarsDB is awesome’}).then(docId <span class="pl-k">=&gt;</span> {
+  <span class="pl-c">// Invoked after persisting document</span>
+})
+posts.insertAll(
+  {text<span class="pl-k">:</span> ‘MarsDB’},
+  {text<span class="pl-k">:</span> ‘is’},
+  {text<span class="pl-k">:</span> ‘awesome’}
+).then(docsIds <span class="pl-k">=&gt;</span> {
+  <span class="pl-c">// invoked when all documents inserted</span>
+});</pre></div>
+
+<h3>
+<a id="updating" class="anchor" href="#updating" aria-hidden="true"><span class="octicon octicon-link"></span></a>Updating</h3>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">const</span> <span class="pl-c1">posts</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">Collection</span>(‘posts’);
+posts.update(
+  {authorId<span class="pl-k">:</span> {$in<span class="pl-k">:</span> [<span class="pl-c1">1</span>, <span class="pl-c1">2</span>, <span class="pl-c1">3</span>]}},
+  {$set<span class="pl-k">:</span> {text<span class="pl-k">:</span> ‘noop’}}
+).then(result <span class="pl-k">=&gt;</span> {
+  <span class="pl-en">console</span>.<span class="pl-c1">log</span>(result.modified) <span class="pl-c">// count of modified docs</span>
+  <span class="pl-en">console</span>.<span class="pl-c1">log</span>(result.updated) <span class="pl-c">// array of updated docs</span>
+  <span class="pl-en">console</span>.<span class="pl-c1">log</span>(result.original) <span class="pl-c">// array of original docs</span>
+});</pre></div>
+
+<h3>
+<a id="removing" class="anchor" href="#removing" aria-hidden="true"><span class="octicon octicon-link"></span></a>Removing</h3>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">const</span> <span class="pl-c1">posts</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">Collection</span>(‘posts’);
+posts.remove({authorId<span class="pl-k">:</span> {$in<span class="pl-k">:</span> [<span class="pl-c1">1</span>,<span class="pl-c1">2</span>,<span class="pl-c1">3</span>]}})
+  .then(removedDocs <span class="pl-k">=&gt;</span> {
+    <span class="pl-c">// do something with removed documents array</span>
+  });</pre></div>
+
+<h2>
+<a id="roadmap" class="anchor" href="#roadmap" aria-hidden="true"><span class="octicon octicon-link"></span></a>Roadmap</h2>
+
+<ul>
+<li>Keep track of multiple remove/update documents in selector (allow only if opations.multi passed)</li>
+<li>Upsert updating</li>
+<li>Indexes support for some kind of simple requests {a: '^b'}, {a: {$lt: 9}}</li>
+<li>Some set of backends</li>
+<li>Documentation</li>
+</ul>
+
+<h2>
+<a id="contributing" class="anchor" href="#contributing" aria-hidden="true"><span class="octicon octicon-link"></span></a>Contributing</h2>
+
+<p>I’m waiting for your pull requests and issues.
+Don’t forget to execute <code>gulp lint</code> before requesting. Accepted only requests without errors.</p>
+
+<h2>
+<a id="license" class="anchor" href="#license" aria-hidden="true"><span class="octicon octicon-link"></span></a>License</h2>
+
+<p>See <a href="LICENSE">License</a></p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/c58">c58</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-69146623-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+  </body>
+</html>
