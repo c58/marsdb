@@ -213,6 +213,16 @@ describe('CursorObservable', () => {
       });
     });
 
+    it('should be invoked before `then` callback', function (done) {
+      var invoked = false;
+      db.find({$or: [{f: 1}, {f: 2}]}).observe(result => {
+        invoked.should.be.equals(false);
+        invoked = true;
+      }).then(() => {
+        invoked.should.be.equals(true);
+        done();
+      });
+    });
   });
 
 
@@ -267,7 +277,7 @@ describe('CursorObservable', () => {
         } else {
           done();
         }
-      }, 210);
+      }, 310);
     });
   });
 

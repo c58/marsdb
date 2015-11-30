@@ -65,9 +65,9 @@
     "vinyl-source-stream": "^1.1.0"
   },
   "scripts": {
-    "test_some": "mocha --require babelhook --reporter spec --timeout 10000",
+    "test_some": "mocha --require babelhook --reporter spec --timeout 1000",
     "test_browser": "gulp build:browser:tests && mocha-phantomjs --reporter spec browser_tests.html",
-    "test": "mocha --require babelhook --reporter spec --timeout 10000 test/both test/node",
+    "test": "mocha --require babelhook --reporter spec --timeout 1000 test/both test/node",
     "coverage": "istanbul cover _mocha --require babelhook test/both test/node -- -u exports -R spec && open coverage/lcov-report/index.html",
     "coveralls": "istanbul cover _mocha --require babelhook test/both test/node --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
   },
