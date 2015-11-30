@@ -127,6 +127,7 @@ var CursorObservable = (function (_Cursor) {
           parent: parentSetter,
           stop: stopper,
           then: function (successFn, failFn) {
+            successFn = _this._prepareListener(successFn);
             return createStoppablePromise(currPromise.then(successFn, failFn));
           }
         };
@@ -199,6 +200,8 @@ var CursorObservable = (function (_Cursor) {
      * Preapare a listener of updates. By default it just debounce
      * it a little for no useless updates when update propagated
      * from children cursors.
+     * It also applied to successFn of `then` of returned by
+     * `observer` stoper object.
      * @param  {Function} listener
      * @return {Promise}
      */
