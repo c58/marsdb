@@ -223,6 +223,22 @@ describe('CursorObservable', () => {
         done();
       });
     });
+
+    it('should observe `findOne` collection method', function (done) {
+      var calls = 0;
+      db.findOne({b: 8}).batchSize(1).debounce(0)
+      .observe(result => {
+        calls += 1;
+        if (calls === 1) {
+          expect(result).to.be.undefined;
+        } else if (calls > 1) {
+          result.b.should.be.equals(8);
+          done();
+        }
+      }).then(() => {
+        db.insert({b: 8});
+      });
+    });
   });
 
 
