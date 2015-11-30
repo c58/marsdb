@@ -20,6 +20,10 @@ var _lodashCollectionSize = require('lodash/collection/size');
 
 var _lodashCollectionSize2 = _interopRequireDefault(_lodashCollectionSize);
 
+var _lodashLangIsArray = require('lodash/lang/isArray');
+
+var _lodashLangIsArray2 = _interopRequireDefault(_lodashLangIsArray);
+
 var _Cursor2 = require('./Cursor');
 
 var _Cursor3 = _interopRequireDefault(_Cursor2);
@@ -152,9 +156,7 @@ var CursorObservable = (function (_Cursor) {
 
       return this.exec().then(function (result) {
         _this2._latestResult = result;
-        _this2._latestIds = new Set(result.map(function (x) {
-          return x._id;
-        }));
+        _this2._updateLatestIds();
         _this2._propagateUpdate(firstRun);
         return result;
       });
@@ -226,6 +228,22 @@ var CursorObservable = (function (_Cursor) {
       this.emit('update', this._latestResult, firstRun);
       if (!firstRun && this._parentCursor && this._parentCursor._propagateUpdate) {
         this._parentCursor._propagateUpdate(false);
+      }
+    }
+
+    /**
+     * By a `_latestResult` update a `_latestIds` field of
+     * the object
+     */
+  }, {
+    key: '_updateLatestIds',
+    value: function _updateLatestIds() {
+      if ((0, _lodashLangIsArray2['default'])(this._latestResult)) {
+        this._latestIds = new Set(this._latestResult.map(function (x) {
+          return x._id;
+        }));
+      } else if (this._latestResult && this._latestResult._id) {
+        this._latestIds = new Set([this._latestResult._id]);
       }
     }
   }]);

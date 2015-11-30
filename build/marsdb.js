@@ -531,7 +531,7 @@ var Collection = (function (_EventEmitter) {
   }, {
     key: 'findOne',
     value: function findOne(query, sortObj) {
-      return new _Cursor2['default'](this, query).sort(sortObj).limit(1).exec().then(function (docs) {
+      return this.find(query).sort(sortObj).limit(1).aggregate(function (docs) {
         return docs[0];
       });
     }
@@ -1140,6 +1140,10 @@ var _lodashCollectionSize = require('lodash/collection/size');
 
 var _lodashCollectionSize2 = _interopRequireDefault(_lodashCollectionSize);
 
+var _lodashLangIsArray = require('lodash/lang/isArray');
+
+var _lodashLangIsArray2 = _interopRequireDefault(_lodashLangIsArray);
+
 var _Cursor2 = require('./Cursor');
 
 var _Cursor3 = _interopRequireDefault(_Cursor2);
@@ -1272,9 +1276,7 @@ var CursorObservable = (function (_Cursor) {
 
       return this.exec().then(function (result) {
         _this2._latestResult = result;
-        _this2._latestIds = new Set(result.map(function (x) {
-          return x._id;
-        }));
+        _this2._updateLatestIds();
         _this2._propagateUpdate(firstRun);
         return result;
       });
@@ -1348,6 +1350,22 @@ var CursorObservable = (function (_Cursor) {
         this._parentCursor._propagateUpdate(false);
       }
     }
+
+    /**
+     * By a `_latestResult` update a `_latestIds` field of
+     * the object
+     */
+  }, {
+    key: '_updateLatestIds',
+    value: function _updateLatestIds() {
+      if ((0, _lodashLangIsArray2['default'])(this._latestResult)) {
+        this._latestIds = new Set(this._latestResult.map(function (x) {
+          return x._id;
+        }));
+      } else if (this._latestResult && this._latestResult._id) {
+        this._latestIds = new Set([this._latestResult._id]);
+      }
+    }
   }]);
 
   return CursorObservable;
@@ -1417,7 +1435,7 @@ function debounce(func, wait, batchSize) {
 
 exports['default'] = CursorObservable;
 
-},{"./Cursor":4,"./EJSON":11,"lodash/collection/size":33}],6:[function(require,module,exports){
+},{"./Cursor":4,"./EJSON":11,"lodash/collection/size":33,"lodash/lang/isArray":88}],6:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {

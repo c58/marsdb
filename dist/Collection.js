@@ -308,7 +308,7 @@ var Collection = (function (_EventEmitter) {
   }, {
     key: 'findOne',
     value: function findOne(query, sortObj) {
-      return new _Cursor2['default'](this, query).sort(sortObj).limit(1).exec().then(function (docs) {
+      return this.find(query).sort(sortObj).limit(1).aggregate(function (docs) {
         return docs[0];
       });
     }
