@@ -5414,6 +5414,7 @@ var EJSON = require('./dist/EJSON')['default'];
 var Base64 = require('./dist/Base64')['default'];
 
 module.exports = {
+  __esModule: true,
   'default': Collection,
   Random: Random,
   EJSON: EJSON,
