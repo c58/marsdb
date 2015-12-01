@@ -84,6 +84,8 @@ posts.find({author: ‘Bob’})
 An order of pipeline methods invokation is important. Next pipeline operation gives as argument a result of a previous operation.
 ```javascript
 const posts = new Collection(‘posts’);
+
+// Get number of all comments in the DB
 posts.find()
   .limit(10)
   .sortFunc((a, b) => a - b + 10)
@@ -91,9 +93,17 @@ posts.find()
   .map(doc => doc.comments.length)
   .reduce((acum, val) => acum + val)
   .then(result => {
-    // result is a sum of coutn of comments
+    // result is a number of all comments
     // in all found posts
   });
+
+// Result is `undefined` because posts
+// is not exists and additional processing
+// is not ran (thanks to `.ifNotEmpty()`)
+posts.find({author: 'not_existing_name'})
+  .aggregate(docs => docs[0])
+  .ifNotEmpty()
+  .aggregate(user => user.name)
 ```
 ### Find with observing changes
 Observable cursor returned only by a `find` method of a collection. Updates of the cursor is batched and debounced (default batch size is `20` and debounce time is `1000 / 15` ms). You can change the paramters by `batchSize` and `debounce` methods of an observable cursor (methods is chained).

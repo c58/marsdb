@@ -81,6 +81,51 @@ describe('Cursor', () => {
   });
 
 
+  describe('#ifNotEmpty', function () {
+    it('should stop pipeline processing if result is null', function (done) {
+      const cursor = new Cursor(db);
+      cursor.find({b: 6})
+      .ifNotEmpty().aggregate(docs => {
+        docs.should.have.length(1);
+        return null;
+      })
+      .ifNotEmpty().aggregate(docs => {
+        throw new Error('Docs is empty but aggregate is invked')
+      })
+      .exec()
+      .then(() => done());
+    });
+
+    it('should stop pipeline processing if result is undefined', function (done) {
+      const cursor = new Cursor(db);
+      cursor.find({b: 6})
+      .ifNotEmpty().aggregate(docs => {
+        docs.should.have.length(1);
+        return undefined;
+      })
+      .ifNotEmpty().aggregate(docs => {
+        throw new Error('Docs is empty but aggregate is invked')
+      })
+      .exec()
+      .then(() => done());
+    });
+
+    it('should stop pipeline processing if result is empty array', function (done) {
+      const cursor = new Cursor(db);
+      cursor.find({b: 6})
+      .ifNotEmpty().aggregate(docs => {
+        docs.should.have.length(1);
+        return [];
+      })
+      .ifNotEmpty().aggregate(docs => {
+        throw new Error('Docs is empty but aggregate is invked')
+      })
+      .exec()
+      .then(() => done());
+    });
+  });
+
+
   describe('#find', function () {
     it('should return all objects with empty query object', function () {
       const cursor = new Cursor(db);
