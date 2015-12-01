@@ -30,6 +30,10 @@ var _lodashLangToArray = require('lodash/lang/toArray');
 
 var _lodashLangToArray2 = _interopRequireDefault(_lodashLangToArray);
 
+var _lodashLangIsEmpty = require('lodash/lang/isEmpty');
+
+var _lodashLangIsEmpty2 = _interopRequireDefault(_lodashLangIsEmpty);
+
 var _eventemitter3 = require('eventemitter3');
 
 var _eventemitter32 = _interopRequireDefault(_eventemitter3);
@@ -54,6 +58,9 @@ var _DocumentSorter = require('./DocumentSorter');
 
 var _DocumentSorter2 = _interopRequireDefault(_DocumentSorter);
 
+// Maker used for stopping pipeline processing
+var PIPLEINE_STOP_MARKER = {};
+
 // Pipeline processors definition
 var PIPELINE_TYPE = (0, _keymirror2['default'])({
   Filter: null,
@@ -63,7 +70,8 @@ var PIPELINE_TYPE = (0, _keymirror2['default'])({
   Reduce: null,
   Join: null,
   JoinEach: null,
-  JoinAll: null
+  JoinAll: null,
+  IfNotEmpty: null
 });
 
 exports.PIPELINE_TYPE = PIPELINE_TYPE;
@@ -96,6 +104,8 @@ var PIPELINE_PROCESSORS = (_PIPELINE_PROCESSORS = {}, _defineProperty(_PIPELINE_
   } else {
     return docs;
   }
+}), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.IfNotEmpty, function (docs) {
+  return (0, _lodashLangIsEmpty2['default'])(docs) ? PIPLEINE_STOP_MARKER : docs;
 }), _PIPELINE_PROCESSORS);
 
 exports.PIPELINE_PROCESSORS = PIPELINE_PROCESSORS;
@@ -217,6 +227,12 @@ var Cursor = (function (_EventEmitter) {
       return this;
     }
   }, {
+    key: 'ifNotEmpty',
+    value: function ifNotEmpty() {
+      this.addPipeline(PIPELINE_TYPE.IfNotEmpty);
+      return this;
+    }
+  }, {
     key: 'addPipeline',
     value: function addPipeline(type, val) {
       this._ensureNotExecuting();
@@ -245,7 +261,11 @@ var Cursor = (function (_EventEmitter) {
         return Promise.resolve(docs);
       } else {
         return Promise.resolve(PIPELINE_PROCESSORS[pipeObj.type](docs, pipeObj, this)).then(function (result) {
-          return _this.processPipeline(result, i + 1);
+          if (result === PIPLEINE_STOP_MARKER) {
+            return result;
+          } else {
+            return _this.processPipeline(result, i + 1);
+          }
         });
       }
     }
@@ -261,7 +281,6 @@ var Cursor = (function (_EventEmitter) {
     value: function exec() {
       var _this2 = this;
 
-      // Get objects with using a fast way if possible
       this._executing = true;
       return this._matchObjects().then(function (docs) {
         return _this2.processPipeline(docs);
@@ -269,11 +288,6 @@ var Cursor = (function (_EventEmitter) {
         _this2._executing = false;
         return docs;
       });
-    }
-  }, {
-    key: 'then',
-    value: function then(resolve, reject) {
-      return this.exec().then(resolve, reject);
     }
   }, {
     key: 'ids',
@@ -289,6 +303,11 @@ var Cursor = (function (_EventEmitter) {
         _this3._executing = false;
         return ids;
       });
+    }
+  }, {
+    key: 'then',
+    value: function then(resolve, reject) {
+      return this.exec().then(resolve, reject);
     }
   }, {
     key: '_matchObjects',
