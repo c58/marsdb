@@ -126,6 +126,7 @@ var Cursor = (function (_EventEmitter) {
     this.db = db;
     this._query = query;
     this._pipeline = [];
+    this._executing = null;
     this._ensureMatcherSorter();
   }
 
@@ -281,33 +282,40 @@ var Cursor = (function (_EventEmitter) {
     value: function exec() {
       var _this2 = this;
 
-      this._executing = true;
-      return this._matchObjects().then(function (docs) {
+      this._executing = this._matchObjects().then(function (docs) {
         return _this2.processPipeline(docs);
       }).then(function (docs) {
-        _this2._executing = false;
+        _this2._executing = null;
         return docs;
       });
+
+      return this._executing;
     }
   }, {
     key: 'ids',
     value: function ids() {
       var _this3 = this;
 
-      this._executing = true;
-      return this._matchObjects().then(function (docs) {
+      this._executing = this._matchObjects().then(function (docs) {
         return docs.map(function (x) {
           return x._id;
         });
       }).then(function (ids) {
-        _this3._executing = false;
+        _this3._executing = null;
         return ids;
       });
+
+      return this._executing;
     }
   }, {
     key: 'then',
     value: function then(resolve, reject) {
       return this.exec().then(resolve, reject);
+    }
+  }, {
+    key: 'whenNotExecuting',
+    value: function whenNotExecuting() {
+      return Promise.resolve(this._executing);
     }
   }, {
     key: '_matchObjects',

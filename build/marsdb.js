@@ -858,6 +858,7 @@ var Cursor = (function (_EventEmitter) {
     this.db = db;
     this._query = query;
     this._pipeline = [];
+    this._executing = null;
     this._ensureMatcherSorter();
   }
 
@@ -1013,33 +1014,40 @@ var Cursor = (function (_EventEmitter) {
     value: function exec() {
       var _this2 = this;
 
-      this._executing = true;
-      return this._matchObjects().then(function (docs) {
+      this._executing = this._matchObjects().then(function (docs) {
         return _this2.processPipeline(docs);
       }).then(function (docs) {
-        _this2._executing = false;
+        _this2._executing = null;
         return docs;
       });
+
+      return this._executing;
     }
   }, {
     key: 'ids',
     value: function ids() {
       var _this3 = this;
 
-      this._executing = true;
-      return this._matchObjects().then(function (docs) {
+      this._executing = this._matchObjects().then(function (docs) {
         return docs.map(function (x) {
           return x._id;
         });
       }).then(function (ids) {
-        _this3._executing = false;
+        _this3._executing = null;
         return ids;
       });
+
+      return this._executing;
     }
   }, {
     key: 'then',
     value: function then(resolve, reject) {
       return this.exec().then(resolve, reject);
+    }
+  }, {
+    key: 'whenNotExecuting',
+    value: function whenNotExecuting() {
+      return Promise.resolve(this._executing);
     }
   }, {
     key: '_matchObjects',
@@ -1117,15 +1125,15 @@ var _createClass = (function () {
   };
 })();
 
-var _get = function get(_x3, _x4, _x5) {
+var _get = function get(_x4, _x5, _x6) {
   var _again = true;_function: while (_again) {
-    var object = _x3,
-        property = _x4,
-        receiver = _x5;desc = parent = getter = undefined;_again = false;if (object === null) object = Function.prototype;var desc = Object.getOwnPropertyDescriptor(object, property);if (desc === undefined) {
+    var object = _x4,
+        property = _x5,
+        receiver = _x6;desc = parent = getter = undefined;_again = false;if (object === null) object = Function.prototype;var desc = Object.getOwnPropertyDescriptor(object, property);if (desc === undefined) {
       var parent = Object.getPrototypeOf(object);if (parent === null) {
         return undefined;
       } else {
-        _x3 = parent;_x4 = property;_x5 = receiver;_again = true;continue _function;
+        _x4 = parent;_x5 = property;_x6 = receiver;_again = true;continue _function;
       }
     } else if ('value' in desc) {
       return desc.value;
@@ -1233,7 +1241,15 @@ var CursorObservable = (function (_Cursor) {
      * It is been resolved when first result of cursor is ready and
      * after first observe listener call.
      *
+     * if `options.declare` is true, then initial update of
+     * the cursor is not initiated and function will return
+     * `this` instead promise. It means, that you can't stop
+     * observer by a stopper object. Use `stopObservers()`
+     * function instead.
+     *
      * @param  {Function}
+     * @param  {Object} options
+     * @param  {Boolean} options.declare
      * @return {Stopper}
      */
   }, {
@@ -1241,8 +1257,7 @@ var CursorObservable = (function (_Cursor) {
     value: function observe(listener) {
       var _this = this;
 
-      listener = this._prepareListener(listener);
-      this.on('update', listener);
+      var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
       // Make new wrapper for make possible to observe
       // multiple times (for removeListener)
@@ -1258,8 +1273,12 @@ var CursorObservable = (function (_Cursor) {
         _this.db.removeListener('update', updateWrapper);
         _this.db.removeListener('remove', updateWrapper);
         _this.removeListener('update', listener);
-        _this.emit('stopped');
+        _this.emit('stopped', listener);
       };
+
+      listener = this._prepareListener(listener);
+      this.on('update', listener);
+      this.on('stop', stopper);
 
       var parentSetter = function parentSetter(cursor) {
         _this._parentCursor = cursor;
@@ -1276,8 +1295,22 @@ var CursorObservable = (function (_Cursor) {
         };
       };
 
-      var firstUpdatePromise = this.update(true);
-      return createStoppablePromise(firstUpdatePromise);
+      if (options.declare) {
+        return this;
+      } else {
+        var firstUpdatePromise = this.update(true);
+        return createStoppablePromise(firstUpdatePromise);
+      }
+    }
+
+    /**
+     * Stop all observers of the cursor by one call
+     * of this function.
+     */
+  }, {
+    key: 'stopObservers',
+    value: function stopObservers() {
+      this.emit('stop');
     }
 
     /**
