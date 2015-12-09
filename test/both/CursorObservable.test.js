@@ -27,6 +27,32 @@ describe('CursorObservable', () => {
     const cursor = new CursorObservable(db, {});
   });
 
+  describe('#whenNotExecuting', function () {
+    it('should wait until request processed', function (done) {
+      const cursor = db.find({a: 1});
+      cursor.then(() => {
+        cursor._query.should.be.deep.equals({a: 1});
+      });
+      cursor.whenNotExecuting().then(() => {
+        cursor.find({a: 2}).then(() => {
+          cursor._query.should.be.deep.equals({a: 2});
+          done();
+        });
+      })
+    });
+
+    it('should rise an exception when try to change cursor while executing', function () {
+      const cursor = db.find({a: 1});
+      cursor.then(() => {
+        cursor._query.should.be.deep.equals({a: 1});
+      });
+      expect(() => {
+        cursor.find({a: 2}).then(() => {
+          cursor._query.should.be.deep.equals({a: 2});
+        });
+      }).to.throw(Error);
+    });
+  });
 
   describe('#observe', function () {
     it('should observe insert without debounce and batchSize eq 1', function (done) {
