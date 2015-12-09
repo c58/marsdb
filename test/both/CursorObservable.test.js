@@ -55,6 +55,24 @@ describe('CursorObservable', () => {
   });
 
   describe('#observe', function () {
+    it('should support multiple declarative style observing', function (done) {
+      let calls = 0;
+      const obsFn = () => {
+        calls += 1;
+        if (calls > 1) {
+          done();
+        }
+      }
+      const cursor = db.find({b: 1})
+      .observe(obsFn, {declare: true})
+      .observe(obsFn, {declare: true})
+
+      cursor.then(() => {
+        calls.should.be.equals(0);
+        cursor.update(true);
+      })
+    });
+
     it('should observe insert without debounce and batchSize eq 1', function (done) {
       var calls = 0;
       const cursor = new CursorObservable(db);
