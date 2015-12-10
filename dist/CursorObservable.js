@@ -207,7 +207,7 @@ var CursorObservable = (function (_Cursor) {
       // that it's in our latest result ids list
       var removedFromResult = !newDoc && oldDoc && (!this._latestIds || this._latestIds.has(oldDoc._id));
 
-      // When it's an update operation we check three things
+      // When it's an update operation we check four things
       // 1. Is a new doc or old doc matched by a query?
       // 2. Is a new doc has different number of fields then an old doc?
       // 3. Is a new doc has a greater updatedAt time then an old doc?
@@ -219,6 +219,7 @@ var CursorObservable = (function (_Cursor) {
       var insertedInResult = updatedInResult || newDoc && !oldDoc && this._matcher.documentMatches(newDoc).result;
 
       if (insertedInResult) {
+        this.emit('cursorChanged');
         return this.update();
       }
     }

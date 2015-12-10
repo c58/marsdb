@@ -38,10 +38,6 @@ var _CursorObservable = require('./CursorObservable');
 
 var _CursorObservable2 = _interopRequireDefault(_CursorObservable);
 
-var _Cursor = require('./Cursor');
-
-var _Cursor2 = _interopRequireDefault(_Cursor);
-
 var _Random = require('./Random');
 
 var _Random2 = _interopRequireDefault(_Random);
@@ -52,6 +48,8 @@ var _Document2 = _interopRequireDefault(_Document);
 
 // Defaults
 var _defaultRandomGenerator = new _Random2['default']();
+var _defaultCursorClass = _CursorObservable2['default'];
+var _defaultStorageManager = _StorageManager2['default'];
 var _defaultIdGenerator = function (modelName) {
   var nextSeed = _defaultRandomGenerator.hexString(20);
   var sequenceSeed = [nextSeed, '/collection/' + modelName];
@@ -60,7 +58,6 @@ var _defaultIdGenerator = function (modelName) {
     seed: nextSeed
   };
 };
-var _defaultStorageManager = _StorageManager2['default'];
 
 var Collection = (function (_EventEmitter) {
   _inherits(Collection, _EventEmitter);
@@ -294,7 +291,7 @@ var Collection = (function (_EventEmitter) {
   }, {
     key: 'find',
     value: function find(query) {
-      return new _CursorObservable2['default'](this, query);
+      return new _defaultCursorClass(this, query);
     }
 
     /**
@@ -339,7 +336,7 @@ var Collection = (function (_EventEmitter) {
   }, {
     key: 'ids',
     value: function ids(query) {
-      return new _Cursor2['default'](this, query).ids();
+      return new _defaultCursorClass(this, query).ids();
     }
   }, {
     key: 'modelName',
@@ -365,6 +362,11 @@ var Collection = (function (_EventEmitter) {
     key: 'defaultIdGenerator',
     value: function defaultIdGenerator(generator) {
       _defaultIdGenerator = generator;
+    }
+  }, {
+    key: 'defaultCursorClass',
+    value: function defaultCursorClass(cursorClass) {
+      _defaultCursorClass = cursorClass;
     }
   }]);
 
