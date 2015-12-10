@@ -143,7 +143,7 @@ describe('CursorObservable', () => {
       });
     });
 
-    it('should work nice with observable joins', function (done) {
+    it('should observe in join and propagate update to upper observer', function (done) {
       var calls = 0;
       db.find({$or: [{f: 1}, {f: 2}]})
         .join((doc) => {
@@ -162,6 +162,33 @@ describe('CursorObservable', () => {
             expect(result[1].joined).to.have.length(1);
             done();
           }
+        }).then(() => {
+          return db.insert({b: 30});
+        });
+    });
+
+    it('should stop observing previous join after upper join update', function (done) {
+      var observerCalls = 0;
+      var joinCalls = 0;
+      db.find({$or: [{f: 1}, {f: 2}]})
+        .joinAll((docs) => {
+          return db.find({b: 30}).observe(res => {
+            if (res.length > 0) {
+              joinCalls += 1;
+              joinCalls.should.be.lte(1);
+            }
+          });
+        })
+        .batchSize(0)
+        .debounce(0)
+        .observe(result => {
+          observerCalls.should.be.lte(2);
+          observerCalls++;
+          if (observerCalls === 2) {
+            done();
+          }
+        }).then(() => {
+          return db.insert({f: 1});
         }).then(() => {
           return db.insert({b: 30});
         });
