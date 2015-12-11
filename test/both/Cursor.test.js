@@ -322,12 +322,33 @@ describe('Cursor', () => {
     });
   });
 
+  describe('#join', function () {
+    it('should use joinEach for an array', function () {
+      return db.find().join(d => {
+        d.should.be.an('object');
+      }).then((result) => {
+        result.should.be.an('array');
+      });
+    });
 
+    it('should use joinAll for single object', function () {
+      return db.findOne().join(d => {
+        d.should.be.an('object');
+      }).then((result) => {
+        result.should.be.an('object');
+      });
+    });
+
+    it('should throw an error if join is not a function', function () {
+      const cursor = new Cursor(db);
+      (() => cursor.join(123)).should.throw(Error);
+    });
+  });
 
   describe('#joinEach', function () {
     it('should join by function with promises', function () {
       const cursor = new Cursor(db);
-      cursor.find().sort({b: 1}).join(d => {
+      cursor.find().sort({b: 1}).joinEach(d => {
         const cursor2 = new Cursor(db);
         return cursor2.find({g: d.g}).exec().then((result) => {
           d.groupObjs = result;
@@ -342,7 +363,7 @@ describe('Cursor', () => {
     });
 
     it('should not change object in a storage', function () {
-      return db.find().sort({b: 1}).join(d => {
+      return db.find().sort({b: 1}).joinEach(d => {
         return db.find({g: d.g}).then((result) => {
           d.groupObjs = result;
         });
