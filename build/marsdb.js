@@ -951,7 +951,10 @@ var Cursor = (function (_EventEmitter) {
   }, {
     key: 'join',
     value: function join(joinFn) {
-      return this.joinEach(joinFn);
+      (0, _invariant2['default'])(typeof joinFn === 'function', 'join(...): argument must be a function');
+
+      this.addPipeline(PIPELINE_TYPE.Join, joinFn);
+      return this;
     }
   }, {
     key: 'joinEach',
