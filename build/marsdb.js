@@ -820,13 +820,19 @@ var PIPELINE_PROCESSORS = (_PIPELINE_PROCESSORS = {}, _defineProperty(_PIPELINE_
 }), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.Reduce, function (docs, pipeObj) {
   return docs.reduce(pipeObj.value, pipeObj.args[0]);
 }), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.Join, function (docs, pipeObj, cursor) {
-  return PIPELINE_PROCESSORS[PIPELINE_TYPE.JoinEach](docs, pipeObj, cursor);
+  if ((0, _lodashLangIsArray2['default'])(docs)) {
+    return PIPELINE_PROCESSORS[PIPELINE_TYPE.JoinEach](docs, pipeObj, cursor);
+  } else {
+    return PIPELINE_PROCESSORS[PIPELINE_TYPE.JoinAll](docs, pipeObj, cursor);
+  }
 }), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.JoinEach, function (docs, pipeObj, cursor) {
   return Promise.all(((0, _lodashLangIsArray2['default'])(docs) ? docs : [docs]).map(function (x) {
     return PIPELINE_PROCESSORS[PIPELINE_TYPE.JoinAll](x, pipeObj, cursor);
   }));
 }), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.JoinAll, function (docs, pipeObj, cursor) {
-  var res = pipeObj.value(docs);
+  var updatedFn = cursor._propagateUpdate ? cursor._propagateUpdate.bind(cursor) : function () {};
+
+  var res = pipeObj.value(docs, updatedFn);
   res = (0, _lodashLangIsArray2['default'])(res) ? res : [res];
   res.forEach(function (observeStopper) {
     if ((0, _lodashLangIsObject2['default'])(observeStopper) && observeStopper.then) {
@@ -1310,10 +1316,12 @@ var CursorObservable = (function (_Cursor) {
     /**
      * Stop all observers of the cursor by one call
      * of this function.
+     * It also stops any delaied update of the cursor.
      */
   }, {
     key: 'stopObservers',
     value: function stopObservers() {
+      this.update.cancel();
       this.emit('stop');
     }
 

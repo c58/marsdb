@@ -140,9 +140,17 @@ posts.find()
       doc.authorObj = user;
     });
   })
-  .join(doc => {
+  .join((doc, updated) => {
     // Also any other “join” mutations supported
     doc.another = _cached_data_by_post[doc._id];
+
+    // Manually update a joined parameter and propagate
+    // update event from current cursor to a root
+    // (`observe` callback invoked)
+    setTimeout(() => {
+      doc.another = 'some another user';
+      updated();
+    }, 10);
   })
   .observe((posts) => {
     // do something with posts with authors

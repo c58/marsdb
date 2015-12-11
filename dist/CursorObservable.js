@@ -159,10 +159,12 @@ var CursorObservable = (function (_Cursor) {
     /**
      * Stop all observers of the cursor by one call
      * of this function.
+     * It also stops any delaied update of the cursor.
      */
   }, {
     key: 'stopObservers',
     value: function stopObservers() {
+      this.update.cancel();
       this.emit('stop');
     }
 
