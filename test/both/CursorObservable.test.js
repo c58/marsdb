@@ -194,6 +194,29 @@ describe('CursorObservable', () => {
         });
     });
 
+    it('should update when join funciton call updater function', function (done) {
+      var observerCalls = 0;
+      db.find({$or: [{f: 1}, {f: 2}]})
+        .joinAll((docs, updated) => {
+          setTimeout(() => {
+            docs[0].updated = true;
+            updated();
+          }, 10);
+        })
+        .batchSize(0)
+        .debounce(0)
+        .observe(result => {
+          observerCalls.should.be.lte(2);
+          observerCalls++;
+          if (observerCalls === 1) {
+            expect(result[0].updated).to.be.undefined;
+          } else if (observerCalls === 2) {
+            result[0].updated.should.be.equals(true);
+            done();
+          }
+        })
+    });
+
     it('should not update a cursor when updated dcc does not match a query', function (done) {
       var calls = 0;
       db.find({$or: [{f: 1}, {f: 2}]}).observe(result => {
