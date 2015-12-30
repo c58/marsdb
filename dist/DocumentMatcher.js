@@ -1,75 +1,71 @@
 'use strict';
 
-Object.defineProperty(exports, '__esModule', {
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
+exports.ELEMENT_OPERATORS = exports.DocumentMatcher = undefined;
 exports.regexpElementMatcher = regexpElementMatcher;
 exports.equalityElementMatcher = equalityElementMatcher;
 exports.makeLookupFunction = makeLookupFunction;
 exports.expandArraysInBranches = expandArraysInBranches;
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+var _isEmpty2 = require('lodash/lang/isEmpty');
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+var _isEmpty3 = _interopRequireDefault(_isEmpty2);
 
-var _lodashLangIsEmpty = require('lodash/lang/isEmpty');
+var _isEqual2 = require('lodash/lang/isEqual');
 
-var _lodashLangIsEmpty2 = _interopRequireDefault(_lodashLangIsEmpty);
+var _isEqual3 = _interopRequireDefault(_isEqual2);
 
-var _lodashLangIsEqual = require('lodash/lang/isEqual');
+var _isArray2 = require('lodash/lang/isArray');
 
-var _lodashLangIsEqual2 = _interopRequireDefault(_lodashLangIsEqual);
+var _isArray3 = _interopRequireDefault(_isArray2);
 
-var _lodashLangIsArray = require('lodash/lang/isArray');
+var _isNumber2 = require('lodash/lang/isNumber');
 
-var _lodashLangIsArray2 = _interopRequireDefault(_lodashLangIsArray);
+var _isNumber3 = _interopRequireDefault(_isNumber2);
 
-var _lodashLangIsNumber = require('lodash/lang/isNumber');
+var _isObject2 = require('lodash/lang/isObject');
 
-var _lodashLangIsNumber2 = _interopRequireDefault(_lodashLangIsNumber);
+var _isObject3 = _interopRequireDefault(_isObject2);
 
-var _lodashLangIsObject = require('lodash/lang/isObject');
+var _isNaN2 = require('lodash/lang/isNaN');
 
-var _lodashLangIsObject2 = _interopRequireDefault(_lodashLangIsObject);
+var _isNaN3 = _interopRequireDefault(_isNaN2);
 
-var _lodashLangIsNaN = require('lodash/lang/isNaN');
+var _has2 = require('lodash/object/has');
 
-var _lodashLangIsNaN2 = _interopRequireDefault(_lodashLangIsNaN);
+var _has3 = _interopRequireDefault(_has2);
 
-var _lodashObjectHas = require('lodash/object/has');
+var _keys2 = require('lodash/object/keys');
 
-var _lodashObjectHas2 = _interopRequireDefault(_lodashObjectHas);
+var _keys3 = _interopRequireDefault(_keys2);
 
-var _lodashObjectKeys = require('lodash/object/keys');
+var _each2 = require('lodash/collection/each');
 
-var _lodashObjectKeys2 = _interopRequireDefault(_lodashObjectKeys);
+var _each3 = _interopRequireDefault(_each2);
 
-var _lodashCollectionEach = require('lodash/collection/each');
+var _contains2 = require('lodash/collection/contains');
 
-var _lodashCollectionEach2 = _interopRequireDefault(_lodashCollectionEach);
+var _contains3 = _interopRequireDefault(_contains2);
 
-var _lodashCollectionContains = require('lodash/collection/contains');
+var _all2 = require('lodash/collection/all');
 
-var _lodashCollectionContains2 = _interopRequireDefault(_lodashCollectionContains);
+var _all3 = _interopRequireDefault(_all2);
 
-var _lodashCollectionAll = require('lodash/collection/all');
+var _map2 = require('lodash/collection/map');
 
-var _lodashCollectionAll2 = _interopRequireDefault(_lodashCollectionAll);
+var _map3 = _interopRequireDefault(_map2);
 
-var _lodashCollectionMap = require('lodash/collection/map');
+var _any2 = require('lodash/collection/any');
 
-var _lodashCollectionMap2 = _interopRequireDefault(_lodashCollectionMap);
+var _any3 = _interopRequireDefault(_any2);
 
-var _lodashCollectionAny = require('lodash/collection/any');
+var _identity2 = require('lodash/utility/identity');
 
-var _lodashCollectionAny2 = _interopRequireDefault(_lodashCollectionAny);
-
-var _lodashUtilityIdentity = require('lodash/utility/identity');
-
-var _lodashUtilityIdentity2 = _interopRequireDefault(_lodashUtilityIdentity);
+var _identity3 = _interopRequireDefault(_identity2);
 
 var _EJSON = require('./EJSON');
 
@@ -80,6 +76,12 @@ var _geojsonUtils = require('geojson-utils');
 var _geojsonUtils2 = _interopRequireDefault(_geojsonUtils);
 
 var _Document = require('./Document');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 // The minimongo selector compiler!
 
@@ -102,7 +104,7 @@ var _Document = require('./Document');
 //   var matcher = new Minimongo.Matcher({a: {$gt: 5}});
 //   if (matcher.documentMatches({a: 7})) ...
 
-var DocumentMatcher = (function () {
+var DocumentMatcher = exports.DocumentMatcher = (function () {
   function DocumentMatcher(selector) {
     _classCallCheck(this, DocumentMatcher);
 
@@ -132,7 +134,7 @@ var DocumentMatcher = (function () {
   _createClass(DocumentMatcher, [{
     key: 'documentMatches',
     value: function documentMatches(doc) {
-      if (!doc || typeof doc !== 'object') {
+      if (!doc || (typeof doc === 'undefined' ? 'undefined' : _typeof(doc)) !== 'object') {
         throw Error('documentMatches needs a document');
       }
       return this._docMatcher(doc);
@@ -158,7 +160,7 @@ var DocumentMatcher = (function () {
         this._selector = { _id: selector };
         this._recordPathUsed('_id');
         return function (doc) {
-          return { result: _EJSON2['default'].equals(doc._id, selector) };
+          return { result: _EJSON2.default.equals(doc._id, selector) };
         };
       }
 
@@ -171,11 +173,11 @@ var DocumentMatcher = (function () {
       }
 
       // Top level can't be an array or true or binary.
-      if (typeof selector === 'boolean' || (0, _Document.isArray)(selector) || _EJSON2['default'].isBinary(selector)) {
+      if (typeof selector === 'boolean' || (0, _Document.isArray)(selector) || _EJSON2.default.isBinary(selector)) {
         throw new Error('Invalid selector: ' + selector);
       }
 
-      this._selector = _EJSON2['default'].clone(selector);
+      this._selector = _EJSON2.default.clone(selector);
       return compileDocumentSelector(selector, this, { isRoot: true });
     }
   }, {
@@ -186,24 +188,25 @@ var DocumentMatcher = (function () {
 
     // Returns a list of key paths the given selector is looking for. It includes
     // the empty string if there is a $where.
+
   }, {
     key: '_getPaths',
     value: function _getPaths() {
-      return (0, _lodashObjectKeys2['default'])(this._paths);
+      return (0, _keys3.default)(this._paths);
     }
   }, {
     key: 'hasGeoQuery',
-    get: function () {
+    get: function get() {
       return this._hasGeoQuery;
     }
   }, {
     key: 'hasWhere',
-    get: function () {
+    get: function get() {
       return this._hasWhere;
     }
   }, {
     key: 'isSimple',
-    get: function () {
+    get: function get() {
       return this._isSimple;
     }
   }]);
@@ -211,8 +214,7 @@ var DocumentMatcher = (function () {
   return DocumentMatcher;
 })();
 
-exports.DocumentMatcher = DocumentMatcher;
-exports['default'] = DocumentMatcher;
+exports.default = DocumentMatcher;
 
 // Takes in a selector that could match a full document (eg, the original
 // selector). Returns a function mapping document->result object.
@@ -221,15 +223,16 @@ exports['default'] = DocumentMatcher;
 //
 // If this is the root document selector (ie, not wrapped in $and or the like),
 // then isRoot is true. (This is used by $near.)
-var compileDocumentSelector = function (docSelector, matcher) {
+
+var compileDocumentSelector = function compileDocumentSelector(docSelector, matcher) {
   var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
   var docMatchers = [];
-  (0, _lodashCollectionEach2['default'])(docSelector, function (subSelector, key) {
+  (0, _each3.default)(docSelector, function (subSelector, key) {
     if (key.substr(0, 1) === '$') {
       // Outer operators are either logical operators (they recurse back into
       // this function), or $where.
-      if (!(0, _lodashObjectHas2['default'])(LOGICAL_OPERATORS, key)) {
+      if (!(0, _has3.default)(LOGICAL_OPERATORS, key)) {
         throw new Error('Unrecognized logical operator: ' + key);
       }
       matcher._isSimple = false;
@@ -257,7 +260,7 @@ var compileDocumentSelector = function (docSelector, matcher) {
 // {$gt: 5, $lt: 9}, or a regular expression, or any non-expression object (to
 // indicate equality).  Returns a branched matcher: a function mapping
 // [branched value]->result object.
-var compileValueSelector = function (valueSelector, matcher, isRoot) {
+var compileValueSelector = function compileValueSelector(valueSelector, matcher, isRoot) {
   if (valueSelector instanceof RegExp) {
     matcher._isSimple = false;
     return convertElementMatcherToBranchedMatcher(regexpElementMatcher(valueSelector));
@@ -271,7 +274,7 @@ var compileValueSelector = function (valueSelector, matcher, isRoot) {
 // Given an element matcher (which evaluates a single value), returns a branched
 // value (which evaluates the element matcher on all the branches and returns a
 // more structured return value possibly including arrayIndices).
-var convertElementMatcherToBranchedMatcher = function (elementMatcher) {
+var convertElementMatcherToBranchedMatcher = function convertElementMatcherToBranchedMatcher(elementMatcher) {
   var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
   return function (branches) {
@@ -280,7 +283,7 @@ var convertElementMatcherToBranchedMatcher = function (elementMatcher) {
       expanded = expandArraysInBranches(branches, options.dontIncludeLeafArrays);
     }
     var ret = {};
-    ret.result = (0, _lodashCollectionAny2['default'])(expanded, function (element) {
+    ret.result = (0, _any3.default)(expanded, function (element) {
       var matched = elementMatcher(element.value);
 
       // Special case for $elemMatch: it means 'true, and use this as an array
@@ -308,13 +311,12 @@ var convertElementMatcherToBranchedMatcher = function (elementMatcher) {
 };
 
 // Takes a RegExp object and returns an element matcher.
-
 function regexpElementMatcher(regexp) {
   return function (value) {
     if (value instanceof RegExp) {
       // Comparing two regexps means seeing if the regexps are identical
       // (really!). Underscore knows how.
-      return (0, _lodashLangIsEqual2['default'])(value, regexp);
+      return (0, _isEqual3.default)(value, regexp);
     }
     // Regexps only work against strings.
     if (typeof value !== 'string') {
@@ -334,7 +336,6 @@ function regexpElementMatcher(regexp) {
 
 // Takes something that is not an operator object and returns an element matcher
 // for equality with that thing.
-
 function equalityElementMatcher(elementSelector) {
   if ((0, _Document.isOperatorObject)(elementSelector)) {
     throw Error('Can\'t create equalityValueSelector for operator object');
@@ -357,25 +358,25 @@ function equalityElementMatcher(elementSelector) {
 
 // Takes an operator object (an object with $ keys) and returns a branched
 // matcher for it.
-var operatorBranchedMatcher = function (valueSelector, matcher, isRoot) {
+var operatorBranchedMatcher = function operatorBranchedMatcher(valueSelector, matcher, isRoot) {
   // Each valueSelector works separately on the various branches.  So one
   // operator can match one branch and another can match another branch.  This
   // is OK.
 
   var operatorMatchers = [];
-  (0, _lodashCollectionEach2['default'])(valueSelector, function (operand, operator) {
+  (0, _each3.default)(valueSelector, function (operand, operator) {
     // XXX we should actually implement $eq, which is new in 2.6
-    var simpleRange = (0, _lodashCollectionContains2['default'])(['$lt', '$lte', '$gt', '$gte'], operator) && (0, _lodashLangIsNumber2['default'])(operand);
-    var simpleInequality = operator === '$ne' && !(0, _lodashLangIsObject2['default'])(operand);
-    var simpleInclusion = (0, _lodashCollectionContains2['default'])(['$in', '$nin'], operator) && (0, _lodashLangIsArray2['default'])(operand) && !(0, _lodashCollectionAny2['default'])(operand, _lodashLangIsObject2['default']);
+    var simpleRange = (0, _contains3.default)(['$lt', '$lte', '$gt', '$gte'], operator) && (0, _isNumber3.default)(operand);
+    var simpleInequality = operator === '$ne' && !(0, _isObject3.default)(operand);
+    var simpleInclusion = (0, _contains3.default)(['$in', '$nin'], operator) && (0, _isArray3.default)(operand) && !(0, _any3.default)(operand, _isObject3.default);
 
     if (!(operator === '$eq' || simpleRange || simpleInclusion || simpleInequality)) {
       matcher._isSimple = false;
     }
 
-    if ((0, _lodashObjectHas2['default'])(VALUE_OPERATORS, operator)) {
+    if ((0, _has3.default)(VALUE_OPERATORS, operator)) {
       operatorMatchers.push(VALUE_OPERATORS[operator](operand, valueSelector, matcher, isRoot));
-    } else if ((0, _lodashObjectHas2['default'])(ELEMENT_OPERATORS, operator)) {
+    } else if ((0, _has3.default)(ELEMENT_OPERATORS, operator)) {
       var options = ELEMENT_OPERATORS[operator];
       operatorMatchers.push(convertElementMatcherToBranchedMatcher(options.compileElementSelector(operand, valueSelector, matcher), options));
     } else {
@@ -386,11 +387,11 @@ var operatorBranchedMatcher = function (valueSelector, matcher, isRoot) {
   return andBranchedMatchers(operatorMatchers);
 };
 
-var compileArrayOfDocumentSelectors = function (selectors, matcher, inElemMatch) {
-  if (!(0, _Document.isArray)(selectors) || (0, _lodashLangIsEmpty2['default'])(selectors)) {
+var compileArrayOfDocumentSelectors = function compileArrayOfDocumentSelectors(selectors, matcher, inElemMatch) {
+  if (!(0, _Document.isArray)(selectors) || (0, _isEmpty3.default)(selectors)) {
     throw Error('$and/$or/$nor must be nonempty array');
   }
-  return (0, _lodashCollectionMap2['default'])(selectors, function (subSelector) {
+  return (0, _map3.default)(selectors, function (subSelector) {
     if (!(0, _Document.isPlainObject)(subSelector)) {
       throw Error('$or/$and/$nor entries need to be full objects');
     }
@@ -400,12 +401,12 @@ var compileArrayOfDocumentSelectors = function (selectors, matcher, inElemMatch)
 
 // Operators that appear at the top level of a document selector.
 var LOGICAL_OPERATORS = {
-  $and: function (subSelector, matcher, inElemMatch) {
+  $and: function $and(subSelector, matcher, inElemMatch) {
     var matchers = compileArrayOfDocumentSelectors(subSelector, matcher, inElemMatch);
     return andDocumentMatchers(matchers);
   },
 
-  $or: function (subSelector, matcher, inElemMatch) {
+  $or: function $or(subSelector, matcher, inElemMatch) {
     var matchers = compileArrayOfDocumentSelectors(subSelector, matcher, inElemMatch);
 
     // Special case: if there is only one matcher, use it directly, *preserving*
@@ -415,7 +416,7 @@ var LOGICAL_OPERATORS = {
     }
 
     return function (doc) {
-      var result = (0, _lodashCollectionAny2['default'])(matchers, function (f) {
+      var result = (0, _any3.default)(matchers, function (f) {
         return f(doc).result;
       });
       // $or does NOT set arrayIndices when it has multiple
@@ -424,10 +425,10 @@ var LOGICAL_OPERATORS = {
     };
   },
 
-  $nor: function (subSelector, matcher, inElemMatch) {
+  $nor: function $nor(subSelector, matcher, inElemMatch) {
     var matchers = compileArrayOfDocumentSelectors(subSelector, matcher, inElemMatch);
     return function (doc) {
-      var result = (0, _lodashCollectionAll2['default'])(matchers, function (f) {
+      var result = (0, _all3.default)(matchers, function (f) {
         return !f(doc).result;
       });
       // Never set arrayIndices, because we only match if nothing in particular
@@ -436,7 +437,7 @@ var LOGICAL_OPERATORS = {
     };
   },
 
-  $where: function (selectorValue, matcher) {
+  $where: function $where(selectorValue, matcher) {
     // Record that *any* path may be used.
     matcher._recordPathUsed('');
     matcher._hasWhere = true;
@@ -454,7 +455,7 @@ var LOGICAL_OPERATORS = {
 
   // This is just used as a comment in the query (in MongoDB, it also ends up in
   // query logs); it has no effect on the actual selection.
-  $comment: function () {
+  $comment: function $comment() {
     return function () {
       return { result: true };
     };
@@ -464,7 +465,7 @@ var LOGICAL_OPERATORS = {
 // Returns a branched matcher that matches iff the given matcher does not.
 // Note that this implicitly 'deMorganizes' the wrapped function.  ie, it
 // means that ALL branch values need to fail to match innerBranchedMatcher.
-var invertBranchedMatcher = function (branchedMatcher) {
+var invertBranchedMatcher = function invertBranchedMatcher(branchedMatcher) {
   return function (branchValues) {
     var invertMe = branchedMatcher(branchValues);
     // We explicitly choose to strip arrayIndices here: it doesn't make sense to
@@ -479,46 +480,46 @@ var invertBranchedMatcher = function (branchedMatcher) {
 // 'match each branched value independently and combine with
 // convertElementMatcherToBranchedMatcher'.
 var VALUE_OPERATORS = {
-  $not: function (operand, valueSelector, matcher) {
+  $not: function $not(operand, valueSelector, matcher) {
     return invertBranchedMatcher(compileValueSelector(operand, matcher));
   },
-  $ne: function (operand) {
+  $ne: function $ne(operand) {
     return invertBranchedMatcher(convertElementMatcherToBranchedMatcher(equalityElementMatcher(operand)));
   },
-  $nin: function (operand) {
+  $nin: function $nin(operand) {
     return invertBranchedMatcher(convertElementMatcherToBranchedMatcher(ELEMENT_OPERATORS.$in.compileElementSelector(operand)));
   },
-  $exists: function (operand) {
+  $exists: function $exists(operand) {
     var exists = convertElementMatcherToBranchedMatcher(function (value) {
       return value !== undefined;
     });
     return operand ? exists : invertBranchedMatcher(exists);
   },
   // $options just provides options for $regex; its logic is inside $regex
-  $options: function (operand, valueSelector) {
-    if (!(0, _lodashObjectHas2['default'])(valueSelector, '$regex')) {
+  $options: function $options(operand, valueSelector) {
+    if (!(0, _has3.default)(valueSelector, '$regex')) {
       throw Error('$options needs a $regex');
     }
     return everythingMatcher;
   },
   // $maxDistance is basically an argument to $near
-  $maxDistance: function (operand, valueSelector) {
+  $maxDistance: function $maxDistance(operand, valueSelector) {
     if (!valueSelector.$near) {
       throw Error('$maxDistance needs a $near');
     }
     return everythingMatcher;
   },
-  $all: function (operand, valueSelector, matcher) {
+  $all: function $all(operand, valueSelector, matcher) {
     if (!(0, _Document.isArray)(operand)) {
       throw Error('$all requires array');
     }
     // Not sure why, but this seems to be what MongoDB does.
-    if ((0, _lodashLangIsEmpty2['default'])(operand)) {
+    if ((0, _isEmpty3.default)(operand)) {
       return nothingMatcher;
     }
 
     var branchedMatchers = [];
-    (0, _lodashCollectionEach2['default'])(operand, function (criterion) {
+    (0, _each3.default)(operand, function (criterion) {
       // XXX handle $all/$elemMatch combination
       if ((0, _Document.isOperatorObject)(criterion)) {
         throw Error('no $ expressions in $all');
@@ -530,7 +531,7 @@ var VALUE_OPERATORS = {
     // SAME branch.
     return andBranchedMatchers(branchedMatchers);
   },
-  $near: function (operand, valueSelector, matcher, isRoot) {
+  $near: function $near(operand, valueSelector, matcher, isRoot) {
     if (!isRoot) {
       throw Error('$near can\'t be inside another $ operator');
     }
@@ -541,7 +542,7 @@ var VALUE_OPERATORS = {
     // marked with a $geometry property.
 
     var maxDistance, point, distance;
-    if ((0, _Document.isPlainObject)(operand) && (0, _lodashObjectHas2['default'])(operand, '$geometry')) {
+    if ((0, _Document.isPlainObject)(operand) && (0, _has3.default)(operand, '$geometry')) {
       // GeoJSON '2dsphere' mode.
       maxDistance = operand.$maxDistance;
       point = operand.$geometry;
@@ -553,9 +554,9 @@ var VALUE_OPERATORS = {
           return null;
         }
         if (value.type === 'Point') {
-          return _geojsonUtils2['default'].pointDistance(point, value);
+          return _geojsonUtils2.default.pointDistance(point, value);
         } else {
-          return _geojsonUtils2['default'].geometryWithinRadius(value, point, maxDistance) ? 0 : maxDistance + 1;
+          return _geojsonUtils2.default.geometryWithinRadius(value, point, maxDistance) ? 0 : maxDistance + 1;
         }
       };
     } else {
@@ -583,7 +584,7 @@ var VALUE_OPERATORS = {
       // each within-$maxDistance branching point.
       branchedValues = expandArraysInBranches(branchedValues);
       var result = { result: false };
-      (0, _lodashCollectionEach2['default'])(branchedValues, function (branch) {
+      (0, _each3.default)(branchedValues, function (branch) {
         var curDistance = distance(branch.value);
         // Skip branches that aren't real points or are too far away.
         if (curDistance === null || curDistance > maxDistance) {
@@ -607,12 +608,12 @@ var VALUE_OPERATORS = {
 };
 
 // Helpers for $near.
-var distanceCoordinatePairs = function (a, b) {
+var distanceCoordinatePairs = function distanceCoordinatePairs(a, b) {
   a = pointToArray(a);
   b = pointToArray(b);
   var x = a[0] - b[0];
   var y = a[1] - b[1];
-  if ((0, _lodashLangIsNaN2['default'])(x) || (0, _lodashLangIsNaN2['default'])(y)) {
+  if ((0, _isNaN3.default)(x) || (0, _isNaN3.default)(y)) {
     return null;
   }
   return Math.sqrt(x * x + y * y);
@@ -621,14 +622,14 @@ var distanceCoordinatePairs = function (a, b) {
 // Makes sure we get 2 elements array and assume the first one to be x and
 // the second one to y no matter what user passes.
 // In case user passes { lon: x, lat: y } returns [x, y]
-var pointToArray = function (point) {
-  return (0, _lodashCollectionMap2['default'])(point, _lodashUtilityIdentity2['default']);
+var pointToArray = function pointToArray(point) {
+  return (0, _map3.default)(point, _identity3.default);
 };
 
 // Helper for $lt/$gt/$lte/$gte.
-var makeInequality = function (cmpValueComparator) {
+var makeInequality = function makeInequality(cmpValueComparator) {
   return {
-    compileElementSelector: function (operand) {
+    compileElementSelector: function compileElementSelector(operand) {
       // Arrays never compare false with non-arrays for any inequality.
       // XXX This was behavior we observed in pre-release MongoDB 2.5, but
       //     it seems to have been reverted.
@@ -674,7 +675,7 @@ var makeInequality = function (cmpValueComparator) {
 //    being called
 //  - dontIncludeLeafArrays, a bool which causes an argument to be passed to
 //    expandArraysInBranches if it is called
-var ELEMENT_OPERATORS = {
+var ELEMENT_OPERATORS = exports.ELEMENT_OPERATORS = {
   $lt: makeInequality(function (cmpValue) {
     return cmpValue < 0;
   }),
@@ -688,7 +689,7 @@ var ELEMENT_OPERATORS = {
     return cmpValue >= 0;
   }),
   $mod: {
-    compileElementSelector: function (operand) {
+    compileElementSelector: function compileElementSelector(operand) {
       if (!((0, _Document.isArray)(operand) && operand.length === 2 && typeof operand[0] === 'number' && typeof operand[1] === 'number')) {
         throw Error('argument to $mod must be an array of two numbers');
       }
@@ -701,13 +702,13 @@ var ELEMENT_OPERATORS = {
     }
   },
   $in: {
-    compileElementSelector: function (operand) {
+    compileElementSelector: function compileElementSelector(operand) {
       if (!(0, _Document.isArray)(operand)) {
         throw Error('$in needs an array');
       }
 
       var elementMatchers = [];
-      (0, _lodashCollectionEach2['default'])(operand, function (option) {
+      (0, _each3.default)(operand, function (option) {
         if (option instanceof RegExp) {
           elementMatchers.push(regexpElementMatcher(option));
         } else if ((0, _Document.isOperatorObject)(option)) {
@@ -722,7 +723,7 @@ var ELEMENT_OPERATORS = {
         if (value === undefined) {
           value = null;
         }
-        return (0, _lodashCollectionAny2['default'])(elementMatchers, function (e) {
+        return (0, _any3.default)(elementMatchers, function (e) {
           return e(value);
         });
       };
@@ -733,7 +734,7 @@ var ELEMENT_OPERATORS = {
     // don't want to consider the element [5,5] in the leaf array [[5,5]] as a
     // possible value.
     dontExpandLeafArrays: true,
-    compileElementSelector: function (operand) {
+    compileElementSelector: function compileElementSelector(operand) {
       if (typeof operand === 'string') {
         // Don't ask me why, but by experimentation, this seems to be what Mongo
         // does.
@@ -752,7 +753,7 @@ var ELEMENT_OPERATORS = {
     // {$type: 4}}. Thus, when we see a leaf array, we *should* expand it but
     // should *not* include it itself.
     dontIncludeLeafArrays: true,
-    compileElementSelector: function (operand) {
+    compileElementSelector: function compileElementSelector(operand) {
       if (typeof operand !== 'number') {
         throw Error('$type needs a number');
       }
@@ -762,7 +763,7 @@ var ELEMENT_OPERATORS = {
     }
   },
   $regex: {
-    compileElementSelector: function (operand, valueSelector) {
+    compileElementSelector: function compileElementSelector(operand, valueSelector) {
       if (!(typeof operand === 'string' || operand instanceof RegExp)) {
         throw Error('$regex has to be a string or RegExp');
       }
@@ -792,7 +793,7 @@ var ELEMENT_OPERATORS = {
   },
   $elemMatch: {
     dontExpandLeafArrays: true,
-    compileElementSelector: function (operand, valueSelector, matcher) {
+    compileElementSelector: function compileElementSelector(operand, valueSelector, matcher) {
       if (!(0, _Document.isPlainObject)(operand)) {
         throw Error('$elemMatch need an object');
       }
@@ -841,7 +842,6 @@ var ELEMENT_OPERATORS = {
   }
 };
 
-exports.ELEMENT_OPERATORS = ELEMENT_OPERATORS;
 // makeLookupFunction(key) returns a lookup function.
 //
 // A lookup function takes in a document and returns an array of matching
@@ -894,7 +894,6 @@ exports.ELEMENT_OPERATORS = ELEMENT_OPERATORS;
 //
 // See the test 'minimongo - lookup' for some examples of what lookup functions
 // return.
-
 function makeLookupFunction(key, options) {
   options = options || {};
   var parts = key.split('.');
@@ -906,7 +905,7 @@ function makeLookupFunction(key, options) {
     lookupRest = makeLookupFunction(parts.slice(1).join('.'));
   }
 
-  var omitUnnecessaryFields = function (retVal) {
+  var omitUnnecessaryFields = function omitUnnecessaryFields(retVal) {
     if (!retVal.dontIterate) {
       delete retVal.dontIterate;
     }
@@ -976,7 +975,7 @@ function makeLookupFunction(key, options) {
     }
 
     var result = [];
-    var appendToResult = function (more) {
+    var appendToResult = function appendToResult(more) {
       Array.prototype.push.apply(result, more);
     };
 
@@ -1001,7 +1000,7 @@ function makeLookupFunction(key, options) {
     // 'look up this index' in that case, not 'also look up this index in all
     // the elements of the array'.
     if ((0, _Document.isArray)(firstLevel) && !(nextPartIsNumeric && options.forSort)) {
-      (0, _lodashCollectionEach2['default'])(firstLevel, function (branch, arrayIndex) {
+      (0, _each3.default)(firstLevel, function (branch, arrayIndex) {
         if ((0, _Document.isPlainObject)(branch)) {
           appendToResult(lookupRest(branch, arrayIndices.concat(arrayIndex)));
         }
@@ -1014,7 +1013,7 @@ function makeLookupFunction(key, options) {
 
 function expandArraysInBranches(branches, skipTheArrays) {
   var branchesOut = [];
-  (0, _lodashCollectionEach2['default'])(branches, function (branch) {
+  (0, _each3.default)(branches, function (branch) {
     var thisIsArray = (0, _Document.isArray)(branch.value);
     // We include the branch itself, *UNLESS* we it's an array that we're going
     // to iterate and we're told to skip arrays.  (That's right, we include some
@@ -1027,7 +1026,7 @@ function expandArraysInBranches(branches, skipTheArrays) {
       });
     }
     if (thisIsArray && !branch.dontIterate) {
-      (0, _lodashCollectionEach2['default'])(branch.value, function (leaf, i) {
+      (0, _each3.default)(branch.value, function (leaf, i) {
         branchesOut.push({
           value: leaf,
           arrayIndices: (branch.arrayIndices || []).concat(i)
@@ -1038,11 +1037,11 @@ function expandArraysInBranches(branches, skipTheArrays) {
   return branchesOut;
 }
 
-var nothingMatcher = function (docOrBranchedValues) {
+var nothingMatcher = function nothingMatcher(docOrBranchedValues) {
   return { result: false };
 };
 
-var everythingMatcher = function (docOrBranchedValues) {
+var everythingMatcher = function everythingMatcher(docOrBranchedValues) {
   return { result: true };
 };
 
@@ -1050,7 +1049,7 @@ var everythingMatcher = function (docOrBranchedValues) {
 // 'document matchers' and 'branched matchers'. They both return result objects
 // but the argument is different: for the former it's a whole doc, whereas for
 // the latter it's an array of 'branched values'.
-var andSomeMatchers = function (subMatchers) {
+var andSomeMatchers = function andSomeMatchers(subMatchers) {
   if (subMatchers.length === 0) {
     return everythingMatcher;
   }
@@ -1060,7 +1059,7 @@ var andSomeMatchers = function (subMatchers) {
 
   return function (docOrBranches) {
     var ret = {};
-    ret.result = (0, _lodashCollectionAll2['default'])(subMatchers, function (f) {
+    ret.result = (0, _all3.default)(subMatchers, function (f) {
       var subResult = f(docOrBranches);
       // Copy a 'distance' number out of the first sub-matcher that has
       // one. Yes, this means that if there are multiple $near fields in a

@@ -1,5 +1,4 @@
 import StorageManager from '../../lib/StorageManager';
-import async from 'async';
 import chai from 'chai';
 chai.use(require('chai-as-promised'));
 chai.should();

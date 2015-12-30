@@ -1,7 +1,6 @@
 import Collection from '../../lib/Collection';
 import EJSON from '../../lib/EJSON';
 import StorageManager from '../../lib/storages/LocalStorageManager';
-import async from 'async';
 import chai, {expect, assert} from 'chai';
 chai.use(require('chai-as-promised'));
 chai.should();

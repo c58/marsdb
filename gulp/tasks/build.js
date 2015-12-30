@@ -26,16 +26,7 @@ gulp.task('build', [
 
 gulp.task('build:node', function() {
   return gulp.src(config.src)
-    .pipe(babel({
-      comments: true,
-      compact: false,
-      blacklist: [
-        'spec.functionName',
-      ],
-      optional: [
-        'es7.trailingFunctionCommas',
-      ]
-    }))
+    .pipe(babel())
     .pipe(gulp.dest(config.dist));
 });
 
@@ -126,16 +117,7 @@ gulp.task('build:browser:tests', ['build:node'], function() {
 
   // Transformations
   var transforms = [
-    babelify.configure({
-      comments: true,
-      compact: false,
-      blacklist: [
-        'spec.functionName',
-      ],
-      optional: [
-        'es7.trailingFunctionCommas',
-      ]
-    }),
+    babelify.configure(),
     'brfs',
     'bulkify',
     'envify'

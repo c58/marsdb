@@ -1,6 +1,5 @@
 import model from '../lib/Document';
 import CollectionIndex from '../lib/CollectionIndex';
-import async from 'async';
 import chai, {except, assert} from 'chai';
 chai.use(require('chai-as-promised'));
 chai.should();

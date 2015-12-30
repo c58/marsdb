@@ -1,28 +1,20 @@
 'use strict';
 
-Object.defineProperty(exports, '__esModule', {
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-var _get = function get(_x4, _x5, _x6) { var _again = true; _function: while (_again) { var object = _x4, property = _x5, receiver = _x6; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x4 = parent; _x5 = property; _x6 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
-
+exports.CursorObservable = undefined;
 exports.debounce = debounce;
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+var _size2 = require('lodash/collection/size');
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+var _size3 = _interopRequireDefault(_size2);
 
-function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+var _isArray2 = require('lodash/lang/isArray');
 
-var _lodashCollectionSize = require('lodash/collection/size');
-
-var _lodashCollectionSize2 = _interopRequireDefault(_lodashCollectionSize);
-
-var _lodashLangIsArray = require('lodash/lang/isArray');
-
-var _lodashLangIsArray2 = _interopRequireDefault(_lodashLangIsArray);
+var _isArray3 = _interopRequireDefault(_isArray2);
 
 var _Cursor2 = require('./Cursor');
 
@@ -31,6 +23,14 @@ var _Cursor3 = _interopRequireDefault(_Cursor2);
 var _EJSON = require('./EJSON');
 
 var _EJSON2 = _interopRequireDefault(_EJSON);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 /**
  * Observable cursor is used for making request auto-updatable
@@ -43,21 +43,12 @@ var CursorObservable = (function (_Cursor) {
   function CursorObservable(db, query) {
     _classCallCheck(this, CursorObservable);
 
-    _get(Object.getPrototypeOf(CursorObservable.prototype), 'constructor', this).call(this, db, query);
-    this.update = debounce(this.update.bind(this), 1000 / 15, 10);
-    this.maybeUpdate = this.maybeUpdate.bind(this);
-  }
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(CursorObservable).call(this, db, query));
 
-  /**
-   * Debounce with updetable wait time and force
-   * execution on some number of calls (batch execution)
-   * Return promise that resolved with result of execution.
-   * Promise cerated on each new execution (on idle).
-   * @param  {Function} func
-   * @param  {Number} wait
-   * @param  {Number} batchSize
-   * @return {Promise}
-   */
+    _this.update = debounce(_this.update.bind(_this), 1000 / 15, 10);
+    _this.maybeUpdate = _this.maybeUpdate.bind(_this);
+    return _this;
+  }
 
   /**
    * Change a batch size of updater.
@@ -81,6 +72,7 @@ var CursorObservable = (function (_Cursor) {
      * @param  {Number} waitTime
      * @return {CursorObservable}
      */
+
   }, {
     key: 'debounce',
     value: function debounce(waitTime) {
@@ -105,44 +97,45 @@ var CursorObservable = (function (_Cursor) {
      * @param  {Boolean} options.declare
      * @return {Stopper}
      */
+
   }, {
     key: 'observe',
     value: function observe(listener) {
-      var _this = this;
+      var _this2 = this;
 
       var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
       // Make new wrapper for make possible to observe
       // multiple times (for removeListener)
-      var updateWrapper = function (a, b) {
-        return _this.maybeUpdate(a, b);
+      var updateWrapper = function updateWrapper(a, b) {
+        return _this2.maybeUpdate(a, b);
       };
       this.db.on('insert', updateWrapper);
       this.db.on('update', updateWrapper);
       this.db.on('remove', updateWrapper);
 
-      var stopper = function () {
-        _this.db.removeListener('insert', updateWrapper);
-        _this.db.removeListener('update', updateWrapper);
-        _this.db.removeListener('remove', updateWrapper);
-        _this.removeListener('update', listener);
-        _this.emit('stopped', listener);
+      var stopper = function stopper() {
+        _this2.db.removeListener('insert', updateWrapper);
+        _this2.db.removeListener('update', updateWrapper);
+        _this2.db.removeListener('remove', updateWrapper);
+        _this2.removeListener('update', listener);
+        _this2.emit('stopped', listener);
       };
 
       listener = this._prepareListener(listener);
       this.on('update', listener);
       this.on('stop', stopper);
 
-      var parentSetter = function (cursor) {
-        _this._parentCursor = cursor;
+      var parentSetter = function parentSetter(cursor) {
+        _this2._parentCursor = cursor;
       };
 
-      var createStoppablePromise = function (currPromise) {
+      var createStoppablePromise = function createStoppablePromise(currPromise) {
         return {
           parent: parentSetter,
           stop: stopper,
-          then: function (successFn, failFn) {
-            successFn = _this._prepareListener(successFn);
+          then: function then(successFn, failFn) {
+            successFn = _this2._prepareListener(successFn);
             return createStoppablePromise(currPromise.then(successFn, failFn));
           }
         };
@@ -161,6 +154,7 @@ var CursorObservable = (function (_Cursor) {
      * of this function.
      * It also stops any delaied update of the cursor.
      */
+
   }, {
     key: 'stopObservers',
     value: function stopObservers() {
@@ -174,17 +168,18 @@ var CursorObservable = (function (_Cursor) {
      * is updated.
      * @return {Promise}
      */
+
   }, {
     key: 'update',
     value: function update() {
-      var _this2 = this;
+      var _this3 = this;
 
       var firstRun = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
 
       return this.exec().then(function (result) {
-        _this2._latestResult = result;
-        _this2._updateLatestIds();
-        _this2._propagateUpdate(firstRun);
+        _this3._latestResult = result;
+        _this3._updateLatestIds();
+        _this3._propagateUpdate(firstRun);
         return result;
       });
     }
@@ -202,6 +197,7 @@ var CursorObservable = (function (_Cursor) {
      * @param  {Object} newDoc
      * @param  {Object} oldDoc
      */
+
   }, {
     key: 'maybeUpdate',
     value: function maybeUpdate(newDoc, oldDoc) {
@@ -214,7 +210,7 @@ var CursorObservable = (function (_Cursor) {
       // 2. Is a new doc has different number of fields then an old doc?
       // 3. Is a new doc has a greater updatedAt time then an old doc?
       // 4. Is a new doc not equals to an old doc?
-      var updatedInResult = removedFromResult || newDoc && oldDoc && (this._matcher.documentMatches(newDoc).result || this._matcher.documentMatches(oldDoc).result) && ((0, _lodashCollectionSize2['default'])(newDoc) !== (0, _lodashCollectionSize2['default'])(oldDoc) || newDoc.updatedAt && (!oldDoc.updatedAt || oldDoc.updatedAt && newDoc.updatedAt > oldDoc.updatedAt) || !_EJSON2['default'].equals(newDoc, oldDoc));
+      var updatedInResult = removedFromResult || newDoc && oldDoc && (this._matcher.documentMatches(newDoc).result || this._matcher.documentMatches(oldDoc).result) && ((0, _size3.default)(newDoc) !== (0, _size3.default)(oldDoc) || newDoc.updatedAt && (!oldDoc.updatedAt || oldDoc.updatedAt && newDoc.updatedAt > oldDoc.updatedAt) || !_EJSON2.default.equals(newDoc, oldDoc));
 
       // When it's an insert operation we just check
       // it's match a query
@@ -235,6 +231,7 @@ var CursorObservable = (function (_Cursor) {
      * @param  {Function} listener
      * @return {Promise}
      */
+
   }, {
     key: '_prepareListener',
     value: function _prepareListener(listener) {
@@ -248,6 +245,7 @@ var CursorObservable = (function (_Cursor) {
      * and call this method on parent cursor if it exists
      * and if it is not first run of update.
      */
+
   }, {
     key: '_propagateUpdate',
     value: function _propagateUpdate() {
@@ -263,10 +261,11 @@ var CursorObservable = (function (_Cursor) {
      * By a `_latestResult` update a `_latestIds` field of
      * the object
      */
+
   }, {
     key: '_updateLatestIds',
     value: function _updateLatestIds() {
-      if ((0, _lodashLangIsArray2['default'])(this._latestResult)) {
+      if ((0, _isArray3.default)(this._latestResult)) {
         this._latestIds = new Set(this._latestResult.map(function (x) {
           return x._id;
         }));
@@ -277,10 +276,20 @@ var CursorObservable = (function (_Cursor) {
   }]);
 
   return CursorObservable;
-})(_Cursor3['default']);
+})(_Cursor3.default);
+
+/**
+ * Debounce with updetable wait time and force
+ * execution on some number of calls (batch execution)
+ * Return promise that resolved with result of execution.
+ * Promise cerated on each new execution (on idle).
+ * @param  {Function} func
+ * @param  {Number} wait
+ * @param  {Number} batchSize
+ * @return {Promise}
+ */
 
 exports.CursorObservable = CursorObservable;
-
 function debounce(func, wait, batchSize) {
   var timeout = null;
   var callsCount = 0;
@@ -288,7 +297,7 @@ function debounce(func, wait, batchSize) {
   var doNotResolve = true;
   var maybeResolve = null;
 
-  var debouncer = function () {
+  var debouncer = function debouncer() {
     var context = this;
     var args = arguments;
 
@@ -323,15 +332,15 @@ function debounce(func, wait, batchSize) {
     return promise;
   };
 
-  var updateBatchSize = function (newBatchSize) {
+  var updateBatchSize = function updateBatchSize(newBatchSize) {
     batchSize = newBatchSize;
   };
 
-  var updateWait = function (newWait) {
+  var updateWait = function updateWait(newWait) {
     wait = newWait;
   };
 
-  var cancel = function () {
+  var cancel = function cancel() {
     clearTimeout(timeout);
   };
 
@@ -341,4 +350,4 @@ function debounce(func, wait, batchSize) {
   return debouncer;
 }
 
-exports['default'] = CursorObservable;
+exports.default = CursorObservable;

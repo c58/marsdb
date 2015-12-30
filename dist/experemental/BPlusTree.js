@@ -1,19 +1,19 @@
+'use strict';
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 /**
  * Originally based on: https://github.com/internalfx/bplus-index
  * Thanks, @internalfx
  */
 
 // NOT WORKING YET
-'use strict';
-
-Object.defineProperty(exports, '__esModule', {
-  value: true
-});
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
-
 var Utils = {};
 var uniqArray = {};
 
@@ -40,8 +40,8 @@ function _makeRequestNullSearcheble(val) {
     _iteratorError = err;
   } finally {
     try {
-      if (!_iteratorNormalCompletion && _iterator['return']) {
-        _iterator['return']();
+      if (!_iteratorNormalCompletion && _iterator.return) {
+        _iterator.return();
       }
     } finally {
       if (_didIteratorError) {
@@ -77,7 +77,7 @@ function _stepForward(index, leaf) {
   }
 }
 
-var Leaf = (function () {
+var Leaf = exports.Leaf = (function () {
   function Leaf() {
     var config = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -93,13 +93,6 @@ var Leaf = (function () {
     this.comparator = config.comparator;
     this.unique = config.unique;
   }
-
-  /**
-   * BPlusTree implementation, aimed to be an index
-   * of MarsDB.
-   * May have custom comparator index and trow error
-   * on duplicates if unique key presented.
-   */
 
   _createClass(Leaf, [{
     key: 'insertData',
@@ -172,8 +165,8 @@ var Leaf = (function () {
         _iteratorError2 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion2 && _iterator2['return']) {
-            _iterator2['return']();
+          if (!_iteratorNormalCompletion2 && _iterator2.return) {
+            _iterator2.return();
           }
         } finally {
           if (_didIteratorError2) {
@@ -217,9 +210,14 @@ var Leaf = (function () {
   return Leaf;
 })();
 
-exports.Leaf = Leaf;
+/**
+ * BPlusTree implementation, aimed to be an index
+ * of MarsDB.
+ * May have custom comparator index and trow error
+ * on duplicates if unique key presented.
+ */
 
-var BPlusTree = (function () {
+var BPlusTree = exports.BPlusTree = (function () {
   function BPlusTree() {
     var config = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -260,8 +258,8 @@ var BPlusTree = (function () {
         _iteratorError3 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion3 && _iterator3['return']) {
-            _iterator3['return']();
+          if (!_iteratorNormalCompletion3 && _iterator3.return) {
+            _iterator3.return();
           }
         } finally {
           if (_didIteratorError3) {
@@ -388,7 +386,7 @@ var BPlusTree = (function () {
           _this2._splitLeaf(leaf);
         });
       } catch (e) {
-        this['delete'](uniqKeys.slice(0, failingIndex), val);
+        this.delete(uniqKeys.slice(0, failingIndex), val);
         throw e;
       }
     }
@@ -435,6 +433,7 @@ var BPlusTree = (function () {
     }
 
     // Private Methods
+
   }, {
     key: '_findLeaf',
     value: function _findLeaf(key, leaf) {
@@ -464,6 +463,7 @@ var BPlusTree = (function () {
         var values = leaf.values;
 
         // TODO: Optimize: we could re-use one of the leaves
+
         var leftLeaf = new Leaf({ comparator: this.comparator, unique: this.unique });
         var rightLeaf = new Leaf({ comparator: this.comparator, unique: this.unique });
 
@@ -729,5 +729,4 @@ var BPlusTree = (function () {
   return BPlusTree;
 })();
 
-exports.BPlusTree = BPlusTree;
-exports['default'] = BPlusTree;
+exports.default = BPlusTree;

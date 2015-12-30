@@ -1,6 +1,5 @@
 import Collection from '../../lib/Collection';
 import Cursor from '../../lib/Cursor';
-import async from 'async';
 import chai from 'chai';
 chai.use(require('chai-as-promised'));
 chai.should();

@@ -1,20 +1,20 @@
-// see http://baagoe.org/en/wiki/Better_random_numbers_for_javascript
-// for a full discussion and Alea implementation.
 'use strict';
 
-Object.defineProperty(exports, '__esModule', {
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
-
-var Alea = function () {
+// see http://baagoe.org/en/wiki/Better_random_numbers_for_javascript
+// for a full discussion and Alea implementation.
+var Alea = function Alea() {
   function Mash() {
     var n = 0xefc8249d;
 
-    var mash = function (data) {
+    var mash = function mash(data) {
       data = data.toString();
       for (var i = 0; i < data.length; i++) {
         n += data.charCodeAt(i);
@@ -63,7 +63,7 @@ var Alea = function () {
     }
     mash = null;
 
-    var random = function () {
+    var random = function random() {
       var t = 2091639 * s0 + c * 2.3283064365386963e-10; // 2^-32
       s0 = s1;
       s1 = s2;
@@ -84,7 +84,7 @@ var Alea = function () {
 var UNMISTAKABLE_CHARS = '23456789ABCDEFGHJKLMNPQRSTWXYZabcdefghijkmnopqrstuvwxyz';
 var BASE64_CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ' + '0123456789-_';
 
-var Random = (function () {
+var Random = exports.Random = (function () {
   function Random() {
     _classCallCheck(this, Random);
 
@@ -191,5 +191,4 @@ var Random = (function () {
   return Random;
 })();
 
-exports.Random = Random;
-exports['default'] = Random;
+exports.default = Random;

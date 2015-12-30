@@ -1,13 +1,13 @@
 'use strict';
 
-Object.defineProperty(exports, '__esModule', {
-  value: true
-});
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
 var _QUERY_LOGIC_OPS_IMPL, _QUERY_COMP_OPS_IMPL;
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.IndexMatcher = undefined;
 exports._getIntersection = _getIntersection;
 exports._getIncludeIntersection = _getIncludeIntersection;
 exports._getExcludeIntersection = _getExcludeIntersection;
@@ -15,19 +15,13 @@ exports._getUnion = _getUnion;
 exports._makeMatchResult = _makeMatchResult;
 exports._normilizeQuery = _normilizeQuery;
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+var _keys2 = require('lodash/object/keys');
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+var _keys3 = _interopRequireDefault(_keys2);
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+var _each2 = require('lodash/collection/each');
 
-var _lodashObjectKeys = require('lodash/object/keys');
-
-var _lodashObjectKeys2 = _interopRequireDefault(_lodashObjectKeys);
-
-var _lodashCollectionEach = require('lodash/collection/each');
-
-var _lodashCollectionEach2 = _interopRequireDefault(_lodashCollectionEach);
+var _each3 = _interopRequireDefault(_each2);
 
 var _invariant = require('invariant');
 
@@ -51,9 +45,16 @@ var _EJSON = require('./EJSON');
 
 var _EJSON2 = _interopRequireDefault(_EJSON);
 
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 // Internal utils
 // Exported for testing
-
 function _getIntersection(include, arrs) {
   var sets = arrs.filter(function (x) {
     return x;
@@ -66,7 +67,7 @@ function _getIntersection(include, arrs) {
     return [];
   }
 
-  (0, _lodashCollectionEach2['default'])(sets[0], function (v) {
+  (0, _each3.default)(sets[0], function (v) {
     var isResValue = true;
     for (var i = 1; i < sets.length; i++) {
       isResValue = sets[i].has(v);
@@ -96,7 +97,7 @@ function _getUnion() {
     arrs[_key] = arguments[_key];
   }
 
-  return Array.from(new Set((0, _flattenArray2['default'])(arrs)));
+  return Array.from(new Set((0, _flattenArray2.default)(arrs)));
 }
 
 function _makeMatchResult() {
@@ -117,9 +118,9 @@ function _makeMatchResult() {
 function _normilizeQuery(query) {
   if (query === undefined || query === null) {
     return { _id: { $exists: false } };
-  } else if (!_Utils2['default'].isObject(query)) {
+  } else if (!_Utils2.default.isObject(query)) {
     return { _id: query };
-  } else if ((0, _isEmpty2['default'])(query)) {
+  } else if ((0, _isEmpty2.default)(query)) {
     return { _id: { $exists: true } };
   }
   return query;
@@ -127,7 +128,7 @@ function _normilizeQuery(query) {
 
 // Query parts implementation
 var QUERY_LOGIC_OPS_IMPL = (_QUERY_LOGIC_OPS_IMPL = {}, _defineProperty(_QUERY_LOGIC_OPS_IMPL, _Document.QUERY_OPS.$and, function (retriver, key, value) {
-  (0, _invariant2['default'])(_Utils2['default'].isArray(value), '$and(...): argument must be an array');
+  (0, _invariant2.default)(_Utils2.default.isArray(value), '$and(...): argument must be an array');
 
   var matchPromises = value.map(function (q) {
     return retriver.execQuery(q);
@@ -137,7 +138,7 @@ var QUERY_LOGIC_OPS_IMPL = (_QUERY_LOGIC_OPS_IMPL = {}, _defineProperty(_QUERY_L
     return _makeMatchResult({ include: result });
   });
 }), _defineProperty(_QUERY_LOGIC_OPS_IMPL, _Document.QUERY_OPS.$or, function (retriver, key, value) {
-  (0, _invariant2['default'])(_Utils2['default'].isArray(value), '$or(...): argument must be an array');
+  (0, _invariant2.default)(_Utils2.default.isArray(value), '$or(...): argument must be an array');
 
   var matchPromises = value.map(function (q) {
     return retriver.execQuery(q);
@@ -149,20 +150,20 @@ var QUERY_LOGIC_OPS_IMPL = (_QUERY_LOGIC_OPS_IMPL = {}, _defineProperty(_QUERY_L
 }), _QUERY_LOGIC_OPS_IMPL);
 
 var QUERY_COMP_OPS_IMPL = (_QUERY_COMP_OPS_IMPL = {}, _defineProperty(_QUERY_COMP_OPS_IMPL, _Document.QUERY_OPS.$in, function (index, value, basic, query) {
-  (0, _invariant2['default'])(_Utils2['default'].isArray(value), '$in(...): argument must be an array');
+  (0, _invariant2.default)(_Utils2.default.isArray(value), '$in(...): argument must be an array');
   _makeMatchResult({ include: index.getMatching(value) }, basic);
 }), _defineProperty(_QUERY_COMP_OPS_IMPL, _Document.QUERY_OPS.$options, function () {}), _defineProperty(_QUERY_COMP_OPS_IMPL, _Document.QUERY_OPS.$regex, function (index, value, basic, query) {
-  (0, _invariant2['default'])(value instanceof RegExp || typeof value === 'string', '$regex(...): argument must be a RegExp or string');
+  (0, _invariant2.default)(value instanceof RegExp || typeof value === 'string', '$regex(...): argument must be a RegExp or string');
 
-  var regex = _Utils2['default'].ensureRegExp(value, query.$options);
-  var matcher = function (v) {
+  var regex = _Utils2.default.ensureRegExp(value, query.$options);
+  var matcher = function matcher(v) {
     return v.key && regex.test(v.key);
   };
   _makeMatchResult({ include: index.getAll({ matcher: matcher }) }, basic);
 }), _defineProperty(_QUERY_COMP_OPS_IMPL, _Document.QUERY_OPS.$exists, function (index, value, basic, query) {
   var withoutField = new Set();
   var withField = new Set();
-  index.getAll({ matcher: function (v) {
+  index.getAll({ matcher: function matcher(v) {
       if (v.key === undefined) {
         withoutField.add(v.value);
       } else {
@@ -197,7 +198,7 @@ var QUERY_COMP_OPS_IMPL = (_QUERY_COMP_OPS_IMPL = {}, _defineProperty(_QUERY_COM
  * of MongoDB-like queries.
  */
 
-var IndexMatcher = (function () {
+var IndexMatcher = exports.IndexMatcher = (function () {
   function IndexMatcher(db, queryObj) {
     var sortObj = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
@@ -220,7 +221,7 @@ var IndexMatcher = (function () {
       var _this = this;
 
       return this.execSortQuery().then(function (sortedIds) {
-        sortedIds = (0, _isEmpty2['default'])(sortedIds) ? _this.db.getIndexIds() : sortedIds;
+        sortedIds = (0, _isEmpty2.default)(sortedIds) ? _this.db.getIndexIds() : sortedIds;
         return _this.execQuery(_this.queryObj, sortedIds);
       }).then(function (queryRes) {
         return queryRes;
@@ -237,12 +238,13 @@ var IndexMatcher = (function () {
      *
      * @return {Promise}
      */
+
   }, {
     key: 'execSortQuery',
     value: function execSortQuery() {
       var _this2 = this;
 
-      var sortKeys = (0, _lodashObjectKeys2['default'])(this.sortObj);
+      var sortKeys = (0, _keys3.default)(this.sortObj);
 
       if (sortKeys.length > 1) {
         throw new Error('Multiple sort keys are not supported yet');
@@ -265,7 +267,7 @@ var IndexMatcher = (function () {
           };
         })();
 
-        if (typeof _ret === 'object') return _ret.v;
+        if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
       }
     }
 
@@ -278,13 +280,14 @@ var IndexMatcher = (function () {
      * @param  {Object} resultSuperset
      * @return {Promise}
      */
+
   }, {
     key: 'execQuery',
     value: function execQuery(query, resultSuperset) {
       var _this3 = this;
 
       query = _normilizeQuery(query);
-      var queryKeys = (0, _lodashObjectKeys2['default'])(query);
+      var queryKeys = (0, _keys3.default)(query);
       var unusedKeys = queryKeys.filter(function (x) {
         return !_this3._usedKeys.has(x);
       });
@@ -326,13 +329,14 @@ var IndexMatcher = (function () {
      * @param  {Object} value
      * @return {Promise}
      */
+
   }, {
     key: 'execLogicalQuery',
     value: function execLogicalQuery(key, query) {
       var _this4 = this;
 
       if (key[0] === '$') {
-        (0, _invariant2['default'])(QUERY_LOGIC_OPS_IMPL[key], 'execLogicalQuery(...): logical operator %s is not supported', key);
+        (0, _invariant2.default)(QUERY_LOGIC_OPS_IMPL[key], 'execLogicalQuery(...): logical operator %s is not supported', key);
         return QUERY_LOGIC_OPS_IMPL[key](this, key, query);
       }
 
@@ -352,6 +356,7 @@ var IndexMatcher = (function () {
      * @param  {Object} query
      * @return {Array}
      */
+
   }, {
     key: 'execCompareQuery',
     value: function execCompareQuery(index, query) {
@@ -363,7 +368,7 @@ var IndexMatcher = (function () {
           return _makeMatchResult({ exclude: index.getAll() });
         }
       }
-      if (_Utils2['default'].isPrimitiveType(query)) {
+      if (_Utils2.default.isPrimitiveType(query)) {
         return _makeMatchResult({ include: index.getMatching(query) });
       }
       if (query instanceof RegExp) {
@@ -371,11 +376,11 @@ var IndexMatcher = (function () {
       }
 
       // Clone for modify in processors
-      query = _EJSON2['default'].clone(query);
+      query = _EJSON2.default.clone(query);
 
       // Combinable
       var basic = _makeMatchResult();
-      var keys = (0, _lodashObjectKeys2['default'])(query);
+      var keys = (0, _keys3.default)(query);
       var dollarFirstKeys = keys.filter(function (k) {
         return k && k[0] === '$';
       });
@@ -385,11 +390,11 @@ var IndexMatcher = (function () {
       var isOnlyDollar = !pathKeys.length && dollarFirstKeys.length;
       var isMixed = pathKeys.length && dollarFirstKeys.length;
 
-      (0, _invariant2['default'])(!isMixed, 'execCompareQuery(...): operators $... can\'t be mixed with normal fields');
+      (0, _invariant2.default)(!isMixed, 'execCompareQuery(...): operators $... can\'t be mixed with normal fields');
 
       if (isOnlyDollar && dollarFirstKeys.length) {
-        (0, _lodashCollectionEach2['default'])(dollarFirstKeys, function (key) {
-          (0, _invariant2['default'])(QUERY_COMP_OPS_IMPL[key], 'execCompareQuery(...): operation %s not supported', key);
+        (0, _each3.default)(dollarFirstKeys, function (key) {
+          (0, _invariant2.default)(QUERY_COMP_OPS_IMPL[key], 'execCompareQuery(...): operation %s not supported', key);
           if (query[key] !== undefined) {
             QUERY_COMP_OPS_IMPL[key](index, query[key], basic, query);
           }
@@ -405,5 +410,4 @@ var IndexMatcher = (function () {
   return IndexMatcher;
 })();
 
-exports.IndexMatcher = IndexMatcher;
-exports['default'] = IndexMatcher;
+exports.default = IndexMatcher;

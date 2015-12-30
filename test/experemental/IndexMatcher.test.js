@@ -3,7 +3,6 @@ import IndexMatcher, * as IndexMatcherInternals from '../lib/IndexMatcher';
 import EJSON from '../lib/EJSON';
 import Collection from '../lib/Collection';
 import Index from '../lib/Index';
-import async from 'async';
 import chai, {except, assert} from 'chai';
 chai.use(require('chai-as-promised'));
 chai.should();

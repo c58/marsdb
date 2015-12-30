@@ -1,57 +1,163 @@
 'use strict';
 
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.default = Queue;
+/**
+ * @return {Object}
+ */
+var LocalPromise = typeof Promise !== 'undefined' ? Promise : function () {
+  return {
+    then: function then() {
+      throw new Error('Queue.configure() before use Queue');
+    }
+  };
+};
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
-
-var _async = require('async');
+var noop = function noop() {};
 
 /**
- * Queue that resolves a Promise when task
- * is done or rejected if errored.
+ * @param {*} value
+ * @returns {LocalPromise}
  */
-
-var PromiseQueue = (function () {
-  function PromiseQueue() {
-    var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-
-    _classCallCheck(this, PromiseQueue);
-
-    this._queue = (0, _async.queue)(this._operationWorker.bind(this), options.concurrency || 1);
+var resolveWith = function resolveWith(value) {
+  if (value && typeof value.then === 'function') {
+    return value;
   }
 
-  _createClass(PromiseQueue, [{
-    key: 'push',
-    value: function push(task) {
-      var _this = this;
+  return new LocalPromise(function (resolve) {
+    resolve(value);
+  });
+};
 
-      var priority = arguments.length <= 1 || arguments[1] === undefined ? 1 : arguments[1];
+/**
+ * It limits concurrently executed promises
+ *
+ * @param {Number} [maxPendingPromises=Infinity] max number of concurrently executed promises
+ * @param {Number} [maxQueuedPromises=Infinity]  max number of queued promises
+ * @constructor
+ *
+ * @example
+ *
+ * var queue = new Queue(1);
+ *
+ * queue.add(function () {
+ *     // resolve of this promise will resume next request
+ *     return downloadTarballFromGithub(url, file);
+ * })
+ * .then(function (file) {
+ *     doStuffWith(file);
+ * });
+ *
+ * queue.add(function () {
+ *     return downloadTarballFromGithub(url, file);
+ * })
+ * // This request will be paused
+ * .then(function (file) {
+ *     doStuffWith(file);
+ * });
+ */
+function Queue(maxPendingPromises, maxQueuedPromises) {
+  this.pendingPromises = 0;
+  this.maxPendingPromises = typeof maxPendingPromises !== 'undefined' ? maxPendingPromises : Infinity;
+  this.maxQueuedPromises = typeof maxQueuedPromises !== 'undefined' ? maxQueuedPromises : Infinity;
+  this.queue = [];
+}
 
-      return new Promise(function (resolve, reject) {
-        _this._queue.push(function () {
-          return new Promise(task);
-        }, function (err) {
-          if (err) {
-            reject(err);
-          } else {
-            resolve();
-          }
-        });
-      });
+/**
+ * Defines promise promiseFactory
+ * @param {Function} GlobalPromise
+ */
+Queue.configure = function (GlobalPromise) {
+  LocalPromise = GlobalPromise;
+};
+
+/**
+ * @param {Function} promiseGenerator
+ * @return {LocalPromise}
+ */
+Queue.prototype.add = function (promiseGenerator) {
+  var self = this;
+  return new LocalPromise(function (resolve, reject, notify) {
+    // Do not queue to much promises
+    if (self.queue.length >= self.maxQueuedPromises) {
+      reject(new Error('Queue limit reached'));
+      return;
     }
-  }, {
-    key: '_operationWorker',
-    value: function _operationWorker(task, next) {
-      task().then(next, next);
-    }
-  }]);
 
-  return PromiseQueue;
-})();
+    // Add to queue
+    self.queue.push({
+      promiseGenerator: promiseGenerator,
+      resolve: resolve,
+      reject: reject,
+      notify: notify || noop
+    });
 
-exports.PromiseQueue = PromiseQueue;
-exports['default'] = PromiseQueue;
+    self._dequeue();
+  });
+};
+
+/**
+ * Number of simultaneously running promises (which are resolving)
+ *
+ * @return {number}
+ */
+Queue.prototype.getPendingLength = function () {
+  return this.pendingPromises;
+};
+
+/**
+ * Number of queued promises (which are waiting)
+ *
+ * @return {number}
+ */
+Queue.prototype.getQueueLength = function () {
+  return this.queue.length;
+};
+
+/**
+ * @returns {boolean} true if first item removed from queue
+ * @private
+ */
+Queue.prototype._dequeue = function () {
+  var self = this;
+  if (this.pendingPromises >= this.maxPendingPromises) {
+    return false;
+  }
+
+  // Remove from queue
+  var item = this.queue.shift();
+  if (!item) {
+    return false;
+  }
+
+  try {
+    this.pendingPromises++;
+
+    resolveWith(item.promiseGenerator())
+    // Forward all stuff
+    .then(function (value) {
+      // It is not pending now
+      self.pendingPromises--;
+      // It should pass values
+      item.resolve(value);
+      self._dequeue();
+    }, function (err) {
+      // It is not pending now
+      self.pendingPromises--;
+      // It should not mask errors
+      item.reject(err);
+      self._dequeue();
+    }, function (message) {
+      // It should pass notifications
+      item.notify(message);
+    });
+  } catch (err) {
+    self.pendingPromises--;
+    item.reject(err);
+    self._dequeue();
+  }
+
+  return true;
+};

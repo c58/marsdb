@@ -1,18 +1,18 @@
+'use strict';
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 /**
  * Based on Meteor's Base64 package.
  * Rewrite with ES6 and better formated for passing
  * linter
  */
-'use strict';
-
-Object.defineProperty(exports, '__esModule', {
-  value: true
-});
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
-
 var BASE_64_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 var BASE_64_VALS = {};
 
@@ -22,11 +22,11 @@ var BASE_64_VALS = {};
   }
 })();
 
-var getChar = function (val) {
+var getChar = function getChar(val) {
   return BASE_64_CHARS.charAt(val);
 };
 
-var getVal = function (ch) {
+var getVal = function getVal(ch) {
   if (ch === '=') {
     return -1;
   }
@@ -35,7 +35,7 @@ var getVal = function (ch) {
 
 // Base 64 encoding
 
-var Base64 = (function () {
+var Base64 = exports.Base64 = (function () {
   function Base64() {
     _classCallCheck(this, Base64);
   }
@@ -168,5 +168,4 @@ var Base64 = (function () {
   return Base64;
 })();
 
-exports.Base64 = Base64;
-exports['default'] = new Base64();
+exports.default = new Base64();

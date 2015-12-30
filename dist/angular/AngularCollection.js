@@ -1,20 +1,21 @@
 'use strict';
 
-Object.defineProperty(exports, '__esModule', {
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+exports.AngularCollection = undefined;
 
 var _AngularCursorObservable = require('./AngularCursorObservable');
 
 var _AngularCursorObservable2 = _interopRequireDefault(_AngularCursorObservable);
 
-var Collection = typeof window !== 'undefined' && window.Mars ? window.Mars.Collection : require('../Collection')['default'];
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Collection = typeof window !== 'undefined' && window.Mars ? window.Mars.Collection : require('../Collection').default;
 
 /**
  * Collection that just delegate all methods to an
@@ -27,7 +28,7 @@ var Collection = typeof window !== 'undefined' && window.Mars ? window.Mars.Coll
  * of the object.
  */
 
-var AngularCollection = (function () {
+var AngularCollection = exports.AngularCollection = (function () {
   function AngularCollection(name, options, $q) {
     _classCallCheck(this, AngularCollection);
 
@@ -73,7 +74,7 @@ var AngularCollection = (function () {
   }, {
     key: 'find',
     value: function find(query) {
-      return new _AngularCursorObservable2['default'](this, query);
+      return new _AngularCursorObservable2.default(this, query);
     }
   }, {
     key: 'findOne',
@@ -98,7 +99,7 @@ var AngularCollection = (function () {
     }
   }, {
     key: 'modelName',
-    get: function () {
+    get: function get() {
       return this._collection.modelName;
     }
   }]);
@@ -106,5 +107,4 @@ var AngularCollection = (function () {
   return AngularCollection;
 })();
 
-exports.AngularCollection = AngularCollection;
-exports['default'] = AngularCollection;
+exports.default = AngularCollection;

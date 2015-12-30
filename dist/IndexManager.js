@@ -1,22 +1,23 @@
 'use strict';
 
-Object.defineProperty(exports, '__esModule', {
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.IndexManager = undefined;
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _keys2 = require('lodash/object/keys');
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
-
-var _lodashObjectKeys = require('lodash/object/keys');
-
-var _lodashObjectKeys2 = _interopRequireDefault(_lodashObjectKeys);
+var _keys3 = _interopRequireDefault(_keys2);
 
 var _invariant = require('invariant');
 
 var _invariant2 = _interopRequireDefault(_invariant);
+
+var _PromiseQueue = require('./PromiseQueue');
+
+var _PromiseQueue2 = _interopRequireDefault(_PromiseQueue);
 
 var _CollectionIndex = require('./CollectionIndex');
 
@@ -26,9 +27,9 @@ var _DocumentRetriver = require('./DocumentRetriver');
 
 var _DocumentRetriver2 = _interopRequireDefault(_DocumentRetriver);
 
-var _PromiseQueue = require('./PromiseQueue');
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var _PromiseQueue2 = _interopRequireDefault(_PromiseQueue);
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 /**
  * Manager for controlling a list of indexes
@@ -37,7 +38,7 @@ var _PromiseQueue2 = _interopRequireDefault(_PromiseQueue);
  * By default it creates an index for `_id` field.
  */
 
-var IndexManager = (function () {
+var IndexManager = exports.IndexManager = (function () {
   function IndexManager(db) {
     var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
@@ -45,9 +46,7 @@ var IndexManager = (function () {
 
     this.db = db;
     this.indexes = {};
-    this._queue = new _PromiseQueue2['default']({
-      concurrency: options.concurrency || 2
-    });
+    this._queue = new _PromiseQueue2.default(options.concurrency || 2);
 
     // By default ensure index by _id field
     this.ensureIndex({
@@ -73,11 +72,11 @@ var IndexManager = (function () {
   _createClass(IndexManager, [{
     key: 'ensureIndex',
     value: function ensureIndex(options) {
-      (0, _invariant2['default'])(options && options.fieldName, 'You must specify a fieldName in options object');
+      (0, _invariant2.default)(options && options.fieldName, 'You must specify a fieldName in options object');
 
       var key = options.fieldName;
       if (!this.indexes[key]) {
-        this.indexes[key] = new _CollectionIndex2['default'](options);
+        this.indexes[key] = new _CollectionIndex2.default(options);
         return this.buildIndex(key);
       } else if (this.indexes[key].buildPromise) {
         return this.indexes[key].buildPromise;
@@ -95,17 +94,18 @@ var IndexManager = (function () {
      * @param  {String} key
      * @return {Promise}
      */
+
   }, {
     key: 'buildIndex',
     value: function buildIndex(key) {
       var _this = this;
 
-      (0, _invariant2['default'])(this.indexes[key], 'Index with key `%s` does not ensured yet', key);
+      (0, _invariant2.default)(this.indexes[key], 'Index with key `%s` does not ensured yet', key);
 
-      var cleanup = function () {
+      var cleanup = function cleanup() {
         return _this.indexes[key].buildPromise = null;
       };
-      var buildPromise = this._queue.push(this._doBuildIndex.bind(this, key), 10).then(cleanup, cleanup);
+      var buildPromise = this._queue.add(this._doBuildIndex.bind(this, key)).then(cleanup, cleanup);
 
       this.indexes[key].buildPromise = buildPromise;
       return buildPromise;
@@ -117,12 +117,13 @@ var IndexManager = (function () {
      * when all indexes is successfully built.
      * @return {Promise}
      */
+
   }, {
     key: 'buildAllIndexes',
     value: function buildAllIndexes() {
       var _this2 = this;
 
-      return Promise.all((0, _lodashObjectKeys2['default'])(this.indexes).map(function (k) {
+      return Promise.all((0, _keys3.default)(this.indexes).map(function (k) {
         return _this2.ensureIndex({
           fieldName: k,
           forceRebuild: true
@@ -135,15 +136,15 @@ var IndexManager = (function () {
      * @param  {String} key
      * @return {Promise}
      */
+
   }, {
     key: 'removeIndex',
     value: function removeIndex(key) {
       var _this3 = this;
 
-      return this._queue.push(function (resolve, reject) {
+      return this._queue.add(function () {
         delete _this3.indexes[key];
-        resolve();
-      }, 10);
+      });
     }
 
     /**
@@ -151,27 +152,27 @@ var IndexManager = (function () {
      * @param  {Object} doc
      * @return {Promise}
      */
+
   }, {
     key: 'indexDocument',
     value: function indexDocument(doc) {
       var _this4 = this;
 
-      return this._queue.push(function (resolve, reject) {
-        var keys = (0, _lodashObjectKeys2['default'])(_this4.indexes);
+      return this._queue.add(function () {
+        var keys = (0, _keys3.default)(_this4.indexes);
         var failingIndex = null;
         try {
           keys.forEach(function (k, i) {
             failingIndex = i;
             _this4.indexes[k].insert(doc);
           });
-          resolve();
         } catch (e) {
           keys.slice(0, failingIndex).forEach(function (k) {
             _this4.indexes[k].remove(doc);
           });
-          reject(e);
+          throw e;
         }
-      }, 1);
+      });
     }
 
     /**
@@ -181,27 +182,27 @@ var IndexManager = (function () {
      * @param  {Object} newDoc
      * @return {Promise}
      */
+
   }, {
     key: 'reindexDocument',
     value: function reindexDocument(oldDoc, newDoc) {
       var _this5 = this;
 
-      return this._queue.push(function (resolve, reject) {
-        var keys = (0, _lodashObjectKeys2['default'])(_this5.indexes);
+      return this._queue.add(function () {
+        var keys = (0, _keys3.default)(_this5.indexes);
         var failingIndex = null;
         try {
           keys.forEach(function (k, i) {
             failingIndex = i;
             _this5.indexes[k].update(oldDoc, newDoc);
           });
-          resolve();
         } catch (e) {
           keys.slice(0, failingIndex).forEach(function (k) {
             _this5.indexes[k].revertUpdate(oldDoc, newDoc);
           });
-          reject(e);
+          throw e;
         }
-      }, 1);
+      });
     }
 
     /**
@@ -209,18 +210,18 @@ var IndexManager = (function () {
      * @param  {Object} doc
      * @return {Promise}
      */
+
   }, {
     key: 'deindexDocument',
     value: function deindexDocument(doc) {
       var _this6 = this;
 
-      return this._queue.push(function (resolve, reject) {
-        var keys = (0, _lodashObjectKeys2['default'])(_this6.indexes);
+      return this._queue.add(function () {
+        var keys = (0, _keys3.default)(_this6.indexes);
         keys.forEach(function (k) {
           _this6.indexes[k].remove(doc);
         });
-        resolve();
-      }, 1);
+      });
     }
 
     /**
@@ -228,16 +229,17 @@ var IndexManager = (function () {
      * @param  {String} key
      * @return {Promise}
      */
+
   }, {
     key: '_doBuildIndex',
-    value: function _doBuildIndex(key, resolve, reject) {
+    value: function _doBuildIndex(key) {
       // Get and reset index
       var index = this.indexes[key];
       index.reset();
 
       // Loop through all doucments in the storage
       var errors = [];
-      new _DocumentRetriver2['default'](this.db).retriveAll().then(function (docs) {
+      return new _DocumentRetriver2.default(this.db).retriveAll().then(function (docs) {
         docs.forEach(function (doc) {
           try {
             index.insert(doc);
@@ -246,10 +248,8 @@ var IndexManager = (function () {
           }
         });
 
-        if (errors.length) {
-          resolve();
-        } else {
-          reject(errors);
+        if (errors.length > 0) {
+          throw new Error('Index build failed with errors: ', errors);
         }
       });
     }
@@ -258,5 +258,4 @@ var IndexManager = (function () {
   return IndexManager;
 })();
 
-exports.IndexManager = IndexManager;
-exports['default'] = IndexManager;
+exports.default = IndexManager;

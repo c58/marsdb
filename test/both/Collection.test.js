@@ -1,6 +1,5 @@
 import {Document} from '../../lib/Document';
 import Collection from '../../lib/Collection';
-import async from 'async';
 import chai, {expect} from 'chai';
 chai.use(require('chai-as-promised'));
 chai.should();

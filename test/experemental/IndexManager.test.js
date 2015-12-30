@@ -1,7 +1,6 @@
 import Collection from '../lib/Collection';
 import IndexManager from '../lib/IndexManager';
 import Index from '../lib/Index';
-import async from 'async';
 import chai from 'chai';
 chai.use(require('chai-as-promised'));
 chai.should();

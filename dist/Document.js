@@ -1,8 +1,9 @@
 'use strict';
 
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.MongoTypeComp = undefined;
 exports.Document = Document;
 exports.selectorIsId = selectorIsId;
 exports.selectorIsIdPerhapsAsObject = selectorIsIdPerhapsAsObject;
@@ -12,27 +13,25 @@ exports.isIndexable = isIndexable;
 exports.isOperatorObject = isOperatorObject;
 exports.isNumericKey = isNumericKey;
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+var _assign2 = require('lodash/object/assign');
 
-var _lodashObjectAssign = require('lodash/object/assign');
+var _assign3 = _interopRequireDefault(_assign2);
 
-var _lodashObjectAssign2 = _interopRequireDefault(_lodashObjectAssign);
+var _isArray2 = require('lodash/lang/isArray');
 
-var _lodashLangIsArray = require('lodash/lang/isArray');
+var _isArray3 = _interopRequireDefault(_isArray2);
 
-var _lodashLangIsArray2 = _interopRequireDefault(_lodashLangIsArray);
+var _isString2 = require('lodash/lang/isString');
 
-var _lodashLangIsString = require('lodash/lang/isString');
+var _isString3 = _interopRequireDefault(_isString2);
 
-var _lodashLangIsString2 = _interopRequireDefault(_lodashLangIsString);
+var _each2 = require('lodash/collection/each');
 
-var _lodashCollectionEach = require('lodash/collection/each');
+var _each3 = _interopRequireDefault(_each2);
 
-var _lodashCollectionEach2 = _interopRequireDefault(_lodashCollectionEach);
+var _size2 = require('lodash/collection/size');
 
-var _lodashCollectionSize = require('lodash/collection/size');
-
-var _lodashCollectionSize2 = _interopRequireDefault(_lodashCollectionSize);
+var _size3 = _interopRequireDefault(_size2);
 
 var _invariant = require('invariant');
 
@@ -42,49 +41,52 @@ var _EJSON = require('./EJSON');
 
 var _EJSON2 = _interopRequireDefault(_EJSON);
 
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
+
 /*
  * Instance of a model (Document)
  * It delegates some useful methods to a given
  * collection object(`remove`, `update`).
  */
-
 function Document(db) {
   var _this = this;
 
   var raw = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
-  (0, _invariant2['default'])(db, 'Document(...): you must give a collection for the document');
+  (0, _invariant2.default)(db, 'Document(...): you must give a collection for the document');
 
   // Ensure raw object
-  raw = (0, _lodashLangIsString2['default'])(raw) ? _EJSON2['default'].parse(raw) : raw;
+  raw = (0, _isString3.default)(raw) ? _EJSON2.default.parse(raw) : raw;
 
   // Define internal methods
   Object.defineProperty(this, 'remove', {
-    value: function () {
-      (0, _invariant2['default'])(_this._id, 'remove(...): document must have an _id for remove');
+    value: function value() {
+      (0, _invariant2.default)(_this._id, 'remove(...): document must have an _id for remove');
       return db.remove({ _id: self._id });
     },
     writable: false
   });
 
   Object.defineProperty(this, 'update', {
-    value: function (modifier) {
-      (0, _invariant2['default'])(this._id, 'update(...): document must have an _id for update');
+    value: function value(modifier) {
+      (0, _invariant2.default)(this._id, 'update(...): document must have an _id for update');
       return db.update({ _id: self._id }, modifier);
     },
     writable: false
   });
 
   Object.defineProperty(this, 'copy', {
-    value: function () {
-      return new Document(db, _EJSON2['default'].clone(_this));
+    value: function value() {
+      return new Document(db, _EJSON2.default.clone(_this));
     },
     writable: false
   });
 
   Object.defineProperty(this, 'serialize', {
-    value: function () {
-      return _EJSON2['default'].stringify(_this);
+    value: function value() {
+      return _EJSON2.default.stringify(_this);
     },
     writable: false
   });
@@ -98,10 +100,10 @@ function Document(db) {
   }
 
   // Move given raw object to a Document
-  (0, _lodashObjectAssign2['default'])(this, raw);
+  (0, _assign3.default)(this, raw);
 }
 
-exports['default'] = Document;
+exports.default = Document;
 
 /**
  * Return true if given selector is an
@@ -115,21 +117,19 @@ function selectorIsId(selector) {
 }
 
 function selectorIsIdPerhapsAsObject(selector) {
-  return selectorIsId(selector) || selector && typeof selector === 'object' && selector._id && selectorIsId(selector._id) && (0, _lodashCollectionSize2['default'])(selector) === 1;
+  return selectorIsId(selector) || selector && (typeof selector === 'undefined' ? 'undefined' : _typeof(selector)) === 'object' && selector._id && selectorIsId(selector._id) && (0, _size3.default)(selector) === 1;
 }
 
 // Like _isArray, but doesn't regard polyfilled Uint8Arrays on old browsers as
 // arrays.
 // XXX maybe this should be EJSON.isArray
-
 function isArray(x) {
-  return (0, _lodashLangIsArray2['default'])(x) && !_EJSON2['default'].isBinary(x);
+  return (0, _isArray3.default)(x) && !_EJSON2.default.isBinary(x);
 }
 
 // XXX maybe this should be EJSON.isObject, though EJSON doesn't know about
 // RegExp
 // XXX note that _type(undefined) === 3!!!!
-
 function isPlainObject(x) {
   return x && MongoTypeComp._type(x) === 3;
 }
@@ -141,14 +141,13 @@ function isIndexable(x) {
 // Returns true if this is an object with at least one key and all keys begin
 // with $.  Unless inconsistentOK is set, throws if some keys begin with $ and
 // others don't.
-
 function isOperatorObject(valueSelector, inconsistentOK) {
   if (!isPlainObject(valueSelector)) {
     return false;
   }
 
   var theseAreOperators = undefined;
-  (0, _lodashCollectionEach2['default'])(valueSelector, function (value, selKey) {
+  (0, _each3.default)(valueSelector, function (value, selKey) {
     var thisIsOperator = selKey.substr(0, 1) === '$';
     if (theseAreOperators === undefined) {
       theseAreOperators = thisIsOperator;
@@ -163,17 +162,16 @@ function isOperatorObject(valueSelector, inconsistentOK) {
 }
 
 // string can be converted to integer
-
 function isNumericKey(s) {
   return (/^[0-9]+$/.test(s)
   );
 }
 
 // helpers used by compiled selector code
-var MongoTypeComp = {
+var MongoTypeComp = exports.MongoTypeComp = {
   // XXX for _all and _in, consider building 'inquery' at compile time..
 
-  _type: function (v) {
+  _type: function _type(v) {
     if (typeof v === 'number') {
       return 1;
     } else if (typeof v === 'string') {
@@ -191,7 +189,7 @@ var MongoTypeComp = {
       return 13;
     } else if (v instanceof Date) {
       return 9;
-    } else if (_EJSON2['default'].isBinary(v)) {
+    } else if (_EJSON2.default.isBinary(v)) {
       return 5;
     }
     return 3; // object
@@ -206,13 +204,13 @@ var MongoTypeComp = {
   },
 
   // deep equality test: use for literal document and array matches
-  _equal: function (a, b) {
-    return _EJSON2['default'].equals(a, b, { keyOrderSensitive: true });
+  _equal: function _equal(a, b) {
+    return _EJSON2.default.equals(a, b, { keyOrderSensitive: true });
   },
 
   // maps a type code to a value that can be used to sort values of
   // different types
-  _typeorder: function (t) {
+  _typeorder: function _typeorder(t) {
     // http://www.mongodb.org/display/DOCS/What+is+the+Compare+Order+for+BSON+Types
     // XXX what is the correct sort position for Javascript code?
     // ('100' in the matrix below)
@@ -243,7 +241,7 @@ var MongoTypeComp = {
   // semantics. (as an extension, consider 'undefined' to be less than
   // any other value.) return negative if a is less, positive if b is
   // less, or 0 if equal
-  _cmp: function (a, b) {
+  _cmp: function _cmp(a, b) {
     if (a === undefined) {
       return b === undefined ? 0 : -1;
     }
@@ -288,7 +286,7 @@ var MongoTypeComp = {
     if (ta === 3) {
       // Object
       // this could be much more efficient in the expected case ...
-      var to_array = function (obj) {
+      var to_array = function to_array(obj) {
         var ret = [];
         for (var key in obj) {
           ret.push(key);
@@ -360,4 +358,3 @@ var MongoTypeComp = {
     throw Error('Unknown type to sort');
   }
 };
-exports.MongoTypeComp = MongoTypeComp;

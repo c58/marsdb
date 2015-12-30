@@ -1,42 +1,33 @@
 'use strict';
 
-Object.defineProperty(exports, '__esModule', {
-  value: true
-});
-
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-
-var _get = function get(_x4, _x5, _x6) { var _again = true; _function: while (_again) { var object = _x4, property = _x5, receiver = _x6; desc = parent = getter = undefined; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x4 = parent; _x5 = property; _x6 = receiver; _again = true; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
 var _PIPELINE_PROCESSORS;
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.Cursor = exports.PIPELINE_PROCESSORS = exports.PIPELINE_TYPE = undefined;
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+var _each2 = require('lodash/collection/each');
 
-function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+var _each3 = _interopRequireDefault(_each2);
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+var _isObject2 = require('lodash/lang/isObject');
 
-var _lodashCollectionEach = require('lodash/collection/each');
+var _isObject3 = _interopRequireDefault(_isObject2);
 
-var _lodashCollectionEach2 = _interopRequireDefault(_lodashCollectionEach);
+var _isArray2 = require('lodash/lang/isArray');
 
-var _lodashLangIsObject = require('lodash/lang/isObject');
+var _isArray3 = _interopRequireDefault(_isArray2);
 
-var _lodashLangIsObject2 = _interopRequireDefault(_lodashLangIsObject);
+var _isEmpty2 = require('lodash/lang/isEmpty');
 
-var _lodashLangIsArray = require('lodash/lang/isArray');
+var _isEmpty3 = _interopRequireDefault(_isEmpty2);
 
-var _lodashLangIsArray2 = _interopRequireDefault(_lodashLangIsArray);
+var _eventemitter = require('eventemitter3');
 
-var _lodashLangIsEmpty = require('lodash/lang/isEmpty');
-
-var _lodashLangIsEmpty2 = _interopRequireDefault(_lodashLangIsEmpty);
-
-var _eventemitter3 = require('eventemitter3');
-
-var _eventemitter32 = _interopRequireDefault(_eventemitter3);
+var _eventemitter2 = _interopRequireDefault(_eventemitter);
 
 var _invariant = require('invariant');
 
@@ -58,11 +49,23 @@ var _DocumentSorter = require('./DocumentSorter');
 
 var _DocumentSorter2 = _interopRequireDefault(_DocumentSorter);
 
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 // Maker used for stopping pipeline processing
 var PIPLEINE_STOP_MARKER = {};
 
 // Pipeline processors definition
-var PIPELINE_TYPE = (0, _keymirror2['default'])({
+var PIPELINE_TYPE = exports.PIPELINE_TYPE = (0, _keymirror2.default)({
   Filter: null,
   Sort: null,
   Map: null,
@@ -74,8 +77,7 @@ var PIPELINE_TYPE = (0, _keymirror2['default'])({
   IfNotEmpty: null
 });
 
-exports.PIPELINE_TYPE = PIPELINE_TYPE;
-var PIPELINE_PROCESSORS = (_PIPELINE_PROCESSORS = {}, _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.Filter, function (docs, pipeObj) {
+var PIPELINE_PROCESSORS = exports.PIPELINE_PROCESSORS = (_PIPELINE_PROCESSORS = {}, _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.Filter, function (docs, pipeObj) {
   return docs.filter(pipeObj.value);
 }), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.Sort, function (docs, pipeObj) {
   return docs.sort(pipeObj.value);
@@ -86,13 +88,13 @@ var PIPELINE_PROCESSORS = (_PIPELINE_PROCESSORS = {}, _defineProperty(_PIPELINE_
 }), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.Reduce, function (docs, pipeObj) {
   return docs.reduce(pipeObj.value, pipeObj.args[0]);
 }), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.Join, function (docs, pipeObj, cursor) {
-  if ((0, _lodashLangIsArray2['default'])(docs)) {
+  if ((0, _isArray3.default)(docs)) {
     return PIPELINE_PROCESSORS[PIPELINE_TYPE.JoinEach](docs, pipeObj, cursor);
   } else {
     return PIPELINE_PROCESSORS[PIPELINE_TYPE.JoinAll](docs, pipeObj, cursor);
   }
 }), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.JoinEach, function (docs, pipeObj, cursor) {
-  docs = (0, _lodashLangIsArray2['default'])(docs) ? docs : [docs];
+  docs = (0, _isArray3.default)(docs) ? docs : [docs];
   var docsLength = docs.length;
   return Promise.all(docs.map(function (x, i) {
     return PIPELINE_PROCESSORS[PIPELINE_TYPE.JoinAll](x, pipeObj, cursor, i, docsLength);
@@ -104,9 +106,9 @@ var PIPELINE_PROCESSORS = (_PIPELINE_PROCESSORS = {}, _defineProperty(_PIPELINE_
   var updatedFn = cursor._propagateUpdate ? cursor._propagateUpdate.bind(cursor) : function () {};
 
   var res = pipeObj.value(docs, updatedFn, i, len);
-  res = (0, _lodashLangIsArray2['default'])(res) ? res : [res];
+  res = (0, _isArray3.default)(res) ? res : [res];
   res.forEach(function (observeStopper) {
-    if ((0, _lodashLangIsObject2['default'])(observeStopper) && observeStopper.then) {
+    if ((0, _isObject3.default)(observeStopper) && observeStopper.then) {
       if (observeStopper.parent) {
         observeStopper.parent(cursor);
         cursor.once('stopped', observeStopper.stop);
@@ -118,10 +120,9 @@ var PIPELINE_PROCESSORS = (_PIPELINE_PROCESSORS = {}, _defineProperty(_PIPELINE_
     return docs;
   });
 }), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.IfNotEmpty, function (docs) {
-  return (0, _lodashLangIsEmpty2['default'])(docs) ? PIPLEINE_STOP_MARKER : docs;
+  return (0, _isEmpty3.default)(docs) ? PIPLEINE_STOP_MARKER : docs;
 }), _PIPELINE_PROCESSORS);
 
-exports.PIPELINE_PROCESSORS = PIPELINE_PROCESSORS;
 /**
  * Class for storing information about query
  * and executing it. It also have a sugar like
@@ -135,19 +136,21 @@ var Cursor = (function (_EventEmitter) {
   function Cursor(db, query) {
     _classCallCheck(this, Cursor);
 
-    _get(Object.getPrototypeOf(Cursor.prototype), 'constructor', this).call(this);
-    this.db = db;
-    this._query = query;
-    this._pipeline = [];
-    this._executing = null;
-    this._ensureMatcherSorter();
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Cursor).call(this));
+
+    _this.db = db;
+    _this._query = query;
+    _this._pipeline = [];
+    _this._executing = null;
+    _this._ensureMatcherSorter();
+    return _this;
   }
 
   _createClass(Cursor, [{
     key: 'skip',
     value: function skip(_skip) {
       this._ensureNotExecuting();
-      (0, _invariant2['default'])(_skip >= 0 || typeof _skip === 'undefined', 'skip(...): skip must be a positive number');
+      (0, _invariant2.default)(_skip >= 0 || typeof _skip === 'undefined', 'skip(...): skip must be a positive number');
 
       this._skip = _skip;
       return this;
@@ -156,7 +159,7 @@ var Cursor = (function (_EventEmitter) {
     key: 'limit',
     value: function limit(_limit) {
       this._ensureNotExecuting();
-      (0, _invariant2['default'])(_limit >= 0 || typeof _limit === 'undefined', 'limit(...): limit must be a positive number');
+      (0, _invariant2.default)(_limit >= 0 || typeof _limit === 'undefined', 'limit(...): limit must be a positive number');
 
       this._limit = _limit;
       return this;
@@ -173,7 +176,7 @@ var Cursor = (function (_EventEmitter) {
     key: 'sort',
     value: function sort(sortObj) {
       this._ensureNotExecuting();
-      (0, _invariant2['default'])(typeof sortObj === 'object' || typeof sortObj === 'undefined' || Array.isArray(sortObj), 'sort(...): argument must be an object');
+      (0, _invariant2.default)((typeof sortObj === 'undefined' ? 'undefined' : _typeof(sortObj)) === 'object' || typeof sortObj === 'undefined' || Array.isArray(sortObj), 'sort(...): argument must be an object');
 
       this._sort = sortObj;
       this._ensureMatcherSorter();
@@ -182,7 +185,7 @@ var Cursor = (function (_EventEmitter) {
   }, {
     key: 'sortFunc',
     value: function sortFunc(sortFn) {
-      (0, _invariant2['default'])(typeof sortFn === 'function', 'sortFunc(...): argument must be a function');
+      (0, _invariant2.default)(typeof sortFn === 'function', 'sortFunc(...): argument must be a function');
 
       this.addPipeline(PIPELINE_TYPE.Sort, sortFn);
       return this;
@@ -190,7 +193,7 @@ var Cursor = (function (_EventEmitter) {
   }, {
     key: 'filter',
     value: function filter(filterFn) {
-      (0, _invariant2['default'])(typeof filterFn === 'function', 'filter(...): argument must be a function');
+      (0, _invariant2.default)(typeof filterFn === 'function', 'filter(...): argument must be a function');
 
       this.addPipeline(PIPELINE_TYPE.Filter, filterFn);
       return this;
@@ -198,7 +201,7 @@ var Cursor = (function (_EventEmitter) {
   }, {
     key: 'map',
     value: function map(mapperFn) {
-      (0, _invariant2['default'])(typeof mapperFn === 'function', 'map(...): mapper must be a function');
+      (0, _invariant2.default)(typeof mapperFn === 'function', 'map(...): mapper must be a function');
 
       this.addPipeline(PIPELINE_TYPE.Map, mapperFn);
       return this;
@@ -206,7 +209,7 @@ var Cursor = (function (_EventEmitter) {
   }, {
     key: 'reduce',
     value: function reduce(reduceFn, initial) {
-      (0, _invariant2['default'])(typeof reduceFn === 'function', 'reduce(...): reducer argument must be a function');
+      (0, _invariant2.default)(typeof reduceFn === 'function', 'reduce(...): reducer argument must be a function');
 
       this.addPipeline(PIPELINE_TYPE.Reduce, reduceFn, initial);
       return this;
@@ -214,7 +217,7 @@ var Cursor = (function (_EventEmitter) {
   }, {
     key: 'aggregate',
     value: function aggregate(aggrFn) {
-      (0, _invariant2['default'])(typeof aggrFn === 'function', 'aggregate(...): aggregator must be a function');
+      (0, _invariant2.default)(typeof aggrFn === 'function', 'aggregate(...): aggregator must be a function');
 
       this.addPipeline(PIPELINE_TYPE.Aggregate, aggrFn);
       return this;
@@ -222,7 +225,7 @@ var Cursor = (function (_EventEmitter) {
   }, {
     key: 'join',
     value: function join(joinFn) {
-      (0, _invariant2['default'])(typeof joinFn === 'function', 'join(...): argument must be a function');
+      (0, _invariant2.default)(typeof joinFn === 'function', 'join(...): argument must be a function');
 
       this.addPipeline(PIPELINE_TYPE.Join, joinFn);
       return this;
@@ -230,7 +233,7 @@ var Cursor = (function (_EventEmitter) {
   }, {
     key: 'joinEach',
     value: function joinEach(joinFn) {
-      (0, _invariant2['default'])(typeof joinFn === 'function', 'joinEach(...): argument must be a function');
+      (0, _invariant2.default)(typeof joinFn === 'function', 'joinEach(...): argument must be a function');
 
       this.addPipeline(PIPELINE_TYPE.JoinEach, joinFn);
       return this;
@@ -238,7 +241,7 @@ var Cursor = (function (_EventEmitter) {
   }, {
     key: 'joinAll',
     value: function joinAll(joinFn) {
-      (0, _invariant2['default'])(typeof joinFn === 'function', 'joinAll(...): argument must be a function');
+      (0, _invariant2.default)(typeof joinFn === 'function', 'joinAll(...): argument must be a function');
 
       this.addPipeline(PIPELINE_TYPE.JoinAll, joinFn);
       return this;
@@ -253,7 +256,7 @@ var Cursor = (function (_EventEmitter) {
     key: 'addPipeline',
     value: function addPipeline(type, val) {
       this._ensureNotExecuting();
-      (0, _invariant2['default'])(type && PIPELINE_TYPE[type], 'Unknown pipeline processor type %s', type);
+      (0, _invariant2.default)(type && PIPELINE_TYPE[type], 'Unknown pipeline processor type %s', type);
 
       for (var _len = arguments.length, args = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
         args[_key - 2] = arguments[_key];
@@ -269,7 +272,7 @@ var Cursor = (function (_EventEmitter) {
   }, {
     key: 'processPipeline',
     value: function processPipeline(docs) {
-      var _this = this;
+      var _this2 = this;
 
       var i = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
 
@@ -281,7 +284,7 @@ var Cursor = (function (_EventEmitter) {
           if (result === PIPLEINE_STOP_MARKER) {
             return result;
           } else {
-            return _this.processPipeline(result, i + 1);
+            return _this2.processPipeline(result, i + 1);
           }
         });
       }
@@ -296,12 +299,12 @@ var Cursor = (function (_EventEmitter) {
   }, {
     key: 'exec',
     value: function exec() {
-      var _this2 = this;
+      var _this3 = this;
 
       this._executing = this._matchObjects().then(function (docs) {
-        return _this2.processPipeline(docs);
+        return _this3.processPipeline(docs);
       }).then(function (docs) {
-        _this2._executing = null;
+        _this3._executing = null;
         return docs;
       });
 
@@ -310,14 +313,14 @@ var Cursor = (function (_EventEmitter) {
   }, {
     key: 'ids',
     value: function ids() {
-      var _this3 = this;
+      var _this4 = this;
 
       this._executing = this._matchObjects().then(function (docs) {
         return docs.map(function (x) {
           return x._id;
         });
       }).then(function (ids) {
-        _this3._executing = null;
+        _this4._executing = null;
         return ids;
       });
 
@@ -336,18 +339,18 @@ var Cursor = (function (_EventEmitter) {
   }, {
     key: '_matchObjects',
     value: function _matchObjects() {
-      var _this4 = this;
+      var _this5 = this;
 
-      return new _DocumentRetriver2['default'](this.db).retriveForQeury(this._query).then(function (docs) {
+      return new _DocumentRetriver2.default(this.db).retriveForQeury(this._query).then(function (docs) {
         var results = [];
-        var withFastLimit = _this4._limit && !_this4._skip && !_this4._sorter;
+        var withFastLimit = _this5._limit && !_this5._skip && !_this5._sorter;
 
-        (0, _lodashCollectionEach2['default'])(docs, function (d) {
-          var match = _this4._matcher.documentMatches(d);
+        (0, _each3.default)(docs, function (d) {
+          var match = _this5._matcher.documentMatches(d);
           if (match.result) {
             results.push(d);
           }
-          if (withFastLimit && results.length === _this4._limit) {
+          if (withFastLimit && results.length === _this5._limit) {
             return false;
           }
         });
@@ -356,38 +359,38 @@ var Cursor = (function (_EventEmitter) {
           return results;
         }
 
-        if (_this4._sorter) {
-          var comparator = _this4._sorter.getComparator();
+        if (_this5._sorter) {
+          var comparator = _this5._sorter.getComparator();
           results.sort(comparator);
         }
 
-        return _this4.processSkipLimits(results);
+        return _this5.processSkipLimits(results);
       });
     }
   }, {
     key: '_ensureMatcherSorter',
     value: function _ensureMatcherSorter() {
       this._sorter = undefined;
-      this._matcher = new _DocumentMatcher2['default'](this._query || {});
+      this._matcher = new _DocumentMatcher2.default(this._query || {});
 
       if (this._matcher.hasGeoQuery || this._sort) {
-        this._sorter = new _DocumentSorter2['default'](this._sort || [], { matcher: this._matcher });
+        this._sorter = new _DocumentSorter2.default(this._sort || [], { matcher: this._matcher });
       }
     }
   }, {
     key: '_ensureNotExecuting',
     value: function _ensureNotExecuting() {
-      (0, _invariant2['default'])(!this.isExecuting, '_ensureNotExecuting(...): cursor is executing, cursor is immutable!');
+      (0, _invariant2.default)(!this.isExecuting, '_ensureNotExecuting(...): cursor is executing, cursor is immutable!');
     }
   }, {
     key: 'isExecuting',
-    get: function () {
+    get: function get() {
       return !!this._executing;
     }
   }]);
 
   return Cursor;
-})(_eventemitter32['default']);
+})(_eventemitter2.default);
 
 exports.Cursor = Cursor;
-exports['default'] = Cursor;
+exports.default = Cursor;

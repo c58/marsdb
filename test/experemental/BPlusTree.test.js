@@ -1,6 +1,5 @@
 import {compareThings} from '../lib/DocumentMatcher';
 import BPlusTree from '../lib/BPlusTree';
-import async from 'async';
 import validate from './lib/bpvalidator';
 import chai, {except, assert} from 'chai';
 chai.use(require('chai-as-promised'));

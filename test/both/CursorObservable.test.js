@@ -1,6 +1,5 @@
 import Collection from '../../lib/Collection';
 import CursorObservable from '../../lib/CursorObservable';
-import async from 'async';
 import chai, {expect} from 'chai';
 chai.use(require('chai-as-promised'));
 chai.should();

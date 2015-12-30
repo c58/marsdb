@@ -1,34 +1,31 @@
 'use strict';
 
-Object.defineProperty(exports, '__esModule', {
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.DocumentModifier = undefined;
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _isObject2 = require('lodash/lang/isObject');
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+var _isObject3 = _interopRequireDefault(_isObject2);
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+var _assign2 = require('lodash/object/assign');
 
-var _lodashLangIsObject = require('lodash/lang/isObject');
+var _assign3 = _interopRequireDefault(_assign2);
 
-var _lodashLangIsObject2 = _interopRequireDefault(_lodashLangIsObject);
+var _each2 = require('lodash/collection/each');
 
-var _lodashObjectAssign = require('lodash/object/assign');
+var _each3 = _interopRequireDefault(_each2);
 
-var _lodashObjectAssign2 = _interopRequireDefault(_lodashObjectAssign);
+var _all2 = require('lodash/collection/all');
 
-var _lodashCollectionEach = require('lodash/collection/each');
+var _all3 = _interopRequireDefault(_all2);
 
-var _lodashCollectionEach2 = _interopRequireDefault(_lodashCollectionEach);
+var _identity2 = require('lodash/utility/identity');
 
-var _lodashCollectionAll = require('lodash/collection/all');
-
-var _lodashCollectionAll2 = _interopRequireDefault(_lodashCollectionAll);
-
-var _lodashUtilityIdentity = require('lodash/utility/identity');
-
-var _lodashUtilityIdentity2 = _interopRequireDefault(_lodashUtilityIdentity);
+var _identity3 = _interopRequireDefault(_identity2);
 
 var _EJSON = require('./EJSON');
 
@@ -48,14 +45,20 @@ var _DocumentSorter2 = _interopRequireDefault(_DocumentSorter);
 
 var _Document = require('./Document');
 
-var DocumentModifier = (function () {
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var DocumentModifier = exports.DocumentModifier = (function () {
   function DocumentModifier(db) {
     var query = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
     _classCallCheck(this, DocumentModifier);
 
     this.db = db;
-    this._matcher = new _DocumentMatcher2['default'](query);
+    this._matcher = new _DocumentMatcher2.default(query);
     this._query = query;
   }
 
@@ -66,13 +69,13 @@ var DocumentModifier = (function () {
 
       var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
-      return new _DocumentRetriver2['default'](this.db).retriveForQeury(this._query).then(function (docs) {
+      return new _DocumentRetriver2.default(this.db).retriveForQeury(this._query).then(function (docs) {
         var oldResults = [];
         var newResults = [];
-        (0, _lodashCollectionEach2['default'])(docs, function (d) {
+        (0, _each3.default)(docs, function (d) {
           var match = _this._matcher.documentMatches(d);
           if (match.result) {
-            var matchOpts = (0, _lodashObjectAssign2['default'])({ arrayIndices: match.arrayIndices }, options);
+            var matchOpts = (0, _assign3.default)({ arrayIndices: match.arrayIndices }, options);
             var newDoc = _this._modifyDocument(d, mod, matchOpts);
             newResults.push(newDoc);
             oldResults.push(d);
@@ -98,6 +101,7 @@ var DocumentModifier = (function () {
     //   - isInsert is set when _modify is being called to compute the document to
     //     insert as part of an upsert operation. We use this primarily to figure
     //     out when to set the fields in $setOnInsert, if present.
+
   }, {
     key: '_modifyDocument',
     value: function _modifyDocument(doc, mod) {
@@ -108,14 +112,14 @@ var DocumentModifier = (function () {
       }
 
       // Make sure the caller can't mutate our data structures.
-      mod = _EJSON2['default'].clone(mod);
+      mod = _EJSON2.default.clone(mod);
 
       var isModifier = (0, _Document.isOperatorObject)(mod);
 
       var newDoc;
 
       if (!isModifier) {
-        if (mod._id && !_EJSON2['default'].equals(doc._id, mod._id)) {
+        if (mod._id && !_EJSON2.default.equals(doc._id, mod._id)) {
           throw new Error('Cannot change the _id of a document');
         }
 
@@ -129,9 +133,9 @@ var DocumentModifier = (function () {
         newDoc._id = doc._id;
       } else {
         // apply modifiers to the doc.
-        newDoc = _EJSON2['default'].clone(doc);
+        newDoc = _EJSON2.default.clone(doc);
 
-        (0, _lodashCollectionEach2['default'])(mod, function (operand, op) {
+        (0, _each3.default)(mod, function (operand, op) {
           var modFunc = MODIFIERS[op];
           // Treat $setOnInsert as $set if this is an insert.
           if (options.isInsert && op === '$setOnInsert') {
@@ -140,7 +144,7 @@ var DocumentModifier = (function () {
           if (!modFunc) {
             throw new Error('Invalid modifier specified ' + op);
           }
-          (0, _lodashCollectionEach2['default'])(operand, function (arg, keypath) {
+          (0, _each3.default)(operand, function (arg, keypath) {
             if (keypath === '') {
               throw new Error('An empty update path is not valid.');
             }
@@ -151,7 +155,7 @@ var DocumentModifier = (function () {
 
             var keyparts = keypath.split('.');
 
-            if (!(0, _lodashCollectionAll2['default'])(keyparts, _lodashUtilityIdentity2['default'])) {
+            if (!(0, _all3.default)(keyparts, _identity3.default)) {
               throw new Error('The update path \'' + keypath + '\' contains an empty field name, which is not allowed.');
             }
 
@@ -173,8 +177,7 @@ var DocumentModifier = (function () {
   return DocumentModifier;
 })();
 
-exports.DocumentModifier = DocumentModifier;
-exports['default'] = DocumentModifier;
+exports.default = DocumentModifier;
 
 // for a.b.c.2.d.e, keyparts should be ['a', 'b', 'c', '2', 'd', 'e'],
 // and then you would operate on the 'e' property of the returned
@@ -193,7 +196,8 @@ exports['default'] = DocumentModifier;
 //
 // if options.arrayIndices is set, use its first element for the (first) '$' in
 // the path.
-var findModTarget = function (doc, keyparts, options) {
+
+var findModTarget = function findModTarget(doc, keyparts, options) {
   options = options || {};
   var usedArrayIndex = false;
   for (var i = 0; i < keyparts.length; i++) {
@@ -242,7 +246,7 @@ var findModTarget = function (doc, keyparts, options) {
       if (!last) {
         if (doc.length === keypart) {
           doc.push({});
-        } else if (typeof doc[keypart] !== 'object') {
+        } else if (_typeof(doc[keypart]) !== 'object') {
           throw new Error('can\'t modify field \'' + keyparts[i + 1] + '\' of list value ' + JSON.stringify(doc[keypart]));
         }
       }
@@ -278,7 +282,7 @@ var NO_CREATE_MODIFIERS = {
 };
 
 var MODIFIERS = {
-  $inc: function (target, field, arg) {
+  $inc: function $inc(target, field, arg) {
     if (typeof arg !== 'number') {
       throw new Error('Modifier $inc allowed for numbers only');
     }
@@ -291,8 +295,8 @@ var MODIFIERS = {
       target[field] = arg;
     }
   },
-  $set: function (target, field, arg) {
-    if (!(0, _lodashLangIsObject2['default'])(target)) {
+  $set: function $set(target, field, arg) {
+    if (!(0, _isObject3.default)(target)) {
       // not an array or an object
       var e = new Error('Cannot set property on non-object field');
       e.setPropertyError = true;
@@ -305,10 +309,10 @@ var MODIFIERS = {
     }
     target[field] = arg;
   },
-  $setOnInsert: function (target, field, arg) {
+  $setOnInsert: function $setOnInsert(target, field, arg) {
     // converted to `$set` in `_modify`
   },
-  $unset: function (target, field, arg) {
+  $unset: function $unset(target, field, arg) {
     if (target !== undefined) {
       if (target instanceof Array) {
         if (field in target) {
@@ -319,7 +323,7 @@ var MODIFIERS = {
       }
     }
   },
-  $push: function (target, field, arg) {
+  $push: function $push(target, field, arg) {
     if (target[field] === undefined) {
       target[field] = [];
     }
@@ -375,7 +379,7 @@ var MODIFIERS = {
       // actually an extension of the Node driver, so it won't work
       // server-side. Could be confusing!
       // XXX is it correct that we don't do geo-stuff here?
-      sortFunction = new _DocumentSorter2['default'](arg.$sort).getComparator();
+      sortFunction = new _DocumentSorter2.default(arg.$sort).getComparator();
       for (var i = 0; i < toPush.length; i++) {
         if (_Document.MongoTypeComp._type(toPush[i]) !== 3) {
           throw new Error('$push like modifiers using $sort ' + 'require all elements to be objects');
@@ -410,8 +414,8 @@ var MODIFIERS = {
         }
     }
   },
-  $pushAll: function (target, field, arg) {
-    if (!(typeof arg === 'object' && arg instanceof Array)) {
+  $pushAll: function $pushAll(target, field, arg) {
+    if (!((typeof arg === 'undefined' ? 'undefined' : _typeof(arg)) === 'object' && arg instanceof Array)) {
       throw new Error('Modifier $pushAll/pullAll allowed for arrays only');
     }
     var x = target[field];
@@ -425,9 +429,9 @@ var MODIFIERS = {
       }
     }
   },
-  $addToSet: function (target, field, arg) {
+  $addToSet: function $addToSet(target, field, arg) {
     var isEach = false;
-    if (typeof arg === 'object') {
+    if ((typeof arg === 'undefined' ? 'undefined' : _typeof(arg)) === 'object') {
       //check if first key is '$each'
       for (var k in arg) {
         if (k === '$each') {
@@ -443,7 +447,7 @@ var MODIFIERS = {
     } else if (!(x instanceof Array)) {
       throw new Error('Cannot apply $addToSet modifier to non-array');
     } else {
-      (0, _lodashCollectionEach2['default'])(values, function (value) {
+      (0, _each3.default)(values, function (value) {
         for (var i = 0; i < x.length; i++) {
           if (_Document.MongoTypeComp._equal(value, x[i])) {
             return;
@@ -453,7 +457,7 @@ var MODIFIERS = {
       });
     }
   },
-  $pop: function (target, field, arg) {
+  $pop: function $pop(target, field, arg) {
     if (target === undefined) {
       return;
     }
@@ -470,7 +474,7 @@ var MODIFIERS = {
       }
     }
   },
-  $pull: function (target, field, arg) {
+  $pull: function $pull(target, field, arg) {
     if (target === undefined) {
       return;
     }
@@ -481,7 +485,7 @@ var MODIFIERS = {
       throw new Error('Cannot apply $pull/pullAll modifier to non-array');
     } else {
       var out = [];
-      if (arg != null && typeof arg === 'object' && !(arg instanceof Array)) {
+      if (arg != null && (typeof arg === 'undefined' ? 'undefined' : _typeof(arg)) === 'object' && !(arg instanceof Array)) {
         // XXX would be much nicer to compile this once, rather than
         // for each document we modify.. but usually we're not
         // modifying that many documents, so we'll let it slide for
@@ -491,7 +495,7 @@ var MODIFIERS = {
         // to permit stuff like {$pull: {a: {$gt: 4}}}.. something
         // like {$gt: 4} is not normally a complete selector.
         // same issue as $elemMatch possibly?
-        var matcher = new _DocumentMatcher2['default'](arg);
+        var matcher = new _DocumentMatcher2.default(arg);
         for (var i = 0; i < x.length; i++) {
           if (!matcher.documentMatches(x[i]).result) {
             out.push(x[i]);
@@ -507,8 +511,8 @@ var MODIFIERS = {
       target[field] = out;
     }
   },
-  $pullAll: function (target, field, arg) {
-    if (!(typeof arg === 'object' && arg instanceof Array)) {
+  $pullAll: function $pullAll(target, field, arg) {
+    if (!((typeof arg === 'undefined' ? 'undefined' : _typeof(arg)) === 'object' && arg instanceof Array)) {
       throw new Error('Modifier $pushAll/pullAll allowed for arrays only');
     }
     if (target === undefined) {
@@ -536,7 +540,7 @@ var MODIFIERS = {
       target[field] = out;
     }
   },
-  $rename: function (target, field, arg, keypath, doc) {
+  $rename: function $rename(target, field, arg, keypath, doc) {
     if (keypath === arg) {
       // no idea why mongo has this restriction..
       throw new Error('$rename source must differ from target');
@@ -561,7 +565,7 @@ var MODIFIERS = {
     var field2 = keyparts.pop();
     target2[field2] = v;
   },
-  $bit: function (target, field, arg) {
+  $bit: function $bit(target, field, arg) {
     // XXX mongo only supports $bit on integers, and we only support
     // native javascript numbers (doubles) so far, so we can't support $bit
     throw new Error('$bit is not supported');
