@@ -35,6 +35,7 @@
     "angular": "^1.4.8",
     "angular-mocks": "^1.4.8",
     "babel": "^6.3.26",
+    "babel-cli": "^6.3.17",
     "babel-eslint": "^5.0.0-beta6",
     "babel-preset-es2015": "^6.3.13",
     "babel-register": "^6.3.13",
@@ -55,7 +56,7 @@
     "gulp-if": "^2.0.0",
     "gulp-rename": "^1.2.2",
     "gulp-uglify": "^1.5.1",
-    "istanbul": "^0.4.1",
+    "istanbul": "^1.0.0-alpha.2",
     "localforage": "^1.3.1",
     "mocha": "^2.3.4",
     "mocha-lcov-reporter": "^1.0.0",
@@ -69,8 +70,8 @@
     "test_some": "mocha --require babelhook --reporter spec --timeout 1000",
     "test_browser": "gulp build:browser:tests && mocha-phantomjs --reporter spec browser_tests.html",
     "test": "mocha --require babelhook --reporter spec --timeout 1000 test/both test/node",
-    "coverage": "istanbul cover _mocha --require babelhook test/both test/node -- -u exports -R spec && open coverage/lcov-report/index.html",
-    "coveralls": "istanbul cover _mocha --require babelhook test/both test/node --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
+    "coverage": "babel-node ./node_modules/istanbul/lib/cli cover _mocha test/both test/node -- -u exports -R spec && open coverage/lcov-report/index.html",
+    "coveralls": "babel-node ./node_modules/istanbul/lib/cli cover _mocha test/both test/node --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
   },
   "main": "index.js",
   "license": "MIT"
