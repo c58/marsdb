@@ -16,7 +16,7 @@ describe('StorageManager', () => {
     });
   });
 
-  it('should clone object when getting', () => {
+  it('should NOT clone object when getting', () => {
     const db = new StorageManager();
     return db.persist('a', {_id: 'a', a: 1}).then(() => {
       return db.get('a');
@@ -24,11 +24,11 @@ describe('StorageManager', () => {
       doc.a = 2;
       return db.get('a');
     }).then(doc => {
-      doc.a.should.be.equal(1);
+      doc.a.should.be.equal(2);
     });
   });
 
-  it('should clone objects when streaming', (done) => {
+  it('should NOT clone objects when streaming', (done) => {
     const db = new StorageManager();
     db.persist('a', {_id: 'a', a: 1}).then(() => {
       db.createReadStream()
@@ -36,7 +36,7 @@ describe('StorageManager', () => {
         .on('end', () => {
           db.createReadStream()
             .on('data', (doc) => {
-              doc.value.a.should.be.equal(1);
+              doc.value.a.should.be.equal(2);
             })
             .on('end', () => {
               done();
