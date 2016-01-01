@@ -26,29 +26,6 @@ You can use it in any JS environment (Browser, Electron, NW.js, Node.js).
 * **Reactive joins** – out of the box
 
 ## Examples
-### Using with Angular 1.x
-Include `marsdb.angular.js` after `marsdb.min.js` and `angular.js` in your `<head>`. Then add a `MarsDB` dependency in your module. That's it. Now you can use `$collection` factory. For example:
-```javascript
-angular.module(‘app’, [‘MarsDB’])
-	.controller(function($scope, $collection) {
-		const posts = $collection(‘posts’);
-
-		// All methods in $collection returns a $q promise
-		// So you don’t need to manually call $digest
-		posts.find({authorId: 123}).observe((docs) => {
-			$scope.posts = docs;
-		}, $scope).then(() => {
-			$scope.loaded = true;
-		});
-
-		// $scope at last argument needed for auto-binding
-		// to a “$destroy” event of the scope for stop
-		// observing changes. You can call it manually and
-		// don’t pass last argument.
-	});
-```
-
-You also can use MarsDB within browserify environment. Just `require(‘marsdb/dist/angular’)` and MarsDB module will be added to the angular. Angular must be defined in a `window` or must be available as a module `require(‘angular’)`.
 
 ### Using within non-ES6 environment
 The `./dist` folder contains already compiled to a ES5 code, but some polyfills needed. For using in a browser you must to include `marsdb.polyfills.js` before `marsdb.min.js`. In node.js you need to `require(‘marsdb/polyfills’)`.
