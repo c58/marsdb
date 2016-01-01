@@ -5,7 +5,7 @@ chai.use(require('chai-as-promised'));
 chai.should();
 
 
-describe('CollectionIndexe', function () {
+describe('CollectionIndex', function () {
 
   describe('Insertion', function () {
 
