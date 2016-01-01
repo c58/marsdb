@@ -6,6 +6,10 @@ cache:
   directories:
     - node_modules
 
+install:
+  - npm install -g babel-cli
+  - npm install
+
 node_js:
   - "5.3"
   - "4.2"
