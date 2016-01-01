@@ -5584,14 +5584,12 @@ var StorageManager = exports.StorageManager = (function () {
       var _this6 = this;
 
       var emitter = new _eventemitter2.default();
-      setTimeout(function () {
-        _this6._loadedPromise.then(function () {
-          (0, _forEach2.default)((0, _keys3.default)(_this6._storage), function (k) {
-            emitter.emit('data', { value: _EJSON2.default.clone(_this6._storage[k]) });
-          });
-          emitter.emit('end');
+      this._loadedPromise.then(function () {
+        (0, _forEach2.default)((0, _keys3.default)(_this6._storage), function (k) {
+          emitter.emit('data', { value: _EJSON2.default.clone(_this6._storage[k]) });
         });
-      }, 1);
+        emitter.emit('end');
+      });
       return emitter;
     }
   }, {
