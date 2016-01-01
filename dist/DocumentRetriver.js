@@ -7,21 +7,17 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.DocumentRetriver = undefined;
 
-var _isObject2 = require('lodash/lang/isObject');
+var _checkTypes = require('check-types');
 
-var _isObject3 = _interopRequireDefault(_isObject2);
+var _checkTypes2 = _interopRequireDefault(_checkTypes);
 
-var _isArray2 = require('lodash/lang/isArray');
+var _keys2 = require('fast.js/object/keys');
 
-var _isArray3 = _interopRequireDefault(_isArray2);
+var _keys3 = _interopRequireDefault(_keys2);
 
-var _has2 = require('lodash/object/has');
+var _map2 = require('fast.js/map');
 
-var _has3 = _interopRequireDefault(_has2);
-
-var _size2 = require('lodash/collection/size');
-
-var _size3 = _interopRequireDefault(_size2);
+var _map3 = _interopRequireDefault(_map2);
 
 var _Document = require('./Document');
 
@@ -62,14 +58,14 @@ var DocumentRetriver = exports.DocumentRetriver = (function () {
       } else if ((0, _Document.selectorIsIdPerhapsAsObject)(query)) {
         // also do the fast path for { _id: idString }
         selectorIds = [query._id];
-      } else if ((0, _isObject3.default)(query) && (0, _has3.default)(query, '_id') && (0, _isObject3.default)(query._id) && (0, _has3.default)(query._id, '$in') && (0, _isArray3.default)(query._id.$in)) {
+      } else if (_checkTypes2.default.object(query) && query.hasOwnProperty('_id') && _checkTypes2.default.object(query._id) && query._id.hasOwnProperty('$in') && _checkTypes2.default.array(query._id.$in)) {
         // and finally fast path for multiple ids
         // selected by $in operator
         selectorIds = query._id.$in;
       }
 
       // Retrive optimally
-      if ((0, _size3.default)(selectorIds) > 0) {
+      if (_checkTypes2.default.object(selectorIds) && (0, _keys3.default)(selectorIds).length > 0) {
         return this.retriveIds(selectorIds);
       } else {
         return this.retriveAll();
@@ -109,7 +105,7 @@ var DocumentRetriver = exports.DocumentRetriver = (function () {
     value: function retriveIds(ids) {
       var _this2 = this;
 
-      var retrPromises = ids.map(function (id) {
+      var retrPromises = (0, _map3.default)(ids, function (id) {
         return _this2.retriveOne(id);
       });
       return Promise.all(retrPromises);

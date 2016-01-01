@@ -8,13 +8,17 @@ Object.defineProperty(exports, "__esModule", {
 exports.CursorObservable = undefined;
 exports.debounce = debounce;
 
-var _size2 = require('lodash/collection/size');
+var _checkTypes = require('check-types');
 
-var _size3 = _interopRequireDefault(_size2);
+var _checkTypes2 = _interopRequireDefault(_checkTypes);
 
-var _isArray2 = require('lodash/lang/isArray');
+var _map2 = require('fast.js/map');
 
-var _isArray3 = _interopRequireDefault(_isArray2);
+var _map3 = _interopRequireDefault(_map2);
+
+var _keys2 = require('fast.js/object/keys');
+
+var _keys3 = _interopRequireDefault(_keys2);
 
 var _Cursor2 = require('./Cursor');
 
@@ -214,7 +218,7 @@ var CursorObservable = (function (_Cursor) {
       // 2. Is a new doc has different number of fields then an old doc?
       // 3. Is a new doc has a greater updatedAt time then an old doc?
       // 4. Is a new doc not equals to an old doc?
-      var updatedInResult = removedFromResult || newDoc && oldDoc && (this._matcher.documentMatches(newDoc).result || this._matcher.documentMatches(oldDoc).result) && ((0, _size3.default)(newDoc) !== (0, _size3.default)(oldDoc) || newDoc.updatedAt && (!oldDoc.updatedAt || oldDoc.updatedAt && newDoc.updatedAt > oldDoc.updatedAt) || !_EJSON2.default.equals(newDoc, oldDoc));
+      var updatedInResult = removedFromResult || newDoc && oldDoc && (this._matcher.documentMatches(newDoc).result || this._matcher.documentMatches(oldDoc).result) && ((0, _keys3.default)(newDoc).length !== (0, _keys3.default)(oldDoc).length || newDoc.updatedAt && (!oldDoc.updatedAt || oldDoc.updatedAt && newDoc.updatedAt > oldDoc.updatedAt) || !_EJSON2.default.equals(newDoc, oldDoc));
 
       // When it's an insert operation we just check
       // it's match a query
@@ -269,8 +273,8 @@ var CursorObservable = (function (_Cursor) {
   }, {
     key: '_updateLatestIds',
     value: function _updateLatestIds() {
-      if ((0, _isArray3.default)(this._latestResult)) {
-        this._latestIds = new Set(this._latestResult.map(function (x) {
+      if (_checkTypes2.default.array(this._latestResult)) {
+        this._latestIds = new Set((0, _map3.default)(this._latestResult, function (x) {
           return x._id;
         }));
       } else if (this._latestResult && this._latestResult._id) {

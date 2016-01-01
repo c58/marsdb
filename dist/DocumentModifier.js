@@ -7,25 +7,21 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.DocumentModifier = undefined;
 
-var _isObject2 = require('lodash/lang/isObject');
+var _checkTypes = require('check-types');
 
-var _isObject3 = _interopRequireDefault(_isObject2);
+var _checkTypes2 = _interopRequireDefault(_checkTypes);
 
-var _assign2 = require('lodash/object/assign');
+var _assign2 = require('fast.js/object/assign');
 
 var _assign3 = _interopRequireDefault(_assign2);
 
-var _each2 = require('lodash/collection/each');
+var _forEach = require('fast.js/forEach');
 
-var _each3 = _interopRequireDefault(_each2);
+var _forEach2 = _interopRequireDefault(_forEach);
 
-var _all2 = require('lodash/collection/all');
+var _every2 = require('fast.js/array/every');
 
-var _all3 = _interopRequireDefault(_all2);
-
-var _identity2 = require('lodash/utility/identity');
-
-var _identity3 = _interopRequireDefault(_identity2);
+var _every3 = _interopRequireDefault(_every2);
 
 var _EJSON = require('./EJSON');
 
@@ -72,7 +68,7 @@ var DocumentModifier = exports.DocumentModifier = (function () {
       return new _DocumentRetriver2.default(this.db).retriveForQeury(this._query).then(function (docs) {
         var oldResults = [];
         var newResults = [];
-        (0, _each3.default)(docs, function (d) {
+        (0, _forEach2.default)(docs, function (d) {
           var match = _this._matcher.documentMatches(d);
           if (match.result) {
             var matchOpts = (0, _assign3.default)({ arrayIndices: match.arrayIndices }, options);
@@ -135,7 +131,7 @@ var DocumentModifier = exports.DocumentModifier = (function () {
         // apply modifiers to the doc.
         newDoc = _EJSON2.default.clone(doc);
 
-        (0, _each3.default)(mod, function (operand, op) {
+        (0, _forEach2.default)(mod, function (operand, op) {
           var modFunc = MODIFIERS[op];
           // Treat $setOnInsert as $set if this is an insert.
           if (options.isInsert && op === '$setOnInsert') {
@@ -144,7 +140,7 @@ var DocumentModifier = exports.DocumentModifier = (function () {
           if (!modFunc) {
             throw new Error('Invalid modifier specified ' + op);
           }
-          (0, _each3.default)(operand, function (arg, keypath) {
+          (0, _forEach2.default)(operand, function (arg, keypath) {
             if (keypath === '') {
               throw new Error('An empty update path is not valid.');
             }
@@ -155,7 +151,9 @@ var DocumentModifier = exports.DocumentModifier = (function () {
 
             var keyparts = keypath.split('.');
 
-            if (!(0, _all3.default)(keyparts, _identity3.default)) {
+            if (!(0, _every3.default)(keyparts, function (x) {
+              return x;
+            })) {
               throw new Error('The update path \'' + keypath + '\' contains an empty field name, which is not allowed.');
             }
 
@@ -296,8 +294,7 @@ var MODIFIERS = {
     }
   },
   $set: function $set(target, field, arg) {
-    if (!(0, _isObject3.default)(target)) {
-      // not an array or an object
+    if (!_checkTypes2.default.object(target) && !_checkTypes2.default.array(target)) {
       var e = new Error('Cannot set property on non-object field');
       e.setPropertyError = true;
       throw e;
@@ -447,7 +444,7 @@ var MODIFIERS = {
     } else if (!(x instanceof Array)) {
       throw new Error('Cannot apply $addToSet modifier to non-array');
     } else {
-      (0, _each3.default)(values, function (value) {
+      (0, _forEach2.default)(values, function (value) {
         for (var i = 0; i < x.length; i++) {
           if (_Document.MongoTypeComp._equal(value, x[i])) {
             return;

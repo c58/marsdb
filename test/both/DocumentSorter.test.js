@@ -44,7 +44,7 @@ var assert_ordering = function (f, values) {
 };
 
 
-describe('DocumentMatcher', () => {
+describe('DocumentSorter', () => {
   it('should corerctly sort respect to BSON ordering', function () {
     var shortBinary = EJSON.newBinary(1);
     shortBinary[0] = 128;

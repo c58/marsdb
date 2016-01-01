@@ -7,13 +7,13 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.StorageManager = undefined;
 
-var _keys2 = require('lodash/object/keys');
+var _keys2 = require('fast.js/object/keys');
 
 var _keys3 = _interopRequireDefault(_keys2);
 
-var _defer2 = require('lodash/function/defer');
+var _forEach = require('fast.js/forEach');
 
-var _defer3 = _interopRequireDefault(_defer2);
+var _forEach2 = _interopRequireDefault(_forEach);
 
 var _eventemitter = require('eventemitter3');
 
@@ -108,14 +108,14 @@ var StorageManager = exports.StorageManager = (function () {
       var _this6 = this;
 
       var emitter = new _eventemitter2.default();
-      (0, _defer3.default)(function () {
+      setTimeout(function () {
         _this6._loadedPromise.then(function () {
-          (0, _keys3.default)(_this6._storage).forEach(function (k) {
+          (0, _forEach2.default)((0, _keys3.default)(_this6._storage), function (k) {
             emitter.emit('data', { value: _EJSON2.default.clone(_this6._storage[k]) });
           });
           emitter.emit('end');
         });
-      });
+      }, 1);
       return emitter;
     }
   }, {

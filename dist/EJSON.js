@@ -1,10 +1,6 @@
 'use strict';
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })(); /**
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        * Based on Meteor's EJSON package.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        * Rewrite with ES6 and better formated for passing
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        * linter
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        */
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -15,39 +11,44 @@ var _Base = require('./Base64');
 
 var _Base2 = _interopRequireDefault(_Base);
 
-var _isEmpty2 = require('lodash/lang/isEmpty');
+var _some2 = require('fast.js/array/some');
 
-var _isEmpty3 = _interopRequireDefault(_isEmpty2);
+var _some3 = _interopRequireDefault(_some2);
 
-var _isNaN2 = require('lodash/lang/isNaN');
+var _checkTypes = require('check-types');
 
-var _isNaN3 = _interopRequireDefault(_isNaN2);
+var _checkTypes2 = _interopRequireDefault(_checkTypes);
 
-var _isArguments2 = require('lodash/lang/isArguments');
-
-var _isArguments3 = _interopRequireDefault(_isArguments2);
-
-var _has2 = require('lodash/object/has');
-
-var _has3 = _interopRequireDefault(_has2);
-
-var _keys2 = require('lodash/object/keys');
+var _keys2 = require('fast.js/object/keys');
 
 var _keys3 = _interopRequireDefault(_keys2);
 
-var _each2 = require('lodash/collection/each');
+var _forEach = require('fast.js/forEach');
 
-var _each3 = _interopRequireDefault(_each2);
+var _forEach2 = _interopRequireDefault(_forEach);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; } /**
+                                                                                                                              * Based on Meteor's EJSON package.
+                                                                                                                              * Rewrite with ES6 and better formated for passing
+                                                                                                                              * linter
+                                                                                                                              */
+
 // Internal utils
-function isInfOrNan(val) {
-  return (0, _isNaN3.default)(val) || val === Infinity || val === -Infinity;
+function _isNaN(val) {
+  return typeof val === 'number' && val != +val;
+}
+function _has(obj, key) {
+  return _checkTypes2.default.object(obj) && obj.hasOwnProperty(key);
+}
+function _isInfOrNan(val) {
+  return _isNaN(val) || val === Infinity || val === -Infinity;
+}
+function _isArguments(val) {
+  return !!val && (typeof val === 'undefined' ? 'undefined' : _typeof(val)) == 'object' && Object.prototype.hasOwnProperty.call(val, 'callee') && !Object.prototype.propertyIsEnumerable.call(val, 'callee');
 }
 
 var EJSON = exports.EJSON = (function () {
@@ -80,7 +81,7 @@ var EJSON = exports.EJSON = (function () {
   _createClass(EJSON, [{
     key: 'addType',
     value: function addType(name, factory) {
-      if ((0, _has3.default)(this._customTypes, name)) {
+      if (_has(this._customTypes, name)) {
         throw new Error('Type ' + name + ' already present');
       }
       this._customTypes[name] = factory;
@@ -185,7 +186,7 @@ var EJSON = exports.EJSON = (function () {
       if (a === b) {
         return true;
       }
-      if ((0, _isNaN3.default)(a) && (0, _isNaN3.default)(b)) {
+      if (_isNaN(a) && _isNaN(b)) {
         return true; // This differs from the IEEE spec for NaN equality, b/c we don't want
         // anything ever with a NaN to be poisoned from becoming equal to anything.
       }
@@ -259,7 +260,7 @@ var EJSON = exports.EJSON = (function () {
       } else {
         i = 0;
         ret = (0, _keys3.default)(a).every(function (key) {
-          if (!(0, _has3.default)(b, key)) {
+          if (!_has(b, key)) {
             return false;
           }
           if (!_this.equals(a[key], b[key], options)) {
@@ -306,7 +307,7 @@ var EJSON = exports.EJSON = (function () {
         return ret;
       }
 
-      if (Array.isArray(v) || (0, _isArguments3.default)(v)) {
+      if (_checkTypes2.default.array(v) || _isArguments(v)) {
         ret = [];
         for (var i = 0; i < v.length; i++) {
           ret[i] = this.clone(v[i]);
@@ -323,7 +324,7 @@ var EJSON = exports.EJSON = (function () {
       }
       // handle other objects
       ret = {};
-      (0, _each3.default)(v, function (val, key) {
+      (0, _forEach2.default)(v, function (val, key) {
         ret[key] = _this2.clone(val);
       });
       return ret;
@@ -340,7 +341,7 @@ var EJSON = exports.EJSON = (function () {
 
       this._builtinConverters = [{ // Date
         matchJSONValue: function matchJSONValue(obj) {
-          return (0, _has3.default)(obj, '$date') && (0, _keys3.default)(obj).length === 1;
+          return _has(obj, '$date') && (0, _keys3.default)(obj).length === 1;
         },
         matchObject: function matchObject(obj) {
           return obj instanceof Date;
@@ -354,12 +355,12 @@ var EJSON = exports.EJSON = (function () {
       }, { // NaN, Inf, -Inf. (These are the only objects with typeof !== 'object'
         // which we match.)
         matchJSONValue: function matchJSONValue(obj) {
-          return (0, _has3.default)(obj, '$InfNaN') && (0, _keys3.default)(obj).length === 1;
+          return _has(obj, '$InfNaN') && (0, _keys3.default)(obj).length === 1;
         },
-        matchObject: isInfOrNan,
+        matchObject: _isInfOrNan,
         toJSONValue: function toJSONValue(obj) {
           var sign;
-          if ((0, _isNaN3.default)(obj)) {
+          if (_isNaN(obj)) {
             sign = 0;
           } else if (obj === Infinity) {
             sign = 1;
@@ -373,10 +374,10 @@ var EJSON = exports.EJSON = (function () {
         }
       }, { // Binary
         matchJSONValue: function matchJSONValue(obj) {
-          return (0, _has3.default)(obj, '$binary') && (0, _keys3.default)(obj).length === 1;
+          return _has(obj, '$binary') && (0, _keys3.default)(obj).length === 1;
         },
         matchObject: function matchObject(obj) {
-          return typeof Uint8Array !== 'undefined' && obj instanceof Uint8Array || obj && (0, _has3.default)(obj, '$Uint8ArrayPolyfill');
+          return typeof Uint8Array !== 'undefined' && obj instanceof Uint8Array || obj && _has(obj, '$Uint8ArrayPolyfill');
         },
         toJSONValue: function toJSONValue(obj) {
           return { $binary: _Base2.default.encode(obj) };
@@ -386,33 +387,33 @@ var EJSON = exports.EJSON = (function () {
         }
       }, { // Escaping one level
         matchJSONValue: function matchJSONValue(obj) {
-          return (0, _has3.default)(obj, '$escape') && (0, _keys3.default)(obj).length === 1;
+          return _has(obj, '$escape') && (0, _keys3.default)(obj).length === 1;
         },
         matchObject: function matchObject(obj) {
-          if ((0, _isEmpty3.default)(obj) || (0, _keys3.default)(obj).length > 2) {
+          if (!_checkTypes2.default.assigned(obj) || _checkTypes2.default.emptyObject(obj) || _checkTypes2.default.object(obj) && (0, _keys3.default)(obj).length > 2) {
             return false;
           }
-          return _this3._builtinConverters.some(function (converter) {
+          return (0, _some3.default)(_this3._builtinConverters, function (converter) {
             return converter.matchJSONValue(obj);
           });
         },
         toJSONValue: function toJSONValue(obj) {
           var newObj = {};
-          (0, _each3.default)(obj, function (val, key) {
+          (0, _forEach2.default)(obj, function (val, key) {
             newObj[key] = _this3.toJSONValue(val);
           });
           return { $escape: newObj };
         },
         fromJSONValue: function fromJSONValue(obj) {
           var newObj = {};
-          (0, _each3.default)(obj.$escape, function (val, key) {
+          (0, _forEach2.default)(obj.$escape, function (val, key) {
             newObj[key] = _this3.fromJSONValue(val);
           });
           return newObj;
         }
       }, { // Custom
         matchJSONValue: function matchJSONValue(obj) {
-          return (0, _has3.default)(obj, '$type') && (0, _has3.default)(obj, '$value') && (0, _keys3.default)(obj).length === 2;
+          return _has(obj, '$type') && _has(obj, '$value') && (0, _keys3.default)(obj).length === 2;
         },
         matchObject: function matchObject(obj) {
           return _this3._isCustomType(obj);
@@ -423,7 +424,7 @@ var EJSON = exports.EJSON = (function () {
         },
         fromJSONValue: function fromJSONValue(obj) {
           var typeName = obj.$type;
-          if (!(0, _has3.default)(_this3._customTypes, typeName)) {
+          if (!_has(_this3._customTypes, typeName)) {
             throw new Error('Custom EJSON type ' + typeName + ' is not defined');
           }
           var converter = _this3._customTypes[typeName];
@@ -434,7 +435,7 @@ var EJSON = exports.EJSON = (function () {
   }, {
     key: '_isCustomType',
     value: function _isCustomType(obj) {
-      return obj && typeof obj.toJSONValue === 'function' && typeof obj.typeName === 'function' && (0, _has3.default)(this._customTypes, obj.typeName());
+      return obj && typeof obj.toJSONValue === 'function' && typeof obj.typeName === 'function' && _has(this._customTypes, obj.typeName());
     }
 
     /**
@@ -461,8 +462,8 @@ var EJSON = exports.EJSON = (function () {
       }
 
       // Iterate over array or object structure.
-      (0, _each3.default)(obj, function (value, key) {
-        if ((typeof value === 'undefined' ? 'undefined' : _typeof(value)) !== 'object' && value !== undefined && !isInfOrNan(value)) {
+      (0, _forEach2.default)(obj, function (value, key) {
+        if ((typeof value === 'undefined' ? 'undefined' : _typeof(value)) !== 'object' && value !== undefined && !_isInfOrNan(value)) {
           return;
         }
 
@@ -519,7 +520,7 @@ var EJSON = exports.EJSON = (function () {
         return obj;
       }
 
-      (0, _each3.default)(obj, function (value, key) {
+      (0, _forEach2.default)(obj, function (value, key) {
         if ((typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object') {
           var changed = _this5._fromJSONValueHelper(value);
           if (value !== changed) {

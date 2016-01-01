@@ -9,21 +9,17 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.Cursor = exports.PIPELINE_PROCESSORS = exports.PIPELINE_TYPE = undefined;
 
-var _each2 = require('lodash/collection/each');
+var _forEach = require('fast.js/forEach');
 
-var _each3 = _interopRequireDefault(_each2);
+var _forEach2 = _interopRequireDefault(_forEach);
 
-var _isObject2 = require('lodash/lang/isObject');
+var _map2 = require('fast.js/map');
 
-var _isObject3 = _interopRequireDefault(_isObject2);
+var _map3 = _interopRequireDefault(_map2);
 
-var _isArray2 = require('lodash/lang/isArray');
+var _checkTypes = require('check-types');
 
-var _isArray3 = _interopRequireDefault(_isArray2);
-
-var _isEmpty2 = require('lodash/lang/isEmpty');
-
-var _isEmpty3 = _interopRequireDefault(_isEmpty2);
+var _checkTypes2 = _interopRequireDefault(_checkTypes);
 
 var _eventemitter = require('eventemitter3');
 
@@ -88,15 +84,15 @@ var PIPELINE_PROCESSORS = exports.PIPELINE_PROCESSORS = (_PIPELINE_PROCESSORS = 
 }), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.Reduce, function (docs, pipeObj) {
   return docs.reduce(pipeObj.value, pipeObj.args[0]);
 }), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.Join, function (docs, pipeObj, cursor) {
-  if ((0, _isArray3.default)(docs)) {
+  if (_checkTypes2.default.array(docs)) {
     return PIPELINE_PROCESSORS[PIPELINE_TYPE.JoinEach](docs, pipeObj, cursor);
   } else {
     return PIPELINE_PROCESSORS[PIPELINE_TYPE.JoinAll](docs, pipeObj, cursor);
   }
 }), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.JoinEach, function (docs, pipeObj, cursor) {
-  docs = (0, _isArray3.default)(docs) ? docs : [docs];
+  docs = _checkTypes2.default.array(docs) ? docs : [docs];
   var docsLength = docs.length;
-  return Promise.all(docs.map(function (x, i) {
+  return Promise.all((0, _map3.default)(docs, function (x, i) {
     return PIPELINE_PROCESSORS[PIPELINE_TYPE.JoinAll](x, pipeObj, cursor, i, docsLength);
   }));
 }), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.JoinAll, function (docs, pipeObj, cursor) {
@@ -106,9 +102,10 @@ var PIPELINE_PROCESSORS = exports.PIPELINE_PROCESSORS = (_PIPELINE_PROCESSORS = 
   var updatedFn = cursor._propagateUpdate ? cursor._propagateUpdate.bind(cursor) : function () {};
 
   var res = pipeObj.value(docs, updatedFn, i, len);
-  res = (0, _isArray3.default)(res) ? res : [res];
-  res.forEach(function (observeStopper) {
-    if ((0, _isObject3.default)(observeStopper) && observeStopper.then) {
+  res = _checkTypes2.default.array(res) ? res : [res];
+
+  (0, _forEach2.default)(res, function (observeStopper) {
+    if (_checkTypes2.default.object(observeStopper) && observeStopper.then) {
       if (observeStopper.parent) {
         observeStopper.parent(cursor);
         cursor.once('stopped', observeStopper.stop);
@@ -116,11 +113,13 @@ var PIPELINE_PROCESSORS = exports.PIPELINE_PROCESSORS = (_PIPELINE_PROCESSORS = 
       }
     }
   });
+
   return Promise.all(res).then(function () {
     return docs;
   });
 }), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.IfNotEmpty, function (docs) {
-  return (0, _isEmpty3.default)(docs) ? PIPLEINE_STOP_MARKER : docs;
+  var isEmptyRes = !_checkTypes2.default.assigned(docs) || _checkTypes2.default.array(docs) && _checkTypes2.default.emptyArray(docs) || _checkTypes2.default.object(docs) && _checkTypes2.default.emptyObject(docs);
+  return isEmptyRes ? PIPLEINE_STOP_MARKER : docs;
 }), _PIPELINE_PROCESSORS);
 
 /**
@@ -316,7 +315,7 @@ var Cursor = (function (_EventEmitter) {
       var _this4 = this;
 
       this._executing = this._matchObjects().then(function (docs) {
-        return docs.map(function (x) {
+        return (0, _map3.default)(docs, function (x) {
           return x._id;
         });
       }).then(function (ids) {
@@ -345,7 +344,7 @@ var Cursor = (function (_EventEmitter) {
         var results = [];
         var withFastLimit = _this5._limit && !_this5._skip && !_this5._sorter;
 
-        (0, _each3.default)(docs, function (d) {
+        (0, _forEach2.default)(docs, function (d) {
           var match = _this5._matcher.documentMatches(d);
           if (match.result) {
             results.push(d);

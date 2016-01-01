@@ -7,9 +7,17 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.IndexManager = undefined;
 
-var _keys2 = require('lodash/object/keys');
+var _keys2 = require('fast.js/object/keys');
 
 var _keys3 = _interopRequireDefault(_keys2);
+
+var _forEach = require('fast.js/forEach');
+
+var _forEach2 = _interopRequireDefault(_forEach);
+
+var _map2 = require('fast.js/map');
+
+var _map3 = _interopRequireDefault(_map2);
 
 var _invariant = require('invariant');
 
@@ -123,7 +131,7 @@ var IndexManager = exports.IndexManager = (function () {
     value: function buildAllIndexes() {
       var _this2 = this;
 
-      return Promise.all((0, _keys3.default)(this.indexes).map(function (k) {
+      return Promise.all((0, _map3.default)((0, _keys3.default)(this.indexes), function (k) {
         return _this2.ensureIndex({
           fieldName: k,
           forceRebuild: true
@@ -162,12 +170,12 @@ var IndexManager = exports.IndexManager = (function () {
         var keys = (0, _keys3.default)(_this4.indexes);
         var failingIndex = null;
         try {
-          keys.forEach(function (k, i) {
+          (0, _forEach2.default)(keys, function (k, i) {
             failingIndex = i;
             _this4.indexes[k].insert(doc);
           });
         } catch (e) {
-          keys.slice(0, failingIndex).forEach(function (k) {
+          (0, _forEach2.default)(keys.slice(0, failingIndex), function (k) {
             _this4.indexes[k].remove(doc);
           });
           throw e;
@@ -192,12 +200,12 @@ var IndexManager = exports.IndexManager = (function () {
         var keys = (0, _keys3.default)(_this5.indexes);
         var failingIndex = null;
         try {
-          keys.forEach(function (k, i) {
+          (0, _forEach2.default)(keys, function (k, i) {
             failingIndex = i;
             _this5.indexes[k].update(oldDoc, newDoc);
           });
         } catch (e) {
-          keys.slice(0, failingIndex).forEach(function (k) {
+          (0, _forEach2.default)(keys.slice(0, failingIndex), function (k) {
             _this5.indexes[k].revertUpdate(oldDoc, newDoc);
           });
           throw e;
@@ -218,7 +226,7 @@ var IndexManager = exports.IndexManager = (function () {
 
       return this._queue.add(function () {
         var keys = (0, _keys3.default)(_this6.indexes);
-        keys.forEach(function (k) {
+        (0, _forEach2.default)(keys, function (k) {
           _this6.indexes[k].remove(doc);
         });
       });
@@ -240,7 +248,7 @@ var IndexManager = exports.IndexManager = (function () {
       // Loop through all doucments in the storage
       var errors = [];
       return new _DocumentRetriver2.default(this.db).retriveAll().then(function (docs) {
-        docs.forEach(function (doc) {
+        (0, _forEach2.default)(docs, function (doc) {
           try {
             index.insert(doc);
           } catch (e) {

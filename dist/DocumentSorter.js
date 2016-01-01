@@ -7,37 +7,29 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.DocumentSorter = undefined;
 
-var _isEmpty2 = require('lodash/lang/isEmpty');
+var _checkTypes = require('check-types');
 
-var _isEmpty3 = _interopRequireDefault(_isEmpty2);
+var _checkTypes2 = _interopRequireDefault(_checkTypes);
 
-var _has2 = require('lodash/object/has');
+var _forEach = require('fast.js/forEach');
 
-var _has3 = _interopRequireDefault(_has2);
+var _forEach2 = _interopRequireDefault(_forEach);
 
-var _each2 = require('lodash/collection/each');
+var _every2 = require('fast.js/array/every');
 
-var _each3 = _interopRequireDefault(_each2);
+var _every3 = _interopRequireDefault(_every2);
 
-var _contains2 = require('lodash/collection/contains');
-
-var _contains3 = _interopRequireDefault(_contains2);
-
-var _all2 = require('lodash/collection/all');
-
-var _all3 = _interopRequireDefault(_all2);
-
-var _size2 = require('lodash/collection/size');
-
-var _size3 = _interopRequireDefault(_size2);
-
-var _map2 = require('lodash/collection/map');
+var _map2 = require('fast.js/map');
 
 var _map3 = _interopRequireDefault(_map2);
 
-var _pluck2 = require('lodash/collection/pluck');
+var _indexOf2 = require('fast.js/array/indexOf');
 
-var _pluck3 = _interopRequireDefault(_pluck2);
+var _indexOf3 = _interopRequireDefault(_indexOf2);
+
+var _keys2 = require('fast.js/object/keys');
+
+var _keys3 = _interopRequireDefault(_keys2);
 
 var _DocumentMatcher = require('./DocumentMatcher');
 
@@ -97,7 +89,7 @@ var DocumentSorter = exports.DocumentSorter = (function () {
         }
       }
     } else if ((typeof spec === 'undefined' ? 'undefined' : _typeof(spec)) === 'object') {
-      (0, _each3.default)(spec, function (value, key) {
+      (0, _forEach2.default)(spec, function (value, key) {
         addSpecPart(key, value >= 0);
       });
     } else {
@@ -109,7 +101,7 @@ var DocumentSorter = exports.DocumentSorter = (function () {
     // modifiers as this sort order. This is only implemented on the server.
     if (this.affectedByModifier) {
       var selector = {};
-      (0, _each3.default)(this._sortSpecParts, function (nextSpec) {
+      (0, _forEach2.default)(this._sortSpecParts, function (nextSpec) {
         selector[nextSpec.path] = 1;
       });
       this._selectorForAffectedByModifier = new _DocumentMatcher2.default(selector);
@@ -154,7 +146,9 @@ var DocumentSorter = exports.DocumentSorter = (function () {
   }, {
     key: '_getPaths',
     value: function _getPaths() {
-      return (0, _pluck3.default)(this._sortSpecParts, 'path');
+      return (0, _map3.default)(this._sortSpecParts, function (x) {
+        return x.path;
+      });
     }
 
     // Finds the minimum key from the doc, according to the sort specs.  (We say
@@ -221,7 +215,7 @@ var DocumentSorter = exports.DocumentSorter = (function () {
 
       var knownPaths = null;
 
-      (0, _each3.default)(this._sortSpecParts, function (spec, whichField) {
+      (0, _forEach2.default)(this._sortSpecParts, function (spec, whichField) {
         // Expand any leaf arrays that we find, and ignore those arrays
         // themselves.  (We never sort based on an array itself.)
         var branches = (0, _DocumentMatcher.expandArraysInBranches)(spec.lookup(doc), true);
@@ -234,7 +228,7 @@ var DocumentSorter = exports.DocumentSorter = (function () {
 
         var usedPaths = false;
         valuesByIndexAndPath[whichField] = {};
-        (0, _each3.default)(branches, function (branch) {
+        (0, _forEach2.default)(branches, function (branch) {
           if (!branch.arrayIndices) {
             // If there are no array indices for a branch, then it must be the
             // only branch, because the only thing that produces multiple branches
@@ -248,7 +242,7 @@ var DocumentSorter = exports.DocumentSorter = (function () {
 
           usedPaths = true;
           var path = pathFromIndices(branch.arrayIndices);
-          if ((0, _has3.default)(valuesByIndexAndPath[whichField], path)) {
+          if (valuesByIndexAndPath[whichField].hasOwnProperty(path)) {
             throw Error('duplicate path: ' + path);
           }
           valuesByIndexAndPath[whichField][path] = branch.value;
@@ -263,7 +257,7 @@ var DocumentSorter = exports.DocumentSorter = (function () {
           // and 'a.x.y' are both arrays, but we don't allow this for now.
           // #NestedArraySort
           // XXX achieve full compatibility here
-          if (knownPaths && !(0, _has3.default)(knownPaths, path)) {
+          if (knownPaths && !knownPaths.hasOwnProperty(path)) {
             throw Error('cannot index parallel arrays');
           }
         });
@@ -271,12 +265,12 @@ var DocumentSorter = exports.DocumentSorter = (function () {
         if (knownPaths) {
           // Similarly to above, paths must match everywhere, unless this is a
           // non-array field.
-          if (!(0, _has3.default)(valuesByIndexAndPath[whichField], '') && (0, _size3.default)(knownPaths) !== (0, _size3.default)(valuesByIndexAndPath[whichField])) {
+          if (!valuesByIndexAndPath[whichField].hasOwnProperty('') && (0, _keys3.default)(knownPaths).length !== (0, _keys3.default)(valuesByIndexAndPath[whichField]).length) {
             throw Error('cannot index parallel arrays!');
           }
         } else if (usedPaths) {
           knownPaths = {};
-          (0, _each3.default)(valuesByIndexAndPath[whichField], function (x, path) {
+          (0, _forEach2.default)(valuesByIndexAndPath[whichField], function (x, path) {
             knownPaths[path] = true;
           });
         }
@@ -285,7 +279,7 @@ var DocumentSorter = exports.DocumentSorter = (function () {
       if (!knownPaths) {
         // Easy case: no use of arrays.
         var soleKey = (0, _map3.default)(valuesByIndexAndPath, function (values) {
-          if (!(0, _has3.default)(values, '')) {
+          if (!values.hasOwnProperty('')) {
             throw Error('no value in sole key case?');
           }
           return values[''];
@@ -294,12 +288,12 @@ var DocumentSorter = exports.DocumentSorter = (function () {
         return;
       }
 
-      (0, _each3.default)(knownPaths, function (x, path) {
+      (0, _forEach2.default)(knownPaths, function (x, path) {
         var key = (0, _map3.default)(valuesByIndexAndPath, function (values) {
-          if ((0, _has3.default)(values, '')) {
+          if (values.hasOwnProperty('')) {
             return values[''];
           }
-          if (!(0, _has3.default)(values, path)) {
+          if (!values.hasOwnProperty(path)) {
             throw Error('missing path?');
           }
           return values[path];
@@ -391,7 +385,7 @@ var DocumentSorter = exports.DocumentSorter = (function () {
       // If we are only sorting by distance, then we're not going to bother to
       // build a key filter.
       // XXX figure out how geoqueries interact with this stuff
-      if ((0, _isEmpty3.default)(this._sortSpecParts)) {
+      if (_checkTypes2.default.emptyArray(this._sortSpecParts)) {
         return;
       }
 
@@ -404,11 +398,11 @@ var DocumentSorter = exports.DocumentSorter = (function () {
       }
 
       var constraintsByPath = {};
-      (0, _each3.default)(this._sortSpecParts, function (spec, i) {
+      (0, _forEach2.default)(this._sortSpecParts, function (spec, i) {
         constraintsByPath[spec.path] = [];
       });
 
-      (0, _each3.default)(selector, function (subSelector, key) {
+      (0, _forEach2.default)(selector, function (subSelector, key) {
         // XXX support $and and $or
 
         var constraints = constraintsByPath[key];
@@ -435,8 +429,8 @@ var DocumentSorter = exports.DocumentSorter = (function () {
         }
 
         if ((0, _Document.isOperatorObject)(subSelector)) {
-          (0, _each3.default)(subSelector, function (operand, operator) {
-            if ((0, _contains3.default)(['$lt', '$lte', '$gt', '$gte'], operator)) {
+          (0, _forEach2.default)(subSelector, function (operand, operator) {
+            if ((0, _indexOf3.default)(['$lt', '$lte', '$gt', '$gte'], operator) >= 0) {
               // XXX this depends on us knowing that these operators don't use any
               // of the arguments to compileElementSelector other than operand.
               constraints.push(_DocumentMatcher.ELEMENT_OPERATORS[operator].compileElementSelector(operand));
@@ -460,13 +454,14 @@ var DocumentSorter = exports.DocumentSorter = (function () {
       // others; we shouldn't create a key filter unless the first sort field is
       // restricted, though after that point we can restrict the other sort fields
       // or not as we wish.
-      if ((0, _isEmpty3.default)(constraintsByPath[this._sortSpecParts[0].path])) {
+      var currConstraint = constraintsByPath[this._sortSpecParts[0].path];
+      if (!_checkTypes2.default.assigned(currConstraint) || _checkTypes2.default.emptyArray(currConstraint)) {
         return;
       }
 
       this._keyFilter = function (key) {
-        return (0, _all3.default)(this._sortSpecParts, function (specPart, index) {
-          return (0, _all3.default)(constraintsByPath[specPart.path], function (f) {
+        return (0, _every3.default)(this._sortSpecParts, function (specPart, index) {
+          return (0, _every3.default)(constraintsByPath[specPart.path], function (f) {
             return f(key[index]);
           });
         });

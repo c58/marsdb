@@ -7,6 +7,14 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.Collection = undefined;
 
+var _forEach = require('fast.js/forEach');
+
+var _forEach2 = _interopRequireDefault(_forEach);
+
+var _map2 = require('fast.js/map');
+
+var _map3 = _interopRequireDefault(_map2);
+
 var _eventemitter = require('eventemitter3');
 
 var _eventemitter2 = _interopRequireDefault(_eventemitter);
@@ -182,7 +190,7 @@ var Collection = exports.Collection = (function (_EventEmitter) {
     value: function insertAll(docs, options) {
       var _this3 = this;
 
-      return Promise.all(docs.map(function (d) {
+      return Promise.all((0, _map3.default)(docs, function (d) {
         return _this3.insert(d, options);
       }));
     }
@@ -212,16 +220,16 @@ var Collection = exports.Collection = (function (_EventEmitter) {
       return this.find(query).exec().then(function (docs) {
         (0, _invariant2.default)(docs.length <= 1 || options.multi, 'remove(..): multi removing is not enabled by options.multi');
 
-        var removeStorgePromises = docs.map(function (d) {
+        var removeStorgePromises = (0, _map3.default)(docs, function (d) {
           return _this4.storageManager.delete(d._id);
         });
-        var removeIndexPromises = docs.map(function (d) {
+        var removeIndexPromises = (0, _map3.default)(docs, function (d) {
           return _this4.indexManager.deindexDocument(d);
         });
         var allPromises = removeStorgePromises.concat(removeIndexPromises);
 
         return Promise.all(allPromises).then(function () {
-          docs.forEach(function (d) {
+          (0, _forEach2.default)(docs, function (d) {
             return _this4.emit('remove', null, d);
           });
           return docs;
@@ -258,20 +266,20 @@ var Collection = exports.Collection = (function (_EventEmitter) {
         var original = result.original;
         var updated = result.updated;
 
-        updated = updated.map(function (x) {
+        updated = (0, _map3.default)(updated, function (x) {
           return _this5.create(x);
         });
 
-        var updateStorgePromises = updated.map(function (d) {
+        var updateStorgePromises = (0, _map3.default)(updated, function (d) {
           return _this5.storageManager.persist(d._id, d);
         });
-        var updateIndexPromises = updated.map(function (d, i) {
+        var updateIndexPromises = (0, _map3.default)(updated, function (d, i) {
           return _this5.indexManager.reindexDocument(original[i], d);
         });
         var allPromises = updateStorgePromises.concat(updateIndexPromises);
 
         return Promise.all(allPromises).then(function () {
-          updated.forEach(function (d, i) {
+          (0, _forEach2.default)(updated, function (d, i) {
             _this5.emit('update', d, original[i]);
           });
           return {

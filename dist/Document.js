@@ -13,25 +13,21 @@ exports.isIndexable = isIndexable;
 exports.isOperatorObject = isOperatorObject;
 exports.isNumericKey = isNumericKey;
 
-var _assign2 = require('lodash/object/assign');
+var _assign2 = require('fast.js/object/assign');
 
 var _assign3 = _interopRequireDefault(_assign2);
 
-var _isArray2 = require('lodash/lang/isArray');
+var _checkTypes = require('check-types');
 
-var _isArray3 = _interopRequireDefault(_isArray2);
+var _checkTypes2 = _interopRequireDefault(_checkTypes);
 
-var _isString2 = require('lodash/lang/isString');
+var _forEach = require('fast.js/forEach');
 
-var _isString3 = _interopRequireDefault(_isString2);
+var _forEach2 = _interopRequireDefault(_forEach);
 
-var _each2 = require('lodash/collection/each');
+var _keys2 = require('fast.js/object/keys');
 
-var _each3 = _interopRequireDefault(_each2);
-
-var _size2 = require('lodash/collection/size');
-
-var _size3 = _interopRequireDefault(_size2);
+var _keys3 = _interopRequireDefault(_keys2);
 
 var _invariant = require('invariant');
 
@@ -58,7 +54,7 @@ function Document(db) {
   (0, _invariant2.default)(db, 'Document(...): you must give a collection for the document');
 
   // Ensure raw object
-  raw = (0, _isString3.default)(raw) ? _EJSON2.default.parse(raw) : raw;
+  raw = _checkTypes2.default.string(raw) ? _EJSON2.default.parse(raw) : raw;
 
   // Define internal methods
   Object.defineProperty(this, 'remove', {
@@ -117,14 +113,14 @@ function selectorIsId(selector) {
 }
 
 function selectorIsIdPerhapsAsObject(selector) {
-  return selectorIsId(selector) || selector && (typeof selector === 'undefined' ? 'undefined' : _typeof(selector)) === 'object' && selector._id && selectorIsId(selector._id) && (0, _size3.default)(selector) === 1;
+  return selectorIsId(selector) || selector && (typeof selector === 'undefined' ? 'undefined' : _typeof(selector)) === 'object' && selector._id && selectorIsId(selector._id) && (0, _keys3.default)(selector).length === 1;
 }
 
 // Like _isArray, but doesn't regard polyfilled Uint8Arrays on old browsers as
 // arrays.
 // XXX maybe this should be EJSON.isArray
 function isArray(x) {
-  return (0, _isArray3.default)(x) && !_EJSON2.default.isBinary(x);
+  return _checkTypes2.default.array(x) && !_EJSON2.default.isBinary(x);
 }
 
 // XXX maybe this should be EJSON.isObject, though EJSON doesn't know about
@@ -147,7 +143,7 @@ function isOperatorObject(valueSelector, inconsistentOK) {
   }
 
   var theseAreOperators = undefined;
-  (0, _each3.default)(valueSelector, function (value, selKey) {
+  (0, _forEach2.default)(valueSelector, function (value, selKey) {
     var thisIsOperator = selKey.substr(0, 1) === '$';
     if (theseAreOperators === undefined) {
       theseAreOperators = thisIsOperator;

@@ -11,69 +11,41 @@ exports.equalityElementMatcher = equalityElementMatcher;
 exports.makeLookupFunction = makeLookupFunction;
 exports.expandArraysInBranches = expandArraysInBranches;
 
-var _isEmpty2 = require('lodash/lang/isEmpty');
+var _checkTypes = require('check-types');
 
-var _isEmpty3 = _interopRequireDefault(_isEmpty2);
+var _checkTypes2 = _interopRequireDefault(_checkTypes);
 
-var _isEqual2 = require('lodash/lang/isEqual');
+var _forEach = require('fast.js/forEach');
 
-var _isEqual3 = _interopRequireDefault(_isEqual2);
+var _forEach2 = _interopRequireDefault(_forEach);
 
-var _isArray2 = require('lodash/lang/isArray');
-
-var _isArray3 = _interopRequireDefault(_isArray2);
-
-var _isNumber2 = require('lodash/lang/isNumber');
-
-var _isNumber3 = _interopRequireDefault(_isNumber2);
-
-var _isObject2 = require('lodash/lang/isObject');
-
-var _isObject3 = _interopRequireDefault(_isObject2);
-
-var _isNaN2 = require('lodash/lang/isNaN');
-
-var _isNaN3 = _interopRequireDefault(_isNaN2);
-
-var _has2 = require('lodash/object/has');
-
-var _has3 = _interopRequireDefault(_has2);
-
-var _keys2 = require('lodash/object/keys');
+var _keys2 = require('fast.js/object/keys');
 
 var _keys3 = _interopRequireDefault(_keys2);
 
-var _each2 = require('lodash/collection/each');
-
-var _each3 = _interopRequireDefault(_each2);
-
-var _contains2 = require('lodash/collection/contains');
-
-var _contains3 = _interopRequireDefault(_contains2);
-
-var _all2 = require('lodash/collection/all');
-
-var _all3 = _interopRequireDefault(_all2);
-
-var _map2 = require('lodash/collection/map');
+var _map2 = require('fast.js/map');
 
 var _map3 = _interopRequireDefault(_map2);
 
-var _any2 = require('lodash/collection/any');
+var _some2 = require('fast.js/array/some');
 
-var _any3 = _interopRequireDefault(_any2);
+var _some3 = _interopRequireDefault(_some2);
 
-var _identity2 = require('lodash/utility/identity');
+var _every2 = require('fast.js/array/every');
 
-var _identity3 = _interopRequireDefault(_identity2);
+var _every3 = _interopRequireDefault(_every2);
 
-var _EJSON = require('./EJSON');
+var _indexOf2 = require('fast.js/array/indexOf');
 
-var _EJSON2 = _interopRequireDefault(_EJSON);
+var _indexOf3 = _interopRequireDefault(_indexOf2);
 
 var _geojsonUtils = require('geojson-utils');
 
 var _geojsonUtils2 = _interopRequireDefault(_geojsonUtils);
+
+var _EJSON = require('./EJSON');
+
+var _EJSON2 = _interopRequireDefault(_EJSON);
 
 var _Document = require('./Document');
 
@@ -192,7 +164,7 @@ var DocumentMatcher = exports.DocumentMatcher = (function () {
   }, {
     key: '_getPaths',
     value: function _getPaths() {
-      return (0, _keys3.default)(this._paths);
+      return _checkTypes2.default.object(this._paths) ? (0, _keys3.default)(this._paths) : null;
     }
   }, {
     key: 'hasGeoQuery',
@@ -228,11 +200,11 @@ var compileDocumentSelector = function compileDocumentSelector(docSelector, matc
   var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
   var docMatchers = [];
-  (0, _each3.default)(docSelector, function (subSelector, key) {
+  (0, _forEach2.default)(docSelector, function (subSelector, key) {
     if (key.substr(0, 1) === '$') {
       // Outer operators are either logical operators (they recurse back into
       // this function), or $where.
-      if (!(0, _has3.default)(LOGICAL_OPERATORS, key)) {
+      if (!LOGICAL_OPERATORS.hasOwnProperty(key)) {
         throw new Error('Unrecognized logical operator: ' + key);
       }
       matcher._isSimple = false;
@@ -283,7 +255,7 @@ var convertElementMatcherToBranchedMatcher = function convertElementMatcherToBra
       expanded = expandArraysInBranches(branches, options.dontIncludeLeafArrays);
     }
     var ret = {};
-    ret.result = (0, _any3.default)(expanded, function (element) {
+    ret.result = (0, _some3.default)(expanded, function (element) {
       var matched = elementMatcher(element.value);
 
       // Special case for $elemMatch: it means 'true, and use this as an array
@@ -316,7 +288,7 @@ function regexpElementMatcher(regexp) {
     if (value instanceof RegExp) {
       // Comparing two regexps means seeing if the regexps are identical
       // (really!). Underscore knows how.
-      return (0, _isEqual3.default)(value, regexp);
+      return String(value) === String(regexp);
     }
     // Regexps only work against strings.
     if (typeof value !== 'string') {
@@ -364,19 +336,19 @@ var operatorBranchedMatcher = function operatorBranchedMatcher(valueSelector, ma
   // is OK.
 
   var operatorMatchers = [];
-  (0, _each3.default)(valueSelector, function (operand, operator) {
+  (0, _forEach2.default)(valueSelector, function (operand, operator) {
     // XXX we should actually implement $eq, which is new in 2.6
-    var simpleRange = (0, _contains3.default)(['$lt', '$lte', '$gt', '$gte'], operator) && (0, _isNumber3.default)(operand);
-    var simpleInequality = operator === '$ne' && !(0, _isObject3.default)(operand);
-    var simpleInclusion = (0, _contains3.default)(['$in', '$nin'], operator) && (0, _isArray3.default)(operand) && !(0, _any3.default)(operand, _isObject3.default);
+    var simpleRange = (0, _indexOf3.default)(['$lt', '$lte', '$gt', '$gte'], operator) >= 0 && _checkTypes2.default.number(operand);
+    var simpleInequality = operator === '$ne' && !_checkTypes2.default.object(operand);
+    var simpleInclusion = (0, _indexOf3.default)(['$in', '$nin'], operator) >= 0 && _checkTypes2.default.array(operand) && !(0, _some3.default)(operand, _checkTypes2.default.object);
 
     if (!(operator === '$eq' || simpleRange || simpleInclusion || simpleInequality)) {
       matcher._isSimple = false;
     }
 
-    if ((0, _has3.default)(VALUE_OPERATORS, operator)) {
+    if (VALUE_OPERATORS.hasOwnProperty(operator)) {
       operatorMatchers.push(VALUE_OPERATORS[operator](operand, valueSelector, matcher, isRoot));
-    } else if ((0, _has3.default)(ELEMENT_OPERATORS, operator)) {
+    } else if (ELEMENT_OPERATORS.hasOwnProperty(operator)) {
       var options = ELEMENT_OPERATORS[operator];
       operatorMatchers.push(convertElementMatcherToBranchedMatcher(options.compileElementSelector(operand, valueSelector, matcher), options));
     } else {
@@ -388,7 +360,7 @@ var operatorBranchedMatcher = function operatorBranchedMatcher(valueSelector, ma
 };
 
 var compileArrayOfDocumentSelectors = function compileArrayOfDocumentSelectors(selectors, matcher, inElemMatch) {
-  if (!(0, _Document.isArray)(selectors) || (0, _isEmpty3.default)(selectors)) {
+  if (!(0, _Document.isArray)(selectors) || _checkTypes2.default.emptyArray(selectors)) {
     throw Error('$and/$or/$nor must be nonempty array');
   }
   return (0, _map3.default)(selectors, function (subSelector) {
@@ -416,7 +388,7 @@ var LOGICAL_OPERATORS = {
     }
 
     return function (doc) {
-      var result = (0, _any3.default)(matchers, function (f) {
+      var result = (0, _some3.default)(matchers, function (f) {
         return f(doc).result;
       });
       // $or does NOT set arrayIndices when it has multiple
@@ -428,7 +400,7 @@ var LOGICAL_OPERATORS = {
   $nor: function $nor(subSelector, matcher, inElemMatch) {
     var matchers = compileArrayOfDocumentSelectors(subSelector, matcher, inElemMatch);
     return function (doc) {
-      var result = (0, _all3.default)(matchers, function (f) {
+      var result = (0, _every3.default)(matchers, function (f) {
         return !f(doc).result;
       });
       // Never set arrayIndices, because we only match if nothing in particular
@@ -497,7 +469,7 @@ var VALUE_OPERATORS = {
   },
   // $options just provides options for $regex; its logic is inside $regex
   $options: function $options(operand, valueSelector) {
-    if (!(0, _has3.default)(valueSelector, '$regex')) {
+    if (!_checkTypes2.default.object(valueSelector) || !valueSelector.hasOwnProperty('$regex')) {
       throw Error('$options needs a $regex');
     }
     return everythingMatcher;
@@ -514,12 +486,12 @@ var VALUE_OPERATORS = {
       throw Error('$all requires array');
     }
     // Not sure why, but this seems to be what MongoDB does.
-    if ((0, _isEmpty3.default)(operand)) {
+    if (_checkTypes2.default.emptyArray(operand)) {
       return nothingMatcher;
     }
 
     var branchedMatchers = [];
-    (0, _each3.default)(operand, function (criterion) {
+    (0, _forEach2.default)(operand, function (criterion) {
       // XXX handle $all/$elemMatch combination
       if ((0, _Document.isOperatorObject)(criterion)) {
         throw Error('no $ expressions in $all');
@@ -542,7 +514,7 @@ var VALUE_OPERATORS = {
     // marked with a $geometry property.
 
     var maxDistance, point, distance;
-    if ((0, _Document.isPlainObject)(operand) && (0, _has3.default)(operand, '$geometry')) {
+    if ((0, _Document.isPlainObject)(operand) && operand.hasOwnProperty('$geometry')) {
       // GeoJSON '2dsphere' mode.
       maxDistance = operand.$maxDistance;
       point = operand.$geometry;
@@ -584,7 +556,7 @@ var VALUE_OPERATORS = {
       // each within-$maxDistance branching point.
       branchedValues = expandArraysInBranches(branchedValues);
       var result = { result: false };
-      (0, _each3.default)(branchedValues, function (branch) {
+      (0, _forEach2.default)(branchedValues, function (branch) {
         var curDistance = distance(branch.value);
         // Skip branches that aren't real points or are too far away.
         if (curDistance === null || curDistance > maxDistance) {
@@ -613,7 +585,7 @@ var distanceCoordinatePairs = function distanceCoordinatePairs(a, b) {
   b = pointToArray(b);
   var x = a[0] - b[0];
   var y = a[1] - b[1];
-  if ((0, _isNaN3.default)(x) || (0, _isNaN3.default)(y)) {
+  if (!_checkTypes2.default.number(x) || !_checkTypes2.default.number(y)) {
     return null;
   }
   return Math.sqrt(x * x + y * y);
@@ -623,7 +595,9 @@ var distanceCoordinatePairs = function distanceCoordinatePairs(a, b) {
 // the second one to y no matter what user passes.
 // In case user passes { lon: x, lat: y } returns [x, y]
 var pointToArray = function pointToArray(point) {
-  return (0, _map3.default)(point, _identity3.default);
+  return (0, _map3.default)(point, function (x) {
+    return x;
+  });
 };
 
 // Helper for $lt/$gt/$lte/$gte.
@@ -708,7 +682,7 @@ var ELEMENT_OPERATORS = exports.ELEMENT_OPERATORS = {
       }
 
       var elementMatchers = [];
-      (0, _each3.default)(operand, function (option) {
+      (0, _forEach2.default)(operand, function (option) {
         if (option instanceof RegExp) {
           elementMatchers.push(regexpElementMatcher(option));
         } else if ((0, _Document.isOperatorObject)(option)) {
@@ -723,7 +697,7 @@ var ELEMENT_OPERATORS = exports.ELEMENT_OPERATORS = {
         if (value === undefined) {
           value = null;
         }
-        return (0, _any3.default)(elementMatchers, function (e) {
+        return (0, _some3.default)(elementMatchers, function (e) {
           return e(value);
         });
       };
@@ -1000,7 +974,7 @@ function makeLookupFunction(key, options) {
     // 'look up this index' in that case, not 'also look up this index in all
     // the elements of the array'.
     if ((0, _Document.isArray)(firstLevel) && !(nextPartIsNumeric && options.forSort)) {
-      (0, _each3.default)(firstLevel, function (branch, arrayIndex) {
+      (0, _forEach2.default)(firstLevel, function (branch, arrayIndex) {
         if ((0, _Document.isPlainObject)(branch)) {
           appendToResult(lookupRest(branch, arrayIndices.concat(arrayIndex)));
         }
@@ -1013,7 +987,7 @@ function makeLookupFunction(key, options) {
 
 function expandArraysInBranches(branches, skipTheArrays) {
   var branchesOut = [];
-  (0, _each3.default)(branches, function (branch) {
+  (0, _forEach2.default)(branches, function (branch) {
     var thisIsArray = (0, _Document.isArray)(branch.value);
     // We include the branch itself, *UNLESS* we it's an array that we're going
     // to iterate and we're told to skip arrays.  (That's right, we include some
@@ -1026,7 +1000,7 @@ function expandArraysInBranches(branches, skipTheArrays) {
       });
     }
     if (thisIsArray && !branch.dontIterate) {
-      (0, _each3.default)(branch.value, function (leaf, i) {
+      (0, _forEach2.default)(branch.value, function (leaf, i) {
         branchesOut.push({
           value: leaf,
           arrayIndices: (branch.arrayIndices || []).concat(i)
@@ -1059,7 +1033,7 @@ var andSomeMatchers = function andSomeMatchers(subMatchers) {
 
   return function (docOrBranches) {
     var ret = {};
-    ret.result = (0, _all3.default)(subMatchers, function (f) {
+    ret.result = (0, _every3.default)(subMatchers, function (f) {
       var subResult = f(docOrBranches);
       // Copy a 'distance' number out of the first sub-matcher that has
       // one. Yes, this means that if there are multiple $near fields in a
