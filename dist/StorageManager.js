@@ -7,10 +7,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.StorageManager = undefined;
 
-var _keys2 = require('fast.js/object/keys');
-
-var _keys3 = _interopRequireDefault(_keys2);
-
 var _forEach = require('fast.js/forEach');
 
 var _forEach2 = _interopRequireDefault(_forEach);
@@ -71,7 +67,7 @@ var StorageManager = exports.StorageManager = (function () {
     value: function destroy() {
       var _this2 = this;
 
-      return this._loadedPromise.then(function () {
+      return this.loaded().then(function () {
         _this2._storage = {};
       });
     }
@@ -80,7 +76,7 @@ var StorageManager = exports.StorageManager = (function () {
     value: function persist(key, value) {
       var _this3 = this;
 
-      return this._loadedPromise.then(function () {
+      return this.loaded().then(function () {
         _this3._storage[key] = _EJSON2.default.clone(value);
       });
     }
@@ -89,7 +85,7 @@ var StorageManager = exports.StorageManager = (function () {
     value: function _delete(key) {
       var _this4 = this;
 
-      return this._loadedPromise.then(function () {
+      return this.loaded().then(function () {
         delete _this4._storage[key];
       });
     }
@@ -98,8 +94,8 @@ var StorageManager = exports.StorageManager = (function () {
     value: function get(key) {
       var _this5 = this;
 
-      return this._loadedPromise.then(function () {
-        return _EJSON2.default.clone(_this5._storage[key]);
+      return this.loaded().then(function () {
+        return _this5._storage[key];
       });
     }
   }, {
@@ -108,9 +104,9 @@ var StorageManager = exports.StorageManager = (function () {
       var _this6 = this;
 
       var emitter = new _eventemitter2.default();
-      this._loadedPromise.then(function () {
-        (0, _forEach2.default)((0, _keys3.default)(_this6._storage), function (k) {
-          emitter.emit('data', { value: _EJSON2.default.clone(_this6._storage[k]) });
+      this.loaded().then(function () {
+        (0, _forEach2.default)(_this6._storage, function (v, k) {
+          emitter.emit('data', { value: v });
         });
         emitter.emit('end');
       });

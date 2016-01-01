@@ -45,6 +45,10 @@ var _DocumentSorter = require('./DocumentSorter');
 
 var _DocumentSorter2 = _interopRequireDefault(_DocumentSorter);
 
+var _EJSON = require('./EJSON');
+
+var _EJSON2 = _interopRequireDefault(_EJSON);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
@@ -301,7 +305,10 @@ var Cursor = (function (_EventEmitter) {
       var _this3 = this;
 
       this._executing = this._matchObjects().then(function (docs) {
-        return _this3.processPipeline(docs);
+        var clonned = (0, _map3.default)(docs, function (doc) {
+          return _EJSON2.default.clone(doc);
+        });
+        return _this3.processPipeline(clonned);
       }).then(function (docs) {
         _this3._executing = null;
         return docs;
