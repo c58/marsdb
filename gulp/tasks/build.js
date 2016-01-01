@@ -15,9 +15,6 @@ var path = require('path');
 
 gulp.task('build', [
   'build:browser',
-  'build:browser:angular',
-  'build:browser:localStorage',
-  //'build:browser:localForage',
   'build:browser:min',
   'build:browser:tests',
   'build:browser:polyfills',
@@ -46,60 +43,6 @@ gulp.task('build:browser:polyfills', function() {
 
   return browserify(customOpts).bundle()
     .pipe(source(config.browser.bundlePolyfillsName))
-    .pipe(buffer())
-    .pipe(uglify())
-    .pipe(gulp.dest(config.build))
-});
-
-gulp.task('build:browser:angular', ['build:node'], function() {
-  var customOpts = {
-    entries: config.browser.entryAngular,
-    debug: false,
-    fullPaths: false
-  };
-
-  return browserify(customOpts)
-    .exclude('../Collection')
-    .exclude('../CursorObservable')
-    .exclude('angular')
-    .bundle()
-    .pipe(source(config.browser.bundleAngularName))
-    .pipe(buffer())
-    .pipe(uglify())
-    .pipe(gulp.dest(config.build))
-});
-
-gulp.task('build:browser:localStorage', ['build:node'], function() {
-  var customOpts = {
-    entries: config.browser.entryLocalStorage,
-    debug: false,
-    fullPaths: false,
-    standalone: 'Mars.Storages.LocalStorage',
-  };
-
-  return browserify(customOpts)
-    .exclude('../StorageManager')
-    .exclude('../EJSON')
-    .bundle()
-    .pipe(source(config.browser.bundleLocalStorageName))
-    .pipe(buffer())
-    .pipe(uglify())
-    .pipe(gulp.dest(config.build))
-});
-
-gulp.task('build:browser:localForage', ['build:node'], function() {
-  var customOpts = {
-    entries: config.browser.entryLocalForage,
-    debug: false,
-    fullPaths: false,
-    standalone: 'Mars.Storages.LocalForage',
-  };
-
-  return browserify(customOpts)
-    .exclude('../StorageManager')
-    .exclude('../EJSON')
-    .bundle()
-    .pipe(source(config.browser.bundleLocalForageName))
     .pipe(buffer())
     .pipe(uglify())
     .pipe(gulp.dest(config.build))

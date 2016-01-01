@@ -130,14 +130,18 @@ var CursorObservable = (function (_Cursor) {
         _this2._parentCursor = cursor;
       };
 
+      var cursorThenGenerator = function cursorThenGenerator(currPromise) {
+        return function (successFn, failFn) {
+          successFn = _this2._prepareListener(successFn);
+          return createStoppablePromise(currPromise.then(successFn, failFn));
+        };
+      };
+
       var createStoppablePromise = function createStoppablePromise(currPromise) {
         return {
           parent: parentSetter,
           stop: stopper,
-          then: function then(successFn, failFn) {
-            successFn = _this2._prepareListener(successFn);
-            return createStoppablePromise(currPromise.then(successFn, failFn));
-          }
+          then: cursorThenGenerator(currPromise)
         };
       };
 

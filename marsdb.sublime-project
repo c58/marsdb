@@ -10,10 +10,6 @@
 			"path": "test",
 		},
 		{
-			"name": "Example",
-			"path": "example"
-		},
-		{
 			"name": "Gulp",
 			"path": "gulp"
 		},
