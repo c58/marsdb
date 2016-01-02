@@ -3,12 +3,11 @@
 MarsDB
 =========
 
-[![Join the chat at https://gitter.im/c58/marsdb](https://badges.gitter.im/c58/marsdb.svg)](https://gitter.im/c58/marsdb?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
 [![Build Status](https://travis-ci.org/c58/marsdb.svg?branch=master)](https://travis-ci.org/c58/marsdb)
 [![npm version](https://badge.fury.io/js/marsdb.svg)](https://www.npmjs.com/package/marsdb)
 [![Coverage Status](https://coveralls.io/repos/c58/marsdb/badge.svg?branch=master&service=github)](https://coveralls.io/github/c58/marsdb?branch=master)
-[![Dependency Status](https://david-dm.org/c58/marsdb.svg)](https://david-dm.org/c58/marsdb)
+[![Dependency Status](https://david-dm.org/c58/marsdb.svg)](https://david-dm.org/c58/marsdb) 
+[![Join the chat at https://gitter.im/c58/marsdb](https://badges.gitter.im/c58/marsdb.svg)](https://gitter.im/c58/marsdb?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 MarsDB is a lightweight client-side database.
 It's based on a Meteor’s `minimongo` matching/modifying implementation. It's carefully written on `ES6`, have a `Promise` based interface and may be backed with any storage implementation (LevelUP, LocalStorage, IndexedDB, etc). For now implemented only LocalStorage and [LocalForage](https://github.com/mozilla/localForage) storage managers. It's also supports `observable` cursors.
