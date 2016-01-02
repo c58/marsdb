@@ -1,3 +1,4 @@
+var EventEmitter = require('eventemitter3');
 var Collection = require('./dist/Collection').default;
 var CursorObservable = require('./dist/CursorObservable').default;
 var StorageManager = require('./dist/StorageManager').default;
@@ -15,4 +16,5 @@ module.exports = {
   Collection: Collection,
   CursorObservable: CursorObservable,
   StorageManager: StorageManager,
+  EventEmitter: EventEmitter
 };
