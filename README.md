@@ -25,6 +25,22 @@ You can use it in any JS environment (Browser, Electron, NW.js, Node.js).
 * **Observable queries** - live queries just like in Meteor, but with simplier interface
 * **Reactive joins** – out of the box
 
+## Bindings
+
+* [React](https://github.com/c58/marsdb-react)
+* [AngularJS 1.x](https://github.com/c58/marsdb-angular)
+
+## Storage implementations
+
+* In-memory (built-in default)
+* [LocalForage](https://github.com/c58/marsdb-localforage)
+* [LocalStorage](https://github.com/c58/marsdb-localstorage)
+
+## Server-side synchronizers
+
+* [Meteor](https://github.com/c58/marsdb-meteor)
+* REST (pull-request if you need it ;))
+
 ## Examples
 
 ### Using within non-ES6 environment
@@ -174,7 +190,6 @@ posts.remove({authorId: {$in: [1,2,3]}})
 * Keep track of multiple remove/update documents in selector (allow only if opations.multi passed)
 * Upsert updating
 * Indexes support for some kind of simple requests {a: '^b'}, {a: {$lt: 9}}
-* Some set of backends
 * Documentation
 
 ## Contributing
