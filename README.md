@@ -52,7 +52,7 @@ It sets in a window/global: Promise, Set and Symbol.
 ### Create a collection
 ```javascript
 import Collection from ‘marsdb’;
-import LocalStorageManager from 'marsdb/lib/LocalStorageManager';
+import LocalStorageManager from 'marsdb-localstorage';
 
 // Setup different id generator and storage managers
 // Default storage is in-memory
@@ -101,7 +101,7 @@ posts.find({author: 'not_existing_name'})
   .aggregate(user => user.name)
 ```
 ### Find with observing changes
-Observable cursor returned only by a `find` method of a collection. Updates of the cursor is batched and debounced (default batch size is `20` and debounce time is `1000 / 15` ms). You can change the paramters by `batchSize` and `debounce` methods of an observable cursor (methods is chained).
+Observable cursor returned by a `find` and `findOne` methods of a collection. Updates of the cursor is batched and debounced (default batch size is `20` and debounce time is `1000 / 15` ms). You can change the paramters by `batchSize` and `debounce` methods of an observable cursor (methods is chained).
 
 ```javascript
 const posts = new Collection(‘posts’);
