@@ -1,6 +1,6 @@
 <div style="text-align:center"><img src="https://static.studytime.me/marsdb.png" /></div>
 
-MarsDB
+[MarsDB](https://github.com/c58/marsdb)
 =========
 
 [![Build Status](https://travis-ci.org/c58/marsdb.svg?branch=master)](https://travis-ci.org/c58/marsdb)
