@@ -54,24 +54,6 @@ describe('Collection', () => {
   });
 
 
-  describe('#static', function () {
-    it('should set static method of the model', function () {
-      const db = new Collection('test');
-      db.static('testStatic', function() {
-        return true;
-      });
-      expect(db.testStatic).to.be.a('function');
-      expect(db.testStatic()).to.be.equals(true);
-    });
-
-    it('should throw an exception if static method with given name exists', function () {
-      const db = new Collection('test');
-      db.static('testStatic', function() {});
-      (() => db.static('testStatic')).should.throw(Error);
-    });
-  });
-
-
   describe('#ensureIndex', function () {
     /*it('should ensure index', function () {
       const db = new Collection('test');
