@@ -17,7 +17,7 @@ describe('Cursor', () => {
       db.insert({a: 'c', b: 3, c: 'some text 3', g: 'g1', f: 11}),
       db.insert({a: 'd', b: 4, c: 'some text 4', g: 'g1', f: 12}),
       db.insert({a: 'e', b: 5, c: 'some text 5', g: 'g2', d: 234, f: 2}),
-      db.insert({a: 'f', b: 6, c: 'some text 6', g: 'g2', f: 20}),
+      db.insert({a: 'f', b: 6, c: 'some text 6', g: 'g2', f: 20, k: {a: 1}}),
       db.insert({a: 'g', b: 7, c: 'some text 7', g: 'g2', f: 21}),
     ]);
   });
@@ -27,6 +27,41 @@ describe('Cursor', () => {
   });
 
 
+  describe('#exec', function () {
+    it('should clone docs by default', function () {
+      const cursor = new Cursor(db);
+      cursor.find({b: {$gt: 4}}).skip(1).sort({b: 1});
+      return cursor.exec().then((docs) => {
+        docs.should.have.length(2);
+        docs[0].k.a.should.be.equals(1);
+        docs[0].b.should.be.equals(6);
+        docs[0].b = 7;
+        docs[0].k.a = 2;
+        return cursor.exec().then((docs) => {
+          docs.should.have.length(2);
+          docs[0].k.a.should.be.equals(1);
+          docs[0].b.should.be.equals(6);
+        });
+      });
+    });
+
+    it('should NOT clone docs when `options.noClone` passed', function () {
+      const cursor = new Cursor(db, {}, {noClone: true});
+      cursor.find({b: {$gt: 4}}).skip(1).sort({b: 1});
+      return cursor.exec().then((docs) => {
+        docs.should.have.length(2);
+        docs[0].k.a.should.be.equals(1);
+        docs[0].b.should.be.equals(6);
+        docs[0].b = 7;
+        docs[0].k.a = 2;
+        return cursor.exec().then((docs) => {
+          docs.should.have.length(2);
+          docs[0].b.should.be.equals(6);
+          docs[0].k.a.should.be.equals(2);
+        });
+      });
+    });
+  });
 
   describe('#skip', function () {
     it('should skip documents with sorting', function () {
@@ -406,16 +441,4 @@ describe('Cursor', () => {
     });
   });
 
-
-  describe('#ids', function () {
-    it('should return list of ids without pipeline processing', function () {
-      const cursor = new Cursor(db);
-      cursor.find({b: {$gt: 5}}).sort({b: 1}).aggregate(d => {
-        throw new Error('should not be there');
-      });
-      return cursor.ids().then((ids) => {
-        ids.should.have.length(2);
-      });
-    });
-  });
 });
