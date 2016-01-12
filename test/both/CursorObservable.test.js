@@ -344,17 +344,24 @@ describe('CursorObservable', () => {
         called = true;
       });
       setTimeout(() => {
-        if (called) {
-          done(new Error('Can\'t be called before debounce'))
-        }
-      }, 90);
-      setTimeout(() => {
         if (!called) {
-          done(new Error('Must be called after debounce'))
-        } else {
-          done();
+          done(new Error('Should be called'));
         }
-      }, 110);
+        db.insert({b: 4.5});
+        called = false;
+        setTimeout(() => {
+          if (called) {
+            done(new Error('Can\'t be called before debounce'))
+          }
+        }, 90);
+        setTimeout(() => {
+          if (!called) {
+            done(new Error('Must be called after debounce'))
+          } else {
+            done();
+          }
+        }, 120);
+      }, 10);
     });
 
     it('should debounce update calls', function (done) {
@@ -365,28 +372,35 @@ describe('CursorObservable', () => {
         called = true;
       });
       setTimeout(() => {
-        if (called) {
-          done(new Error('Can\'t be called before debounce'));
+        if (!called) {
+          done(new Error('Should be called'));
         }
         db.insert({b: 4.5});
-      }, 90);
-      setTimeout(() => {
-        if (called) {
-          done(new Error('Can\'t be called before debounce'));
-        }
-      }, 110);
-      setTimeout(() => {
-        if (called) {
-          done(new Error('Can\'t be called before debounce'));
-        }
-      }, 190);
-      setTimeout(() => {
-        if (!called) {
-          done(new Error('Must be called after debounce'));
-        } else {
-          done();
-        }
-      }, 310);
+        called = false;
+        setTimeout(() => {
+          if (called) {
+            done(new Error('Can\'t be called before debounce'));
+          }
+          db.insert({b: 4.5});
+        }, 90);
+        setTimeout(() => {
+          if (called) {
+            done(new Error('Can\'t be called before debounce'));
+          }
+        }, 110);
+        setTimeout(() => {
+          if (called) {
+            done(new Error('Can\'t be called before debounce'));
+          }
+        }, 190);
+        setTimeout(() => {
+          if (!called) {
+            done(new Error('Must be called after debounce'));
+          } else {
+            done();
+          }
+        }, 310);
+      }, 10);
     });
   });
 
@@ -401,10 +415,11 @@ describe('CursorObservable', () => {
       });
 
       setTimeout(() => {
-        if (called) {
-          done(new Error('Can\'t be called before debounce'));
+        if (!called) {
+          done(new Error('Should be called'));
         }
-        Promise.all([1, 2, 3, 4].map(x => db.insert({b: 4.5}))).then(() => {
+        called = false;
+        Promise.all([1, 2, 3, 4, 5].map(x => db.insert({b: 4.5}))).then(() => {
           setTimeout(() => {
             if (called) {
               done(new Error('Can\'t be called before debounce'));
