@@ -1,7 +1,9 @@
 import Collection from '../../lib/Collection';
 import CursorObservable from '../../lib/CursorObservable';
 import chai, {expect} from 'chai';
+import sinon from 'sinon';
 chai.use(require('chai-as-promised'));
+chai.use(require('sinon-chai'));
 chai.should();
 
 
@@ -336,6 +338,7 @@ describe('CursorObservable', () => {
 
 
   describe('#debounce', function () {
+
     it('should change debounce wait time', function (done) {
       var called = false;
       const cursor = new CursorObservable(db);
