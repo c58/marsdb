@@ -67,7 +67,7 @@ Collection.defaultIdGenerator(() => {
 
 const users = new Collection(‘users’);
 ```
-### Find a documents
+### Find documents
 ```javascript
 const posts = new Collection(‘posts’);
 posts.find({author: ‘Bob’})
