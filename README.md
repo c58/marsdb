@@ -37,6 +37,7 @@ You can use it in any JS environment (Browser, Electron, NW.js, Node.js).
 * [LocalForage](https://github.com/c58/marsdb-localforage)
 * [LocalStorage](https://github.com/c58/marsdb-localstorage)
 * [LevelUP](https://github.com/c58/marsdb-levelup)
+* [MongoDB](https://github.com/c58/marsdb-mongo)
 
 ## Server-side synchronizers
 
