@@ -311,7 +311,9 @@ var Collection = exports.Collection = (function (_EventEmitter) {
   }, {
     key: 'find',
     value: function find(query) {
-      return new _defaultCursorClass(this, query);
+      var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+      return new _defaultCursorClass(this, query, options);
     }
 
     /**
@@ -326,7 +328,9 @@ var Collection = exports.Collection = (function (_EventEmitter) {
   }, {
     key: 'findOne',
     value: function findOne(query, sortObj) {
-      return this.find(query).sort(sortObj).limit(1).aggregate(function (docs) {
+      var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
+      return this.find(query, options).sort(sortObj).limit(1).aggregate(function (docs) {
         return docs[0];
       });
     }

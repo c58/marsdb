@@ -521,7 +521,9 @@ var Collection = exports.Collection = (function (_EventEmitter) {
   }, {
     key: 'find',
     value: function find(query) {
-      return new _defaultCursorClass(this, query);
+      var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+      return new _defaultCursorClass(this, query, options);
     }
 
     /**
@@ -536,7 +538,9 @@ var Collection = exports.Collection = (function (_EventEmitter) {
   }, {
     key: 'findOne',
     value: function findOne(query, sortObj) {
-      return this.find(query).sort(sortObj).limit(1).aggregate(function (docs) {
+      var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
+      return this.find(query, options).sort(sortObj).limit(1).aggregate(function (docs) {
         return docs[0];
       });
     }
@@ -608,7 +612,7 @@ var Collection = exports.Collection = (function (_EventEmitter) {
 
 exports.default = Collection;
 
-},{"./CursorObservable":5,"./Document":6,"./DocumentModifier":8,"./IndexManager":12,"./Random":14,"./StorageManager":15,"eventemitter3":18,"fast.js/forEach":24,"fast.js/map":26,"invariant":33}],3:[function(require,module,exports){
+},{"./CursorObservable":5,"./Document":6,"./DocumentModifier":8,"./IndexManager":12,"./Random":14,"./StorageManager":15,"eventemitter3":18,"fast.js/forEach":24,"fast.js/map":29,"invariant":36}],3:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () {
@@ -698,7 +702,7 @@ var CollectionIndex = exports.CollectionIndex = (function () {
 
 exports.default = CollectionIndex;
 
-},{"invariant":33}],4:[function(require,module,exports){
+},{"invariant":36}],4:[function(require,module,exports){
 'use strict';
 
 function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
@@ -719,6 +723,10 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.Cursor = exports.PIPELINE_PROCESSORS = exports.PIPELINE_TYPE = undefined;
+
+var _bind2 = require('fast.js/function/bind');
+
+var _bind3 = _interopRequireDefault(_bind2);
 
 var _forEach = require('fast.js/forEach');
 
@@ -836,7 +844,7 @@ var PIPELINE_PROCESSORS = exports.PIPELINE_PROCESSORS = (_PIPELINE_PROCESSORS = 
   var i = arguments.length <= 3 || arguments[3] === undefined ? 0 : arguments[3];
   var len = arguments.length <= 4 || arguments[4] === undefined ? 1 : arguments[4];
 
-  var updatedFn = cursor._propagateUpdate ? cursor._propagateUpdate.bind(cursor) : function () {};
+  var updatedFn = cursor._propagateUpdate ? (0, _bind3.default)(cursor._propagateUpdate, cursor) : function () {};
 
   var res = pipeObj.value(docs, updatedFn, i, len);
   res = _checkTypes2.default.array(res) ? res : [res];
@@ -869,12 +877,13 @@ var PIPELINE_PROCESSORS = exports.PIPELINE_PROCESSORS = (_PIPELINE_PROCESSORS = 
 var Cursor = (function (_EventEmitter) {
   _inherits(Cursor, _EventEmitter);
 
-  function Cursor(db, query) {
+  function Cursor(db, query, options) {
     _classCallCheck(this, Cursor);
 
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Cursor).call(this));
 
     _this.db = db;
+    _this.options = options;
     _this._query = query;
     _this._pipeline = [];
     _this._executing = null;
@@ -1037,7 +1046,11 @@ var Cursor = (function (_EventEmitter) {
     value: function exec() {
       var _this3 = this;
 
-      this._executing = this._matchObjects().then(function (docs) {
+      var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+      this._executing = this._prepareCursor(options).then(function () {
+        return _this3._matchObjects();
+      }).then(function (docs) {
         var clonned = (0, _map3.default)(docs, function (doc) {
           return _EJSON2.default.clone(doc);
         });
@@ -1054,7 +1067,9 @@ var Cursor = (function (_EventEmitter) {
     value: function ids() {
       var _this4 = this;
 
-      this._executing = this._matchObjects().then(function (docs) {
+      this._executing = this._prepareCursor().then(function () {
+        return _this4._matchObjects();
+      }).then(function (docs) {
         return (0, _map3.default)(docs, function (x) {
           return x._id;
         });
@@ -1074,6 +1089,13 @@ var Cursor = (function (_EventEmitter) {
     key: 'whenNotExecuting',
     value: function whenNotExecuting() {
       return Promise.resolve(this._executing);
+    }
+  }, {
+    key: '_prepareCursor',
+    value: function _prepareCursor() {
+      var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+      return Promise.resolve();
     }
   }, {
     key: '_matchObjects',
@@ -1134,7 +1156,7 @@ var Cursor = (function (_EventEmitter) {
 exports.Cursor = Cursor;
 exports.default = Cursor;
 
-},{"./DocumentMatcher":7,"./DocumentRetriver":9,"./DocumentSorter":10,"./EJSON":11,"check-types":17,"eventemitter3":18,"fast.js/forEach":24,"fast.js/map":26,"invariant":33,"keymirror":32}],5:[function(require,module,exports){
+},{"./DocumentMatcher":7,"./DocumentRetriver":9,"./DocumentSorter":10,"./EJSON":11,"check-types":17,"eventemitter3":18,"fast.js/forEach":24,"fast.js/function/bind":27,"fast.js/map":29,"invariant":36,"keymirror":35}],5:[function(require,module,exports){
 'use strict';
 
 function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
@@ -1154,6 +1176,10 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.CursorObservable = undefined;
 exports.debounce = debounce;
+
+var _bind2 = require('fast.js/function/bind');
+
+var _bind3 = _interopRequireDefault(_bind2);
 
 var _checkTypes = require('check-types');
 
@@ -1205,13 +1231,13 @@ function _inherits(subClass, superClass) {
 var CursorObservable = (function (_Cursor) {
   _inherits(CursorObservable, _Cursor);
 
-  function CursorObservable(db, query) {
+  function CursorObservable(db, query, options) {
     _classCallCheck(this, CursorObservable);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(CursorObservable).call(this, db, query));
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(CursorObservable).call(this, db, query, options));
 
-    _this.update = debounce(_this.update.bind(_this), 1000 / 15, 10);
-    _this.maybeUpdate = _this.maybeUpdate.bind(_this);
+    _this.update = debounce((0, _bind3.default)(_this.update, _this), 1000 / 15, 10);
+    _this.maybeUpdate = (0, _bind3.default)(_this.maybeUpdate, _this);
     return _this;
   }
 
@@ -1313,7 +1339,7 @@ var CursorObservable = (function (_Cursor) {
       if (options.declare) {
         return this;
       } else {
-        var firstUpdatePromise = this.update(true);
+        var firstUpdatePromise = this.update.func(true);
         return createStoppablePromise(firstUpdatePromise);
       }
     }
@@ -1345,7 +1371,10 @@ var CursorObservable = (function (_Cursor) {
 
       var firstRun = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
 
-      return this.exec().then(function (result) {
+      return this.exec({
+        observable: true,
+        firstRun: firstRun
+      }).then(function (result) {
         _this3._latestResult = result;
         _this3._updateLatestIds();
         _this3._propagateUpdate(firstRun);
@@ -1516,12 +1545,13 @@ function debounce(func, wait, batchSize) {
   debouncer.updateBatchSize = updateBatchSize;
   debouncer.updateWait = updateWait;
   debouncer.cancel = cancel;
+  debouncer.func = func;
   return debouncer;
 }
 
 exports.default = CursorObservable;
 
-},{"./Cursor":4,"./EJSON":11,"check-types":17,"fast.js/map":26,"fast.js/object/keys":29}],6:[function(require,module,exports){
+},{"./Cursor":4,"./EJSON":11,"check-types":17,"fast.js/function/bind":27,"fast.js/map":29,"fast.js/object/keys":32}],6:[function(require,module,exports){
 'use strict';
 
 function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
@@ -1885,7 +1915,7 @@ var MongoTypeComp = exports.MongoTypeComp = {
   }
 };
 
-},{"./EJSON":11,"check-types":17,"fast.js/forEach":24,"fast.js/object/assign":27,"fast.js/object/keys":29,"invariant":33}],7:[function(require,module,exports){
+},{"./EJSON":11,"check-types":17,"fast.js/forEach":24,"fast.js/object/assign":30,"fast.js/object/keys":32,"invariant":36}],7:[function(require,module,exports){
 'use strict';
 
 function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
@@ -2969,7 +2999,7 @@ var andSomeMatchers = function andSomeMatchers(subMatchers) {
 var andDocumentMatchers = andSomeMatchers;
 var andBranchedMatchers = andSomeMatchers;
 
-},{"./Document":6,"./EJSON":11,"check-types":17,"fast.js/array/every":19,"fast.js/array/indexOf":21,"fast.js/array/some":23,"fast.js/forEach":24,"fast.js/map":26,"fast.js/object/keys":29,"geojson-utils":31}],8:[function(require,module,exports){
+},{"./Document":6,"./EJSON":11,"check-types":17,"fast.js/array/every":19,"fast.js/array/indexOf":21,"fast.js/array/some":23,"fast.js/forEach":24,"fast.js/map":29,"fast.js/object/keys":32,"geojson-utils":34}],8:[function(require,module,exports){
 'use strict';
 
 function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
@@ -3559,7 +3589,7 @@ var MODIFIERS = {
   }
 };
 
-},{"./Document":6,"./DocumentMatcher":7,"./DocumentRetriver":9,"./DocumentSorter":10,"./EJSON":11,"check-types":17,"fast.js/array/every":19,"fast.js/forEach":24,"fast.js/object/assign":27}],9:[function(require,module,exports){
+},{"./Document":6,"./DocumentMatcher":7,"./DocumentRetriver":9,"./DocumentSorter":10,"./EJSON":11,"check-types":17,"fast.js/array/every":19,"fast.js/forEach":24,"fast.js/object/assign":30}],9:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () {
@@ -3619,6 +3649,8 @@ var DocumentRetriver = exports.DocumentRetriver = (function () {
   /**
    * Retrive an optimal superset of documents
    * by given query based on _id field of the query
+   *
+   * TODO: there is a place for indexes
    * @param  {Object} query
    * @return {Promise}
    */
@@ -3709,7 +3741,7 @@ var DocumentRetriver = exports.DocumentRetriver = (function () {
 
 exports.default = DocumentRetriver;
 
-},{"./Document":6,"check-types":17,"fast.js/map":26,"fast.js/object/keys":29}],10:[function(require,module,exports){
+},{"./Document":6,"check-types":17,"fast.js/map":29,"fast.js/object/keys":32}],10:[function(require,module,exports){
 'use strict';
 
 function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
@@ -4221,7 +4253,7 @@ var composeComparators = function composeComparators(comparatorArray) {
   };
 };
 
-},{"./Document":6,"./DocumentMatcher":7,"check-types":17,"fast.js/array/every":19,"fast.js/array/indexOf":21,"fast.js/forEach":24,"fast.js/map":26,"fast.js/object/keys":29}],11:[function(require,module,exports){
+},{"./Document":6,"./DocumentMatcher":7,"check-types":17,"fast.js/array/every":19,"fast.js/array/indexOf":21,"fast.js/forEach":24,"fast.js/map":29,"fast.js/object/keys":32}],11:[function(require,module,exports){
 'use strict';
 
 function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
@@ -4808,7 +4840,7 @@ var EJSON = exports.EJSON = (function () {
 
 exports.default = new EJSON();
 
-},{"./Base64":1,"check-types":17,"fast.js/array/some":23,"fast.js/forEach":24,"fast.js/object/keys":29}],12:[function(require,module,exports){
+},{"./Base64":1,"check-types":17,"fast.js/array/some":23,"fast.js/forEach":24,"fast.js/object/keys":32}],12:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () {
@@ -4825,6 +4857,10 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.IndexManager = undefined;
+
+var _bind2 = require('fast.js/function/bind');
+
+var _bind3 = _interopRequireDefault(_bind2);
 
 var _keys2 = require('fast.js/object/keys');
 
@@ -4938,7 +4974,7 @@ var IndexManager = exports.IndexManager = (function () {
       var cleanup = function cleanup() {
         return _this.indexes[key].buildPromise = null;
       };
-      var buildPromise = this._queue.add(this._doBuildIndex.bind(this, key)).then(cleanup, cleanup);
+      var buildPromise = this._queue.add((0, _bind3.default)(this._doBuildIndex, this, key)).then(cleanup, cleanup);
 
       this.indexes[key].buildPromise = buildPromise;
       return buildPromise;
@@ -4956,7 +4992,7 @@ var IndexManager = exports.IndexManager = (function () {
     value: function buildAllIndexes() {
       var _this2 = this;
 
-      return Promise.all((0, _map3.default)((0, _keys3.default)(this.indexes), function (k) {
+      return Promise.all((0, _map3.default)(this.indexes, function (v, k) {
         return _this2.ensureIndex({
           fieldName: k,
           forceRebuild: true
@@ -5093,7 +5129,7 @@ var IndexManager = exports.IndexManager = (function () {
 
 exports.default = IndexManager;
 
-},{"./CollectionIndex":3,"./DocumentRetriver":9,"./PromiseQueue":13,"fast.js/forEach":24,"fast.js/map":26,"fast.js/object/keys":29,"invariant":33}],13:[function(require,module,exports){
+},{"./CollectionIndex":3,"./DocumentRetriver":9,"./PromiseQueue":13,"fast.js/forEach":24,"fast.js/function/bind":27,"fast.js/map":29,"fast.js/object/keys":32,"invariant":36}],13:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -5598,6 +5634,7 @@ var StorageManager = exports.StorageManager = (function () {
   }, {
     key: '_loadStorage',
     value: function _loadStorage() {
+      this._storage = {};
       return Promise.resolve();
     }
   }]);
@@ -5610,6 +5647,7 @@ exports.default = StorageManager;
 },{"./EJSON":11,"./PromiseQueue":13,"eventemitter3":18,"fast.js/forEach":24}],16:[function(require,module,exports){
 'use strict';
 
+var EventEmitter = require('eventemitter3');
 var Collection = require('./dist/Collection').default;
 var CursorObservable = require('./dist/CursorObservable').default;
 var StorageManager = require('./dist/StorageManager').default;
@@ -5625,10 +5663,11 @@ module.exports = {
   Base64: Base64,
   Collection: Collection,
   CursorObservable: CursorObservable,
-  StorageManager: StorageManager
+  StorageManager: StorageManager,
+  EventEmitter: EventEmitter
 };
 
-},{"./dist/Base64":1,"./dist/Collection":2,"./dist/CursorObservable":5,"./dist/EJSON":11,"./dist/Random":14,"./dist/StorageManager":15}],17:[function(require,module,exports){
+},{"./dist/Base64":1,"./dist/Collection":2,"./dist/CursorObservable":5,"./dist/EJSON":11,"./dist/Random":14,"./dist/StorageManager":15,"eventemitter3":18}],17:[function(require,module,exports){
 /*globals define, module, Symbol */
 
 (function (globals) {
@@ -6854,7 +6893,7 @@ module.exports = function fastEvery (subject, fn, thisContext) {
   return true;
 };
 
-},{"../function/bindInternal3":25}],20:[function(require,module,exports){
+},{"../function/bindInternal3":28}],20:[function(require,module,exports){
 'use strict';
 
 var bindInternal3 = require('../function/bindInternal3');
@@ -6877,7 +6916,7 @@ module.exports = function fastForEach (subject, fn, thisContext) {
   }
 };
 
-},{"../function/bindInternal3":25}],21:[function(require,module,exports){
+},{"../function/bindInternal3":28}],21:[function(require,module,exports){
 'use strict';
 
 /**
@@ -6938,7 +6977,7 @@ module.exports = function fastMap (subject, fn, thisContext) {
   return result;
 };
 
-},{"../function/bindInternal3":25}],23:[function(require,module,exports){
+},{"../function/bindInternal3":28}],23:[function(require,module,exports){
 'use strict';
 
 var bindInternal3 = require('../function/bindInternal3');
@@ -6965,7 +7004,7 @@ module.exports = function fastSome (subject, fn, thisContext) {
   return false;
 };
 
-},{"../function/bindInternal3":25}],24:[function(require,module,exports){
+},{"../function/bindInternal3":28}],24:[function(require,module,exports){
 'use strict';
 
 var forEachArray = require('./array/forEach'),
@@ -6988,7 +7027,142 @@ module.exports = function fastForEach (subject, fn, thisContext) {
     return forEachObject(subject, fn, thisContext);
   }
 };
-},{"./array/forEach":20,"./object/forEach":28}],25:[function(require,module,exports){
+},{"./array/forEach":20,"./object/forEach":31}],25:[function(require,module,exports){
+'use strict';
+
+/**
+ * Internal helper for applying a function without a context.
+ */
+module.exports = function applyNoContext (subject, args) {
+  switch (args.length) {
+    case 0:
+      return subject();
+    case 1:
+      return subject(args[0]);
+    case 2:
+      return subject(args[0], args[1]);
+    case 3:
+      return subject(args[0], args[1], args[2]);
+    case 4:
+      return subject(args[0], args[1], args[2], args[3]);
+    case 5:
+      return subject(args[0], args[1], args[2], args[3], args[4]);
+    case 6:
+      return subject(args[0], args[1], args[2], args[3], args[4], args[5]);
+    case 7:
+      return subject(args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
+    case 8:
+      return subject(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7]);
+    default:
+      return subject.apply(undefined, args);
+  }
+};
+
+},{}],26:[function(require,module,exports){
+'use strict';
+
+/**
+ * Internal helper for applying a function with a context.
+ */
+module.exports = function applyWithContext (subject, thisContext, args) {
+  switch (args.length) {
+    case 0:
+      return subject.call(thisContext);
+    case 1:
+      return subject.call(thisContext, args[0]);
+    case 2:
+      return subject.call(thisContext, args[0], args[1]);
+    case 3:
+      return subject.call(thisContext, args[0], args[1], args[2]);
+    case 4:
+      return subject.call(thisContext, args[0], args[1], args[2], args[3]);
+    case 5:
+      return subject.call(thisContext, args[0], args[1], args[2], args[3], args[4]);
+    case 6:
+      return subject.call(thisContext, args[0], args[1], args[2], args[3], args[4], args[5]);
+    case 7:
+      return subject.call(thisContext, args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
+    case 8:
+      return subject.call(thisContext, args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7]);
+    default:
+      return subject.apply(thisContext, args);
+  }
+};
+
+},{}],27:[function(require,module,exports){
+'use strict';
+
+var applyWithContext = require('./applyWithContext');
+var applyNoContext = require('./applyNoContext');
+
+/**
+ * # Bind
+ * Analogue of `Function::bind()`.
+ *
+ * ```js
+ * var bind = require('fast.js').bind;
+ * var bound = bind(myfunc, this, 1, 2, 3);
+ *
+ * bound(4);
+ * ```
+ *
+ *
+ * @param  {Function} fn          The function which should be bound.
+ * @param  {Object}   thisContext The context to bind the function to.
+ * @param  {mixed}    args, ...   Additional arguments to pre-bind.
+ * @return {Function}             The bound function.
+ */
+module.exports = function fastBind (fn, thisContext) {
+  var boundLength = arguments.length - 2,
+      boundArgs;
+
+  if (boundLength > 0) {
+    boundArgs = new Array(boundLength);
+    for (var i = 0; i < boundLength; i++) {
+      boundArgs[i] = arguments[i + 2];
+    }
+    if (thisContext !== undefined) {
+      return function () {
+        var length = arguments.length,
+            args = new Array(boundLength + length),
+            i;
+        for (i = 0; i < boundLength; i++) {
+          args[i] = boundArgs[i];
+        }
+        for (i = 0; i < length; i++) {
+          args[boundLength + i] = arguments[i];
+        }
+        return applyWithContext(fn, thisContext, args);
+      };
+    }
+    else {
+      return function () {
+        var length = arguments.length,
+            args = new Array(boundLength + length),
+            i;
+        for (i = 0; i < boundLength; i++) {
+          args[i] = boundArgs[i];
+        }
+        for (i = 0; i < length; i++) {
+          args[boundLength + i] = arguments[i];
+        }
+        return applyNoContext(fn, args);
+      };
+    }
+  }
+  if (thisContext !== undefined) {
+    return function () {
+      return applyWithContext(fn, thisContext, arguments);
+    };
+  }
+  else {
+    return function () {
+      return applyNoContext(fn, arguments);
+    };
+  }
+};
+
+},{"./applyNoContext":25,"./applyWithContext":26}],28:[function(require,module,exports){
 'use strict';
 
 /**
@@ -7001,7 +7175,7 @@ module.exports = function bindInternal3 (func, thisContext) {
   };
 };
 
-},{}],26:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 'use strict';
 
 var mapArray = require('./array/map'),
@@ -7025,7 +7199,7 @@ module.exports = function fastMap (subject, fn, thisContext) {
     return mapObject(subject, fn, thisContext);
   }
 };
-},{"./array/map":22,"./object/map":30}],27:[function(require,module,exports){
+},{"./array/map":22,"./object/map":33}],30:[function(require,module,exports){
 'use strict';
 
 /**
@@ -7061,7 +7235,7 @@ module.exports = function fastAssign (target) {
   return target;
 };
 
-},{}],28:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 'use strict';
 
 var bindInternal3 = require('../function/bindInternal3');
@@ -7086,7 +7260,7 @@ module.exports = function fastForEachObject (subject, fn, thisContext) {
   }
 };
 
-},{"../function/bindInternal3":25}],29:[function(require,module,exports){
+},{"../function/bindInternal3":28}],32:[function(require,module,exports){
 'use strict';
 
 /**
@@ -7104,7 +7278,7 @@ module.exports = typeof Object.keys === "function" ? Object.keys : /* istanbul i
   }
   return keys;
 };
-},{}],30:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 'use strict';
 
 var bindInternal3 = require('../function/bindInternal3');
@@ -7132,7 +7306,7 @@ module.exports = function fastMapObject (subject, fn, thisContext) {
   return result;
 };
 
-},{"../function/bindInternal3":25}],31:[function(require,module,exports){
+},{"../function/bindInternal3":28}],34:[function(require,module,exports){
 (function () {
   var gju = this.gju = {};
 
@@ -7542,7 +7716,7 @@ module.exports = function fastMapObject (subject, fn, thisContext) {
 
 })();
 
-},{}],32:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 /**
  * Copyright 2013-2014 Facebook, Inc.
  *
@@ -7597,7 +7771,7 @@ var keyMirror = function(obj) {
 
 module.exports = keyMirror;
 
-},{}],33:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.

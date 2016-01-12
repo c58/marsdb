@@ -8,6 +8,10 @@ Object.defineProperty(exports, "__esModule", {
 exports.CursorObservable = undefined;
 exports.debounce = debounce;
 
+var _bind2 = require('fast.js/function/bind');
+
+var _bind3 = _interopRequireDefault(_bind2);
+
 var _checkTypes = require('check-types');
 
 var _checkTypes2 = _interopRequireDefault(_checkTypes);
@@ -44,13 +48,13 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var CursorObservable = (function (_Cursor) {
   _inherits(CursorObservable, _Cursor);
 
-  function CursorObservable(db, query) {
+  function CursorObservable(db, query, options) {
     _classCallCheck(this, CursorObservable);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(CursorObservable).call(this, db, query));
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(CursorObservable).call(this, db, query, options));
 
-    _this.update = debounce(_this.update.bind(_this), 1000 / 15, 10);
-    _this.maybeUpdate = _this.maybeUpdate.bind(_this);
+    _this.update = debounce((0, _bind3.default)(_this.update, _this), 1000 / 15, 10);
+    _this.maybeUpdate = (0, _bind3.default)(_this.maybeUpdate, _this);
     return _this;
   }
 
@@ -152,7 +156,7 @@ var CursorObservable = (function (_Cursor) {
       if (options.declare) {
         return this;
       } else {
-        var firstUpdatePromise = this.update(true);
+        var firstUpdatePromise = this.update.func(true);
         return createStoppablePromise(firstUpdatePromise);
       }
     }
@@ -184,7 +188,10 @@ var CursorObservable = (function (_Cursor) {
 
       var firstRun = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
 
-      return this.exec().then(function (result) {
+      return this.exec({
+        observable: true,
+        firstRun: firstRun
+      }).then(function (result) {
         _this3._latestResult = result;
         _this3._updateLatestIds();
         _this3._propagateUpdate(firstRun);
@@ -355,6 +362,7 @@ function debounce(func, wait, batchSize) {
   debouncer.updateBatchSize = updateBatchSize;
   debouncer.updateWait = updateWait;
   debouncer.cancel = cancel;
+  debouncer.func = func;
   return debouncer;
 }
 

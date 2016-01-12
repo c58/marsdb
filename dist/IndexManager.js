@@ -7,6 +7,10 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.IndexManager = undefined;
 
+var _bind2 = require('fast.js/function/bind');
+
+var _bind3 = _interopRequireDefault(_bind2);
+
 var _keys2 = require('fast.js/object/keys');
 
 var _keys3 = _interopRequireDefault(_keys2);
@@ -113,7 +117,7 @@ var IndexManager = exports.IndexManager = (function () {
       var cleanup = function cleanup() {
         return _this.indexes[key].buildPromise = null;
       };
-      var buildPromise = this._queue.add(this._doBuildIndex.bind(this, key)).then(cleanup, cleanup);
+      var buildPromise = this._queue.add((0, _bind3.default)(this._doBuildIndex, this, key)).then(cleanup, cleanup);
 
       this.indexes[key].buildPromise = buildPromise;
       return buildPromise;
@@ -131,7 +135,7 @@ var IndexManager = exports.IndexManager = (function () {
     value: function buildAllIndexes() {
       var _this2 = this;
 
-      return Promise.all((0, _map3.default)((0, _keys3.default)(this.indexes), function (k) {
+      return Promise.all((0, _map3.default)(this.indexes, function (v, k) {
         return _this2.ensureIndex({
           fieldName: k,
           forceRebuild: true

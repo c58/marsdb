@@ -9,6 +9,10 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.Cursor = exports.PIPELINE_PROCESSORS = exports.PIPELINE_TYPE = undefined;
 
+var _bind2 = require('fast.js/function/bind');
+
+var _bind3 = _interopRequireDefault(_bind2);
+
 var _forEach = require('fast.js/forEach');
 
 var _forEach2 = _interopRequireDefault(_forEach);
@@ -103,7 +107,7 @@ var PIPELINE_PROCESSORS = exports.PIPELINE_PROCESSORS = (_PIPELINE_PROCESSORS = 
   var i = arguments.length <= 3 || arguments[3] === undefined ? 0 : arguments[3];
   var len = arguments.length <= 4 || arguments[4] === undefined ? 1 : arguments[4];
 
-  var updatedFn = cursor._propagateUpdate ? cursor._propagateUpdate.bind(cursor) : function () {};
+  var updatedFn = cursor._propagateUpdate ? (0, _bind3.default)(cursor._propagateUpdate, cursor) : function () {};
 
   var res = pipeObj.value(docs, updatedFn, i, len);
   res = _checkTypes2.default.array(res) ? res : [res];
@@ -136,12 +140,13 @@ var PIPELINE_PROCESSORS = exports.PIPELINE_PROCESSORS = (_PIPELINE_PROCESSORS = 
 var Cursor = (function (_EventEmitter) {
   _inherits(Cursor, _EventEmitter);
 
-  function Cursor(db, query) {
+  function Cursor(db, query, options) {
     _classCallCheck(this, Cursor);
 
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Cursor).call(this));
 
     _this.db = db;
+    _this.options = options;
     _this._query = query;
     _this._pipeline = [];
     _this._executing = null;
@@ -304,7 +309,11 @@ var Cursor = (function (_EventEmitter) {
     value: function exec() {
       var _this3 = this;
 
-      this._executing = this._matchObjects().then(function (docs) {
+      var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+      this._executing = this._prepareCursor(options).then(function () {
+        return _this3._matchObjects();
+      }).then(function (docs) {
         var clonned = (0, _map3.default)(docs, function (doc) {
           return _EJSON2.default.clone(doc);
         });
@@ -321,7 +330,9 @@ var Cursor = (function (_EventEmitter) {
     value: function ids() {
       var _this4 = this;
 
-      this._executing = this._matchObjects().then(function (docs) {
+      this._executing = this._prepareCursor().then(function () {
+        return _this4._matchObjects();
+      }).then(function (docs) {
         return (0, _map3.default)(docs, function (x) {
           return x._id;
         });
@@ -341,6 +352,13 @@ var Cursor = (function (_EventEmitter) {
     key: 'whenNotExecuting',
     value: function whenNotExecuting() {
       return Promise.resolve(this._executing);
+    }
+  }, {
+    key: '_prepareCursor',
+    value: function _prepareCursor() {
+      var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+      return Promise.resolve();
     }
   }, {
     key: '_matchObjects',

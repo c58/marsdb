@@ -115,6 +115,7 @@ var StorageManager = exports.StorageManager = (function () {
   }, {
     key: '_loadStorage',
     value: function _loadStorage() {
+      this._storage = {};
       return Promise.resolve();
     }
   }]);
