@@ -6,7 +6,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.CursorObservable = undefined;
-exports.debounce = debounce;
 
 var _bind2 = require('fast.js/function/bind');
 
@@ -32,6 +31,10 @@ var _EJSON = require('./EJSON');
 
 var _EJSON2 = _interopRequireDefault(_EJSON);
 
+var _debounce = require('./debounce');
+
+var _debounce2 = _interopRequireDefault(_debounce);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -53,7 +56,7 @@ var CursorObservable = (function (_Cursor) {
 
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(CursorObservable).call(this, db, query, options));
 
-    _this.update = debounce((0, _bind3.default)(_this.update, _this), 1000 / 15, 10);
+    _this.update = (0, _debounce2.default)((0, _bind3.default)(_this.update, _this), 1000 / 15, 10);
     _this.maybeUpdate = (0, _bind3.default)(_this.maybeUpdate, _this);
     return _this;
   }
@@ -252,7 +255,7 @@ var CursorObservable = (function (_Cursor) {
     value: function _prepareListener(listener) {
       // Debounce listener a little for update propagation
       // when joins updated
-      return debounce(listener, 0, 0);
+      return (0, _debounce2.default)(listener, 0, 0);
     }
 
     /**
@@ -293,77 +296,5 @@ var CursorObservable = (function (_Cursor) {
   return CursorObservable;
 })(_Cursor3.default);
 
-/**
- * Debounce with updetable wait time and force
- * execution on some number of calls (batch execution)
- * Return promise that resolved with result of execution.
- * Promise cerated on each new execution (on idle).
- * @param  {Function} func
- * @param  {Number} wait
- * @param  {Number} batchSize
- * @return {Promise}
- */
-
 exports.CursorObservable = CursorObservable;
-function debounce(func, wait, batchSize) {
-  var timeout = null;
-  var callsCount = 0;
-  var promise = null;
-  var doNotResolve = true;
-  var maybeResolve = null;
-
-  var debouncer = function debouncer() {
-    var context = this;
-    var args = arguments;
-
-    if (!promise) {
-      promise = new Promise(function (resolve, reject) {
-        maybeResolve = function () {
-          if (doNotResolve) {
-            timeout = setTimeout(maybeResolve, wait);
-            doNotResolve = false;
-          } else {
-            promise = null;
-            callsCount = 0;
-            timeout = null;
-            doNotResolve = true;
-            maybeResolve = null;
-            resolve(func.apply(context, args));
-          }
-        };
-        maybeResolve();
-      });
-    } else {
-      var callNow = batchSize && callsCount >= batchSize;
-      doNotResolve = !callNow;
-
-      if (callNow && maybeResolve) {
-        clearTimeout(timeout);
-        maybeResolve();
-      }
-    }
-
-    callsCount += 1;
-    return promise;
-  };
-
-  var updateBatchSize = function updateBatchSize(newBatchSize) {
-    batchSize = newBatchSize;
-  };
-
-  var updateWait = function updateWait(newWait) {
-    wait = newWait;
-  };
-
-  var cancel = function cancel() {
-    clearTimeout(timeout);
-  };
-
-  debouncer.updateBatchSize = updateBatchSize;
-  debouncer.updateWait = updateWait;
-  debouncer.cancel = cancel;
-  debouncer.func = func;
-  return debouncer;
-}
-
 exports.default = CursorObservable;

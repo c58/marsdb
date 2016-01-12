@@ -597,7 +597,7 @@ var Collection = exports.Collection = (function (_EventEmitter) {
 
 exports.default = Collection;
 
-},{"./CursorObservable":5,"./DocumentModifier":8,"./EJSON":11,"./IndexManager":12,"./Random":14,"./StorageManager":15,"check-types":17,"eventemitter3":18,"fast.js/forEach":24,"fast.js/map":29,"invariant":36}],3:[function(require,module,exports){
+},{"./CursorObservable":5,"./DocumentModifier":8,"./EJSON":11,"./IndexManager":12,"./Random":14,"./StorageManager":15,"check-types":18,"eventemitter3":19,"fast.js/forEach":25,"fast.js/map":30,"invariant":36}],3:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () {
@@ -1132,7 +1132,7 @@ var Cursor = (function (_EventEmitter) {
 exports.Cursor = Cursor;
 exports.default = Cursor;
 
-},{"./DocumentMatcher":7,"./DocumentRetriver":9,"./DocumentSorter":10,"./EJSON":11,"check-types":17,"eventemitter3":18,"fast.js/forEach":24,"fast.js/function/bind":27,"fast.js/map":29,"invariant":36,"keymirror":35}],5:[function(require,module,exports){
+},{"./DocumentMatcher":7,"./DocumentRetriver":9,"./DocumentSorter":10,"./EJSON":11,"check-types":18,"eventemitter3":19,"fast.js/forEach":25,"fast.js/function/bind":28,"fast.js/map":30,"invariant":36,"keymirror":37}],5:[function(require,module,exports){
 'use strict';
 
 function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
@@ -1151,7 +1151,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.CursorObservable = undefined;
-exports.debounce = debounce;
 
 var _bind2 = require('fast.js/function/bind');
 
@@ -1176,6 +1175,10 @@ var _Cursor3 = _interopRequireDefault(_Cursor2);
 var _EJSON = require('./EJSON');
 
 var _EJSON2 = _interopRequireDefault(_EJSON);
+
+var _debounce = require('./debounce');
+
+var _debounce2 = _interopRequireDefault(_debounce);
 
 function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : { default: obj };
@@ -1212,7 +1215,7 @@ var CursorObservable = (function (_Cursor) {
 
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(CursorObservable).call(this, db, query, options));
 
-    _this.update = debounce((0, _bind3.default)(_this.update, _this), 1000 / 15, 10);
+    _this.update = (0, _debounce2.default)((0, _bind3.default)(_this.update, _this), 1000 / 15, 10);
     _this.maybeUpdate = (0, _bind3.default)(_this.maybeUpdate, _this);
     return _this;
   }
@@ -1411,7 +1414,7 @@ var CursorObservable = (function (_Cursor) {
     value: function _prepareListener(listener) {
       // Debounce listener a little for update propagation
       // when joins updated
-      return debounce(listener, 0, 0);
+      return (0, _debounce2.default)(listener, 0, 0);
     }
 
     /**
@@ -1452,82 +1455,10 @@ var CursorObservable = (function (_Cursor) {
   return CursorObservable;
 })(_Cursor3.default);
 
-/**
- * Debounce with updetable wait time and force
- * execution on some number of calls (batch execution)
- * Return promise that resolved with result of execution.
- * Promise cerated on each new execution (on idle).
- * @param  {Function} func
- * @param  {Number} wait
- * @param  {Number} batchSize
- * @return {Promise}
- */
-
 exports.CursorObservable = CursorObservable;
-function debounce(func, wait, batchSize) {
-  var timeout = null;
-  var callsCount = 0;
-  var promise = null;
-  var doNotResolve = true;
-  var maybeResolve = null;
-
-  var debouncer = function debouncer() {
-    var context = this;
-    var args = arguments;
-
-    if (!promise) {
-      promise = new Promise(function (resolve, reject) {
-        maybeResolve = function () {
-          if (doNotResolve) {
-            timeout = setTimeout(maybeResolve, wait);
-            doNotResolve = false;
-          } else {
-            promise = null;
-            callsCount = 0;
-            timeout = null;
-            doNotResolve = true;
-            maybeResolve = null;
-            resolve(func.apply(context, args));
-          }
-        };
-        maybeResolve();
-      });
-    } else {
-      var callNow = batchSize && callsCount >= batchSize;
-      doNotResolve = !callNow;
-
-      if (callNow && maybeResolve) {
-        clearTimeout(timeout);
-        maybeResolve();
-      }
-    }
-
-    callsCount += 1;
-    return promise;
-  };
-
-  var updateBatchSize = function updateBatchSize(newBatchSize) {
-    batchSize = newBatchSize;
-  };
-
-  var updateWait = function updateWait(newWait) {
-    wait = newWait;
-  };
-
-  var cancel = function cancel() {
-    clearTimeout(timeout);
-  };
-
-  debouncer.updateBatchSize = updateBatchSize;
-  debouncer.updateWait = updateWait;
-  debouncer.cancel = cancel;
-  debouncer.func = func;
-  return debouncer;
-}
-
 exports.default = CursorObservable;
 
-},{"./Cursor":4,"./EJSON":11,"check-types":17,"fast.js/function/bind":27,"fast.js/map":29,"fast.js/object/keys":32}],6:[function(require,module,exports){
+},{"./Cursor":4,"./EJSON":11,"./debounce":16,"check-types":18,"fast.js/function/bind":28,"fast.js/map":30,"fast.js/object/keys":33}],6:[function(require,module,exports){
 'use strict';
 
 function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
@@ -1821,7 +1752,7 @@ var MongoTypeComp = exports.MongoTypeComp = {
   }
 };
 
-},{"./EJSON":11,"check-types":17,"fast.js/forEach":24,"fast.js/object/keys":32}],7:[function(require,module,exports){
+},{"./EJSON":11,"check-types":18,"fast.js/forEach":25,"fast.js/object/keys":33}],7:[function(require,module,exports){
 'use strict';
 
 function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
@@ -2905,7 +2836,7 @@ var andSomeMatchers = function andSomeMatchers(subMatchers) {
 var andDocumentMatchers = andSomeMatchers;
 var andBranchedMatchers = andSomeMatchers;
 
-},{"./Document":6,"./EJSON":11,"check-types":17,"fast.js/array/every":19,"fast.js/array/indexOf":21,"fast.js/array/some":23,"fast.js/forEach":24,"fast.js/map":29,"fast.js/object/keys":32,"geojson-utils":34}],8:[function(require,module,exports){
+},{"./Document":6,"./EJSON":11,"check-types":18,"fast.js/array/every":20,"fast.js/array/indexOf":22,"fast.js/array/some":24,"fast.js/forEach":25,"fast.js/map":30,"fast.js/object/keys":33,"geojson-utils":35}],8:[function(require,module,exports){
 'use strict';
 
 function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
@@ -3495,7 +3426,7 @@ var MODIFIERS = {
   }
 };
 
-},{"./Document":6,"./DocumentMatcher":7,"./DocumentRetriver":9,"./DocumentSorter":10,"./EJSON":11,"check-types":17,"fast.js/array/every":19,"fast.js/forEach":24,"fast.js/object/assign":30}],9:[function(require,module,exports){
+},{"./Document":6,"./DocumentMatcher":7,"./DocumentRetriver":9,"./DocumentSorter":10,"./EJSON":11,"check-types":18,"fast.js/array/every":20,"fast.js/forEach":25,"fast.js/object/assign":31}],9:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () {
@@ -3648,7 +3579,7 @@ var DocumentRetriver = exports.DocumentRetriver = (function () {
 
 exports.default = DocumentRetriver;
 
-},{"./Document":6,"check-types":17,"fast.js/map":29,"fast.js/object/keys":32}],10:[function(require,module,exports){
+},{"./Document":6,"check-types":18,"fast.js/map":30,"fast.js/object/keys":33}],10:[function(require,module,exports){
 'use strict';
 
 function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
@@ -4160,7 +4091,7 @@ var composeComparators = function composeComparators(comparatorArray) {
   };
 };
 
-},{"./Document":6,"./DocumentMatcher":7,"check-types":17,"fast.js/array/every":19,"fast.js/array/indexOf":21,"fast.js/forEach":24,"fast.js/map":29,"fast.js/object/keys":32}],11:[function(require,module,exports){
+},{"./Document":6,"./DocumentMatcher":7,"check-types":18,"fast.js/array/every":20,"fast.js/array/indexOf":22,"fast.js/forEach":25,"fast.js/map":30,"fast.js/object/keys":33}],11:[function(require,module,exports){
 'use strict';
 
 function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
@@ -4747,7 +4678,7 @@ var EJSON = exports.EJSON = (function () {
 
 exports.default = new EJSON();
 
-},{"./Base64":1,"check-types":17,"fast.js/array/some":23,"fast.js/forEach":24,"fast.js/object/keys":32}],12:[function(require,module,exports){
+},{"./Base64":1,"check-types":18,"fast.js/array/some":24,"fast.js/forEach":25,"fast.js/object/keys":33}],12:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () {
@@ -5036,7 +4967,7 @@ var IndexManager = exports.IndexManager = (function () {
 
 exports.default = IndexManager;
 
-},{"./CollectionIndex":3,"./DocumentRetriver":9,"./PromiseQueue":13,"fast.js/forEach":24,"fast.js/function/bind":27,"fast.js/map":29,"fast.js/object/keys":32,"invariant":36}],13:[function(require,module,exports){
+},{"./CollectionIndex":3,"./DocumentRetriver":9,"./PromiseQueue":13,"fast.js/forEach":25,"fast.js/function/bind":28,"fast.js/map":30,"fast.js/object/keys":33,"invariant":36}],13:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -5551,12 +5482,94 @@ var StorageManager = exports.StorageManager = (function () {
 
 exports.default = StorageManager;
 
-},{"./EJSON":11,"./PromiseQueue":13,"eventemitter3":18,"fast.js/forEach":24}],16:[function(require,module,exports){
+},{"./EJSON":11,"./PromiseQueue":13,"eventemitter3":19,"fast.js/forEach":25}],16:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = debounce;
+/**
+ * Debounce with updetable wait time and force
+ * execution on some number of calls (batch execution)
+ * Return promise that resolved with result of execution.
+ * Promise cerated on each new execution (on idle).
+ * @param  {Function} func
+ * @param  {Number} wait
+ * @param  {Number} batchSize
+ * @return {Promise}
+ */
+function debounce(func, wait, batchSize) {
+  var timeout = null;
+  var callsCount = 0;
+  var promise = null;
+  var doNotResolve = true;
+  var maybeResolve = null;
+
+  var debouncer = function debouncer() {
+    var context = this;
+    var args = arguments;
+
+    if (!promise) {
+      promise = new Promise(function (resolve, reject) {
+        maybeResolve = function () {
+          if (doNotResolve) {
+            timeout = setTimeout(maybeResolve, wait);
+            doNotResolve = false;
+          } else {
+            promise = null;
+            callsCount = 0;
+            timeout = null;
+            doNotResolve = true;
+            maybeResolve = null;
+            resolve(func.apply(context, args));
+          }
+        };
+        maybeResolve();
+      });
+    } else {
+      var callNow = batchSize && callsCount >= batchSize;
+      doNotResolve = !callNow;
+
+      if (callNow && maybeResolve) {
+        var returnPromise = promise;
+        clearTimeout(timeout);
+        maybeResolve();
+        callsCount += 1;
+        return returnPromise;
+      }
+    }
+
+    callsCount += 1;
+    return promise;
+  };
+
+  var updateBatchSize = function updateBatchSize(newBatchSize) {
+    batchSize = newBatchSize;
+  };
+
+  var updateWait = function updateWait(newWait) {
+    wait = newWait;
+  };
+
+  var cancel = function cancel() {
+    clearTimeout(timeout);
+  };
+
+  debouncer.updateBatchSize = updateBatchSize;
+  debouncer.updateWait = updateWait;
+  debouncer.cancel = cancel;
+  debouncer.func = func;
+  return debouncer;
+}
+
+},{}],17:[function(require,module,exports){
 'use strict';
 
 var EventEmitter = require('eventemitter3');
 var Collection = require('./dist/Collection').default;
 var CursorObservable = require('./dist/CursorObservable').default;
+var debounce = require('./dist/debounce').default;
 var StorageManager = require('./dist/StorageManager').default;
 var Random = require('./dist/Random').default;
 var EJSON = require('./dist/EJSON').default;
@@ -5571,10 +5584,11 @@ module.exports = {
   Collection: Collection,
   CursorObservable: CursorObservable,
   StorageManager: StorageManager,
-  EventEmitter: EventEmitter
+  EventEmitter: EventEmitter,
+  debounce: debounce
 };
 
-},{"./dist/Base64":1,"./dist/Collection":2,"./dist/CursorObservable":5,"./dist/EJSON":11,"./dist/Random":14,"./dist/StorageManager":15,"eventemitter3":18}],17:[function(require,module,exports){
+},{"./dist/Base64":1,"./dist/Collection":2,"./dist/CursorObservable":5,"./dist/EJSON":11,"./dist/Random":14,"./dist/StorageManager":15,"./dist/debounce":16,"eventemitter3":19}],18:[function(require,module,exports){
 /*globals define, module, Symbol */
 
 (function (globals) {
@@ -6509,7 +6523,7 @@ module.exports = {
   }
 }(this));
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 'use strict';
 
 //
@@ -6773,7 +6787,7 @@ if ('undefined' !== typeof module) {
   module.exports = EventEmitter;
 }
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 'use strict';
 
 var bindInternal3 = require('../function/bindInternal3');
@@ -6800,7 +6814,7 @@ module.exports = function fastEvery (subject, fn, thisContext) {
   return true;
 };
 
-},{"../function/bindInternal3":28}],20:[function(require,module,exports){
+},{"../function/bindInternal3":29}],21:[function(require,module,exports){
 'use strict';
 
 var bindInternal3 = require('../function/bindInternal3');
@@ -6823,7 +6837,7 @@ module.exports = function fastForEach (subject, fn, thisContext) {
   }
 };
 
-},{"../function/bindInternal3":28}],21:[function(require,module,exports){
+},{"../function/bindInternal3":29}],22:[function(require,module,exports){
 'use strict';
 
 /**
@@ -6858,7 +6872,7 @@ module.exports = function fastIndexOf (subject, target, fromIndex) {
   return -1;
 };
 
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 'use strict';
 
 var bindInternal3 = require('../function/bindInternal3');
@@ -6884,7 +6898,7 @@ module.exports = function fastMap (subject, fn, thisContext) {
   return result;
 };
 
-},{"../function/bindInternal3":28}],23:[function(require,module,exports){
+},{"../function/bindInternal3":29}],24:[function(require,module,exports){
 'use strict';
 
 var bindInternal3 = require('../function/bindInternal3');
@@ -6911,7 +6925,7 @@ module.exports = function fastSome (subject, fn, thisContext) {
   return false;
 };
 
-},{"../function/bindInternal3":28}],24:[function(require,module,exports){
+},{"../function/bindInternal3":29}],25:[function(require,module,exports){
 'use strict';
 
 var forEachArray = require('./array/forEach'),
@@ -6934,7 +6948,7 @@ module.exports = function fastForEach (subject, fn, thisContext) {
     return forEachObject(subject, fn, thisContext);
   }
 };
-},{"./array/forEach":20,"./object/forEach":31}],25:[function(require,module,exports){
+},{"./array/forEach":21,"./object/forEach":32}],26:[function(require,module,exports){
 'use strict';
 
 /**
@@ -6965,7 +6979,7 @@ module.exports = function applyNoContext (subject, args) {
   }
 };
 
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 'use strict';
 
 /**
@@ -6996,7 +7010,7 @@ module.exports = function applyWithContext (subject, thisContext, args) {
   }
 };
 
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 'use strict';
 
 var applyWithContext = require('./applyWithContext');
@@ -7069,7 +7083,7 @@ module.exports = function fastBind (fn, thisContext) {
   }
 };
 
-},{"./applyNoContext":25,"./applyWithContext":26}],28:[function(require,module,exports){
+},{"./applyNoContext":26,"./applyWithContext":27}],29:[function(require,module,exports){
 'use strict';
 
 /**
@@ -7082,7 +7096,7 @@ module.exports = function bindInternal3 (func, thisContext) {
   };
 };
 
-},{}],29:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 'use strict';
 
 var mapArray = require('./array/map'),
@@ -7106,7 +7120,7 @@ module.exports = function fastMap (subject, fn, thisContext) {
     return mapObject(subject, fn, thisContext);
   }
 };
-},{"./array/map":22,"./object/map":33}],30:[function(require,module,exports){
+},{"./array/map":23,"./object/map":34}],31:[function(require,module,exports){
 'use strict';
 
 /**
@@ -7142,7 +7156,7 @@ module.exports = function fastAssign (target) {
   return target;
 };
 
-},{}],31:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 'use strict';
 
 var bindInternal3 = require('../function/bindInternal3');
@@ -7167,7 +7181,7 @@ module.exports = function fastForEachObject (subject, fn, thisContext) {
   }
 };
 
-},{"../function/bindInternal3":28}],32:[function(require,module,exports){
+},{"../function/bindInternal3":29}],33:[function(require,module,exports){
 'use strict';
 
 /**
@@ -7185,7 +7199,7 @@ module.exports = typeof Object.keys === "function" ? Object.keys : /* istanbul i
   }
   return keys;
 };
-},{}],33:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 'use strict';
 
 var bindInternal3 = require('../function/bindInternal3');
@@ -7213,7 +7227,7 @@ module.exports = function fastMapObject (subject, fn, thisContext) {
   return result;
 };
 
-},{"../function/bindInternal3":28}],34:[function(require,module,exports){
+},{"../function/bindInternal3":29}],35:[function(require,module,exports){
 (function () {
   var gju = this.gju = {};
 
@@ -7623,7 +7637,60 @@ module.exports = function fastMapObject (subject, fn, thisContext) {
 
 })();
 
-},{}],35:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
+/**
+ * Copyright 2013-2015, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ */
+
+'use strict';
+
+/**
+ * Use invariant() to assert state which your program assumes to be true.
+ *
+ * Provide sprintf-style format (only %s is supported) and arguments
+ * to provide information about what broke and what you were
+ * expecting.
+ *
+ * The invariant message will be stripped in production, but the invariant
+ * will remain to ensure logic does not differ in production.
+ */
+
+var invariant = function(condition, format, a, b, c, d, e, f) {
+  if ("production" !== 'production') {
+    if (format === undefined) {
+      throw new Error('invariant requires an error message argument');
+    }
+  }
+
+  if (!condition) {
+    var error;
+    if (format === undefined) {
+      error = new Error(
+        'Minified exception occurred; use the non-minified dev environment ' +
+        'for the full error message and additional helpful warnings.'
+      );
+    } else {
+      var args = [a, b, c, d, e, f];
+      var argIndex = 0;
+      error = new Error(
+        format.replace(/%s/g, function() { return args[argIndex++]; })
+      );
+      error.name = 'Invariant Violation';
+    }
+
+    error.framesToPop = 1; // we don't care about invariant's own frame
+    throw error;
+  }
+};
+
+module.exports = invariant;
+
+},{}],37:[function(require,module,exports){
 /**
  * Copyright 2013-2014 Facebook, Inc.
  *
@@ -7678,58 +7745,5 @@ var keyMirror = function(obj) {
 
 module.exports = keyMirror;
 
-},{}],36:[function(require,module,exports){
-/**
- * Copyright 2013-2015, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-
-'use strict';
-
-/**
- * Use invariant() to assert state which your program assumes to be true.
- *
- * Provide sprintf-style format (only %s is supported) and arguments
- * to provide information about what broke and what you were
- * expecting.
- *
- * The invariant message will be stripped in production, but the invariant
- * will remain to ensure logic does not differ in production.
- */
-
-var invariant = function(condition, format, a, b, c, d, e, f) {
-  if ("production" !== 'production') {
-    if (format === undefined) {
-      throw new Error('invariant requires an error message argument');
-    }
-  }
-
-  if (!condition) {
-    var error;
-    if (format === undefined) {
-      error = new Error(
-        'Minified exception occurred; use the non-minified dev environment ' +
-        'for the full error message and additional helpful warnings.'
-      );
-    } else {
-      var args = [a, b, c, d, e, f];
-      var argIndex = 0;
-      error = new Error(
-        format.replace(/%s/g, function() { return args[argIndex++]; })
-      );
-      error.name = 'Invariant Violation';
-    }
-
-    error.framesToPop = 1; // we don't care about invariant's own frame
-    throw error;
-  }
-};
-
-module.exports = invariant;
-
-},{}]},{},[16])(16)
+},{}]},{},[17])(17)
 });
