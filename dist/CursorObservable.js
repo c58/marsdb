@@ -43,6 +43,10 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+// Defaults
+var _defaultDebounce = 1000 / 60;
+var _defaultBatchSize = 10;
+
 /**
  * Observable cursor is used for making request auto-updatable
  * after some changes is happen in a database.
@@ -56,23 +60,23 @@ var CursorObservable = (function (_Cursor) {
 
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(CursorObservable).call(this, db, query, options));
 
-    _this.update = (0, _debounce2.default)((0, _bind3.default)(_this.update, _this), 1000 / 15, 10);
+    _this.update = (0, _debounce2.default)((0, _bind3.default)(_this.update, _this), _defaultDebounce, _defaultBatchSize);
     _this.maybeUpdate = (0, _bind3.default)(_this.maybeUpdate, _this);
     return _this;
   }
 
-  /**
-   * Change a batch size of updater.
-   * Btach size is a number of changes must be happen
-   * in debounce interval to force execute debounced
-   * function (update a result, in our case)
-   *
-   * @param  {Number} batchSize
-   * @return {CursorObservable}
-   */
-
   _createClass(CursorObservable, [{
     key: 'batchSize',
+
+    /**
+     * Change a batch size of updater.
+     * Btach size is a number of changes must be happen
+     * in debounce interval to force execute debounced
+     * function (update a result, in our case)
+     *
+     * @param  {Number} batchSize
+     * @return {CursorObservable}
+     */
     value: function batchSize(_batchSize) {
       this.update.updateBatchSize(_batchSize);
       return this;
@@ -290,6 +294,16 @@ var CursorObservable = (function (_Cursor) {
       } else if (this._latestResult && this._latestResult._id) {
         this._latestIds = new Set([this._latestResult._id]);
       }
+    }
+  }], [{
+    key: 'defaultDebounce',
+    value: function defaultDebounce(waitTime) {
+      _defaultDebounce = waitTime;
+    }
+  }, {
+    key: 'defaultBatchSize',
+    value: function defaultBatchSize(batchSize) {
+      _defaultBatchSize = batchSize;
     }
   }]);
 
