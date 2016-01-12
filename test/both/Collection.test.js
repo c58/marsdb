@@ -16,10 +16,6 @@ describe('Collection', () => {
     const doc = db.create({a: 2, b: 3});
     doc.a.should.be.equal(2);
     doc.b.should.be.equal(3);
-    doc.should.have.property('remove');
-    doc.should.have.property('update');
-    doc.should.have.property('copy');
-    doc.should.have.property('serialize');
   });
 
 
@@ -72,25 +68,6 @@ describe('Collection', () => {
       const db = new Collection('test');
       db.static('testStatic', function() {});
       (() => db.static('testStatic')).should.throw(Error);
-    });
-  });
-
-
-  describe('#method', function () {
-    it('should set object method of each created document', function () {
-      const db = new Collection('test');
-      db.method('testMethod', function() {
-        return true;
-      });
-      const doc = db.create({a: 1});
-      expect(doc.testMethod).to.be.a('function');
-      expect(doc.testMethod()).to.be.equals(true);
-    });
-
-    it('should throw an exception if method with given name exists', function () {
-      const db = new Collection('test');
-      db.method('testMethod', function() {});
-      (() => db.method('testMethod')).should.throw(Error);
     });
   });
 

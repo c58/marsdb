@@ -56,7 +56,7 @@ describe('Cursor', () => {
         docs[0].k.a = 2;
         return cursor.exec().then((docs) => {
           docs.should.have.length(2);
-          docs[0].b.should.be.equals(6);
+          docs[0].b.should.be.equals(7);
           docs[0].k.a.should.be.equals(2);
         });
       });
