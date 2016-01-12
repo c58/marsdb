@@ -28,6 +28,10 @@ describe('Cursor', () => {
 
 
   describe('#exec', function () {
+    it('should execute only with multiple calls', function () {
+      // TODO
+    });
+
     it('should clone docs by default', function () {
       const cursor = new Cursor(db);
       cursor.find({b: {$gt: 4}}).skip(1).sort({b: 1});
