@@ -140,7 +140,10 @@ var PIPELINE_PROCESSORS = exports.PIPELINE_PROCESSORS = (_PIPELINE_PROCESSORS = 
 var Cursor = (function (_EventEmitter) {
   _inherits(Cursor, _EventEmitter);
 
-  function Cursor(db, query, options) {
+  function Cursor(db) {
+    var query = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+    var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
     _classCallCheck(this, Cursor);
 
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Cursor).call(this));
@@ -314,31 +317,19 @@ var Cursor = (function (_EventEmitter) {
       this._executing = this._prepareCursor(options).then(function () {
         return _this3._matchObjects();
       }).then(function (docs) {
-        var clonned = (0, _map3.default)(docs, function (doc) {
-          return _EJSON2.default.clone(doc);
-        });
+        var clonned = undefined;
+        if (_this3.options.noClone) {
+          clonned = docs;
+        } else {
+          clonned = (0, _map3.default)(docs, function (doc) {
+            return _EJSON2.default.clone(doc);
+          });
+        }
+
         return _this3.processPipeline(clonned);
       }).then(function (docs) {
         _this3._executing = null;
         return docs;
-      });
-
-      return this._executing;
-    }
-  }, {
-    key: 'ids',
-    value: function ids() {
-      var _this4 = this;
-
-      this._executing = this._prepareCursor().then(function () {
-        return _this4._matchObjects();
-      }).then(function (docs) {
-        return (0, _map3.default)(docs, function (x) {
-          return x._id;
-        });
-      }).then(function (ids) {
-        _this4._executing = null;
-        return ids;
       });
 
       return this._executing;
@@ -363,18 +354,18 @@ var Cursor = (function (_EventEmitter) {
   }, {
     key: '_matchObjects',
     value: function _matchObjects() {
-      var _this5 = this;
+      var _this4 = this;
 
       return new _DocumentRetriver2.default(this.db).retriveForQeury(this._query).then(function (docs) {
         var results = [];
-        var withFastLimit = _this5._limit && !_this5._skip && !_this5._sorter;
+        var withFastLimit = _this4._limit && !_this4._skip && !_this4._sorter;
 
         (0, _forEach2.default)(docs, function (d) {
-          var match = _this5._matcher.documentMatches(d);
+          var match = _this4._matcher.documentMatches(d);
           if (match.result) {
             results.push(d);
           }
-          if (withFastLimit && results.length === _this5._limit) {
+          if (withFastLimit && results.length === _this4._limit) {
             return false;
           }
         });
@@ -383,12 +374,12 @@ var Cursor = (function (_EventEmitter) {
           return results;
         }
 
-        if (_this5._sorter) {
-          var comparator = _this5._sorter.getComparator();
+        if (_this4._sorter) {
+          var comparator = _this4._sorter.getComparator();
           results.sort(comparator);
         }
 
-        return _this5.processSkipLimits(results);
+        return _this4.processSkipLimits(results);
       });
     }
   }, {

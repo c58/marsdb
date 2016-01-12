@@ -211,6 +211,10 @@ var _map2 = require('fast.js/map');
 
 var _map3 = _interopRequireDefault(_map2);
 
+var _checkTypes = require('check-types');
+
+var _checkTypes2 = _interopRequireDefault(_checkTypes);
+
 var _eventemitter = require('eventemitter3');
 
 var _eventemitter2 = _interopRequireDefault(_eventemitter);
@@ -239,9 +243,9 @@ var _Random = require('./Random');
 
 var _Random2 = _interopRequireDefault(_Random);
 
-var _Document = require('./Document');
+var _EJSON = require('./EJSON');
 
-var _Document2 = _interopRequireDefault(_Document);
+var _EJSON2 = _interopRequireDefault(_EJSON);
 
 function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : { default: obj };
@@ -305,41 +309,10 @@ var Collection = exports.Collection = (function (_EventEmitter) {
     /**
      * Factory for creating an object of the model
      * @param  {String|Object} raw
-     * @return {Document}
+     * @return {Object}
      */
     value: function create(raw) {
-      return new _Document2.default(this, raw);
-    }
-
-    /**
-     * Set a static function in a model. Chainable.
-     * @param  {String}   name
-     * @param  {Function} fn
-     * @return {this}
-     */
-
-  }, {
-    key: 'static',
-    value: function _static(name, fn) {
-      (0, _invariant2.default)(!Collection.prototype.hasOwnProperty(name) && typeof fn === 'function', 'Static function `%s` must not be an existing one in a model', name);
-      this[name] = fn;
-      return this;
-    }
-
-    /**
-     * Setup a method in a model (all created documents).
-     * Chainable.
-     * @param  {String}   name
-     * @param  {Function} fn
-     * @return {this}
-     */
-
-  }, {
-    key: 'method',
-    value: function method(name, fn) {
-      (0, _invariant2.default)(!this._methods[name] && typeof fn === 'function', 'Method function `%s` already defined in a model', name);
-      this._methods[name] = fn;
-      return this;
+      return _checkTypes2.default.string(raw) ? _EJSON2.default.parse(raw) : raw;
     }
 
     /**
@@ -513,8 +486,12 @@ var Collection = exports.Collection = (function (_EventEmitter) {
     }
 
     /**
-     * Make a cursor with given query and return
+     * Make a cursor with given query and return.
+     * By default all documents clonned before passed
+     * to pipeline functions. By setting `options.noClone`
+     * to `true` clonning may be disabled (for your own risk)
      * @param  {Object} query
+     * @param  {Number} options.noClone
      * @return {CursorObservable}
      */
 
@@ -532,7 +509,7 @@ var Collection = exports.Collection = (function (_EventEmitter) {
      * or with undefined if no object found.
      * @param  {Object} query
      * @param  {Object} sortObj
-     * @return {Promise}
+     * @return {CursorObservable}
      */
 
   }, {
@@ -552,14 +529,17 @@ var Collection = exports.Collection = (function (_EventEmitter) {
      * `find().length`, because it does not going to the
      * storage.
      * @param  {Object} query
-     * @return {Promise}
+     * @return {CursorObservable}
      */
 
   }, {
     key: 'count',
     value: function count(query) {
-      return this.ids(query).then(function (ids) {
-        return ids.length;
+      var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+      options.noClone = true;
+      return this.find(query, options).aggregate(function (docs) {
+        return docs.length;
       });
     }
 
@@ -567,13 +547,18 @@ var Collection = exports.Collection = (function (_EventEmitter) {
      * Return a list of ids by given query. Uses only
      * indexes.
      * @param  {Object} query
-     * @return {Promise}
+     * @return {CursorObservable}
      */
 
   }, {
     key: 'ids',
     value: function ids(query) {
-      return new _defaultCursorClass(this, query).ids();
+      var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+      options.noClone = true;
+      return this.find(query, options).map(function (doc) {
+        return doc._id;
+      });
     }
   }, {
     key: 'modelName',
@@ -612,7 +597,7 @@ var Collection = exports.Collection = (function (_EventEmitter) {
 
 exports.default = Collection;
 
-},{"./CursorObservable":5,"./Document":6,"./DocumentModifier":8,"./IndexManager":12,"./Random":14,"./StorageManager":15,"eventemitter3":18,"fast.js/forEach":24,"fast.js/map":29,"invariant":36}],3:[function(require,module,exports){
+},{"./CursorObservable":5,"./DocumentModifier":8,"./EJSON":11,"./IndexManager":12,"./Random":14,"./StorageManager":15,"check-types":17,"eventemitter3":18,"fast.js/forEach":24,"fast.js/map":29,"invariant":36}],3:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () {
@@ -877,7 +862,10 @@ var PIPELINE_PROCESSORS = exports.PIPELINE_PROCESSORS = (_PIPELINE_PROCESSORS = 
 var Cursor = (function (_EventEmitter) {
   _inherits(Cursor, _EventEmitter);
 
-  function Cursor(db, query, options) {
+  function Cursor(db) {
+    var query = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+    var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
     _classCallCheck(this, Cursor);
 
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Cursor).call(this));
@@ -1051,31 +1039,19 @@ var Cursor = (function (_EventEmitter) {
       this._executing = this._prepareCursor(options).then(function () {
         return _this3._matchObjects();
       }).then(function (docs) {
-        var clonned = (0, _map3.default)(docs, function (doc) {
-          return _EJSON2.default.clone(doc);
-        });
+        var clonned = undefined;
+        if (_this3.options.noClone) {
+          clonned = docs;
+        } else {
+          clonned = (0, _map3.default)(docs, function (doc) {
+            return _EJSON2.default.clone(doc);
+          });
+        }
+
         return _this3.processPipeline(clonned);
       }).then(function (docs) {
         _this3._executing = null;
         return docs;
-      });
-
-      return this._executing;
-    }
-  }, {
-    key: 'ids',
-    value: function ids() {
-      var _this4 = this;
-
-      this._executing = this._prepareCursor().then(function () {
-        return _this4._matchObjects();
-      }).then(function (docs) {
-        return (0, _map3.default)(docs, function (x) {
-          return x._id;
-        });
-      }).then(function (ids) {
-        _this4._executing = null;
-        return ids;
       });
 
       return this._executing;
@@ -1100,18 +1076,18 @@ var Cursor = (function (_EventEmitter) {
   }, {
     key: '_matchObjects',
     value: function _matchObjects() {
-      var _this5 = this;
+      var _this4 = this;
 
       return new _DocumentRetriver2.default(this.db).retriveForQeury(this._query).then(function (docs) {
         var results = [];
-        var withFastLimit = _this5._limit && !_this5._skip && !_this5._sorter;
+        var withFastLimit = _this4._limit && !_this4._skip && !_this4._sorter;
 
         (0, _forEach2.default)(docs, function (d) {
-          var match = _this5._matcher.documentMatches(d);
+          var match = _this4._matcher.documentMatches(d);
           if (match.result) {
             results.push(d);
           }
-          if (withFastLimit && results.length === _this5._limit) {
+          if (withFastLimit && results.length === _this4._limit) {
             return false;
           }
         });
@@ -1120,12 +1096,12 @@ var Cursor = (function (_EventEmitter) {
           return results;
         }
 
-        if (_this5._sorter) {
-          var comparator = _this5._sorter.getComparator();
+        if (_this4._sorter) {
+          var comparator = _this4._sorter.getComparator();
           results.sort(comparator);
         }
 
-        return _this5.processSkipLimits(results);
+        return _this4.processSkipLimits(results);
       });
     }
   }, {
@@ -1560,7 +1536,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.MongoTypeComp = undefined;
-exports.Document = Document;
 exports.selectorIsId = selectorIsId;
 exports.selectorIsIdPerhapsAsObject = selectorIsIdPerhapsAsObject;
 exports.isArray = isArray;
@@ -1568,10 +1543,6 @@ exports.isPlainObject = isPlainObject;
 exports.isIndexable = isIndexable;
 exports.isOperatorObject = isOperatorObject;
 exports.isNumericKey = isNumericKey;
-
-var _assign2 = require('fast.js/object/assign');
-
-var _assign3 = _interopRequireDefault(_assign2);
 
 var _checkTypes = require('check-types');
 
@@ -1585,10 +1556,6 @@ var _keys2 = require('fast.js/object/keys');
 
 var _keys3 = _interopRequireDefault(_keys2);
 
-var _invariant = require('invariant');
-
-var _invariant2 = _interopRequireDefault(_invariant);
-
 var _EJSON = require('./EJSON');
 
 var _EJSON2 = _interopRequireDefault(_EJSON);
@@ -1601,73 +1568,12 @@ function _typeof(obj) {
   return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj === 'undefined' ? 'undefined' : _typeof2(obj);
 }
 
-/*
- * Instance of a model (Document)
- * It delegates some useful methods to a given
- * collection object(`remove`, `update`).
- */
-function Document(db) {
-  var _this = this;
-
-  var raw = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-
-  (0, _invariant2.default)(db, 'Document(...): you must give a collection for the document');
-
-  // Ensure raw object
-  raw = _checkTypes2.default.string(raw) ? _EJSON2.default.parse(raw) : raw;
-
-  // Define internal methods
-  Object.defineProperty(this, 'remove', {
-    value: function value() {
-      (0, _invariant2.default)(_this._id, 'remove(...): document must have an _id for remove');
-      return db.remove({ _id: self._id });
-    },
-    writable: false
-  });
-
-  Object.defineProperty(this, 'update', {
-    value: function value(modifier) {
-      (0, _invariant2.default)(this._id, 'update(...): document must have an _id for update');
-      return db.update({ _id: self._id }, modifier);
-    },
-    writable: false
-  });
-
-  Object.defineProperty(this, 'copy', {
-    value: function value() {
-      return new Document(db, _EJSON2.default.clone(_this));
-    },
-    writable: false
-  });
-
-  Object.defineProperty(this, 'serialize', {
-    value: function value() {
-      return _EJSON2.default.stringify(_this);
-    },
-    writable: false
-  });
-
-  // Special methods from collection
-  for (var method in db._methods) {
-    Object.defineProperty(this, method, {
-      value: db._methods[method],
-      writable: false
-    });
-  }
-
-  // Move given raw object to a Document
-  (0, _assign3.default)(this, raw);
-}
-
-exports.default = Document;
-
 /**
  * Return true if given selector is an
  * object id type (string or number)
  * @param  {Mixed} selector
  * @return {Boolean}
  */
-
 function selectorIsId(selector) {
   return typeof selector === 'string' || typeof selector === 'number';
 }
@@ -1915,7 +1821,7 @@ var MongoTypeComp = exports.MongoTypeComp = {
   }
 };
 
-},{"./EJSON":11,"check-types":17,"fast.js/forEach":24,"fast.js/object/assign":30,"fast.js/object/keys":32,"invariant":36}],7:[function(require,module,exports){
+},{"./EJSON":11,"check-types":17,"fast.js/forEach":24,"fast.js/object/keys":32}],7:[function(require,module,exports){
 'use strict';
 
 function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
@@ -3651,6 +3557,7 @@ var DocumentRetriver = exports.DocumentRetriver = (function () {
    * by given query based on _id field of the query
    *
    * TODO: there is a place for indexes
+   *
    * @param  {Object} query
    * @return {Promise}
    */

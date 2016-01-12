@@ -4,7 +4,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.MongoTypeComp = undefined;
-exports.Document = Document;
 exports.selectorIsId = selectorIsId;
 exports.selectorIsIdPerhapsAsObject = selectorIsIdPerhapsAsObject;
 exports.isArray = isArray;
@@ -12,10 +11,6 @@ exports.isPlainObject = isPlainObject;
 exports.isIndexable = isIndexable;
 exports.isOperatorObject = isOperatorObject;
 exports.isNumericKey = isNumericKey;
-
-var _assign2 = require('fast.js/object/assign');
-
-var _assign3 = _interopRequireDefault(_assign2);
 
 var _checkTypes = require('check-types');
 
@@ -29,10 +24,6 @@ var _keys2 = require('fast.js/object/keys');
 
 var _keys3 = _interopRequireDefault(_keys2);
 
-var _invariant = require('invariant');
-
-var _invariant2 = _interopRequireDefault(_invariant);
-
 var _EJSON = require('./EJSON');
 
 var _EJSON2 = _interopRequireDefault(_EJSON);
@@ -41,73 +32,12 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
 
-/*
- * Instance of a model (Document)
- * It delegates some useful methods to a given
- * collection object(`remove`, `update`).
- */
-function Document(db) {
-  var _this = this;
-
-  var raw = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
-
-  (0, _invariant2.default)(db, 'Document(...): you must give a collection for the document');
-
-  // Ensure raw object
-  raw = _checkTypes2.default.string(raw) ? _EJSON2.default.parse(raw) : raw;
-
-  // Define internal methods
-  Object.defineProperty(this, 'remove', {
-    value: function value() {
-      (0, _invariant2.default)(_this._id, 'remove(...): document must have an _id for remove');
-      return db.remove({ _id: self._id });
-    },
-    writable: false
-  });
-
-  Object.defineProperty(this, 'update', {
-    value: function value(modifier) {
-      (0, _invariant2.default)(this._id, 'update(...): document must have an _id for update');
-      return db.update({ _id: self._id }, modifier);
-    },
-    writable: false
-  });
-
-  Object.defineProperty(this, 'copy', {
-    value: function value() {
-      return new Document(db, _EJSON2.default.clone(_this));
-    },
-    writable: false
-  });
-
-  Object.defineProperty(this, 'serialize', {
-    value: function value() {
-      return _EJSON2.default.stringify(_this);
-    },
-    writable: false
-  });
-
-  // Special methods from collection
-  for (var method in db._methods) {
-    Object.defineProperty(this, method, {
-      value: db._methods[method],
-      writable: false
-    });
-  }
-
-  // Move given raw object to a Document
-  (0, _assign3.default)(this, raw);
-}
-
-exports.default = Document;
-
 /**
  * Return true if given selector is an
  * object id type (string or number)
  * @param  {Mixed} selector
  * @return {Boolean}
  */
-
 function selectorIsId(selector) {
   return typeof selector === 'string' || typeof selector === 'number';
 }

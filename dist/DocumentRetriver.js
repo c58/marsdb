@@ -45,6 +45,7 @@ var DocumentRetriver = exports.DocumentRetriver = (function () {
    * by given query based on _id field of the query
    *
    * TODO: there is a place for indexes
+   *
    * @param  {Object} query
    * @return {Promise}
    */

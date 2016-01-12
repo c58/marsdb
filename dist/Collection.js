@@ -15,6 +15,10 @@ var _map2 = require('fast.js/map');
 
 var _map3 = _interopRequireDefault(_map2);
 
+var _checkTypes = require('check-types');
+
+var _checkTypes2 = _interopRequireDefault(_checkTypes);
+
 var _eventemitter = require('eventemitter3');
 
 var _eventemitter2 = _interopRequireDefault(_eventemitter);
@@ -43,9 +47,9 @@ var _Random = require('./Random');
 
 var _Random2 = _interopRequireDefault(_Random);
 
-var _Document = require('./Document');
+var _EJSON = require('./EJSON');
 
-var _Document2 = _interopRequireDefault(_Document);
+var _EJSON2 = _interopRequireDefault(_EJSON);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -95,41 +99,10 @@ var Collection = exports.Collection = (function (_EventEmitter) {
     /**
      * Factory for creating an object of the model
      * @param  {String|Object} raw
-     * @return {Document}
+     * @return {Object}
      */
     value: function create(raw) {
-      return new _Document2.default(this, raw);
-    }
-
-    /**
-     * Set a static function in a model. Chainable.
-     * @param  {String}   name
-     * @param  {Function} fn
-     * @return {this}
-     */
-
-  }, {
-    key: 'static',
-    value: function _static(name, fn) {
-      (0, _invariant2.default)(!Collection.prototype.hasOwnProperty(name) && typeof fn === 'function', 'Static function `%s` must not be an existing one in a model', name);
-      this[name] = fn;
-      return this;
-    }
-
-    /**
-     * Setup a method in a model (all created documents).
-     * Chainable.
-     * @param  {String}   name
-     * @param  {Function} fn
-     * @return {this}
-     */
-
-  }, {
-    key: 'method',
-    value: function method(name, fn) {
-      (0, _invariant2.default)(!this._methods[name] && typeof fn === 'function', 'Method function `%s` already defined in a model', name);
-      this._methods[name] = fn;
-      return this;
+      return _checkTypes2.default.string(raw) ? _EJSON2.default.parse(raw) : raw;
     }
 
     /**
@@ -303,8 +276,12 @@ var Collection = exports.Collection = (function (_EventEmitter) {
     }
 
     /**
-     * Make a cursor with given query and return
+     * Make a cursor with given query and return.
+     * By default all documents clonned before passed
+     * to pipeline functions. By setting `options.noClone`
+     * to `true` clonning may be disabled (for your own risk)
      * @param  {Object} query
+     * @param  {Number} options.noClone
      * @return {CursorObservable}
      */
 
@@ -322,7 +299,7 @@ var Collection = exports.Collection = (function (_EventEmitter) {
      * or with undefined if no object found.
      * @param  {Object} query
      * @param  {Object} sortObj
-     * @return {Promise}
+     * @return {CursorObservable}
      */
 
   }, {
@@ -342,14 +319,17 @@ var Collection = exports.Collection = (function (_EventEmitter) {
      * `find().length`, because it does not going to the
      * storage.
      * @param  {Object} query
-     * @return {Promise}
+     * @return {CursorObservable}
      */
 
   }, {
     key: 'count',
     value: function count(query) {
-      return this.ids(query).then(function (ids) {
-        return ids.length;
+      var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+      options.noClone = true;
+      return this.find(query, options).aggregate(function (docs) {
+        return docs.length;
       });
     }
 
@@ -357,13 +337,18 @@ var Collection = exports.Collection = (function (_EventEmitter) {
      * Return a list of ids by given query. Uses only
      * indexes.
      * @param  {Object} query
-     * @return {Promise}
+     * @return {CursorObservable}
      */
 
   }, {
     key: 'ids',
     value: function ids(query) {
-      return new _defaultCursorClass(this, query).ids();
+      var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+      options.noClone = true;
+      return this.find(query, options).map(function (doc) {
+        return doc._id;
+      });
     }
   }, {
     key: 'modelName',
