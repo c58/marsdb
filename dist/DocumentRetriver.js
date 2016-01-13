@@ -11,10 +11,6 @@ var _checkTypes = require('check-types');
 
 var _checkTypes2 = _interopRequireDefault(_checkTypes);
 
-var _keys2 = require('fast.js/object/keys');
-
-var _keys3 = _interopRequireDefault(_keys2);
-
 var _map2 = require('fast.js/map');
 
 var _map3 = _interopRequireDefault(_map2);
@@ -68,7 +64,7 @@ var DocumentRetriver = exports.DocumentRetriver = (function () {
       }
 
       // Retrive optimally
-      if (_checkTypes2.default.object(selectorIds) && (0, _keys3.default)(selectorIds).length > 0) {
+      if (_checkTypes2.default.array(selectorIds) && selectorIds.length > 0) {
         return this.retriveIds(selectorIds);
       } else {
         return this.retriveAll();

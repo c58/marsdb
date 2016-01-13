@@ -61,6 +61,7 @@ var StorageManager = exports.StorageManager = (function () {
       } else {
         this._loadedPromise = this._loadStorage();
       }
+      return this.loaded();
     }
   }, {
     key: 'destroy',

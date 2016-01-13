@@ -314,23 +314,25 @@ var Cursor = (function (_EventEmitter) {
 
       var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
-      this._executing = this._prepareCursor(options).then(function () {
-        return _this3._matchObjects();
-      }).then(function (docs) {
-        var clonned = undefined;
-        if (_this3.options.noClone) {
-          clonned = docs;
-        } else {
-          clonned = (0, _map3.default)(docs, function (doc) {
-            return _EJSON2.default.clone(doc);
-          });
-        }
+      if (!this._executing) {
+        this._executing = this._prepareCursor(options).then(function () {
+          return _this3._matchObjects();
+        }).then(function (docs) {
+          var clonned = undefined;
+          if (_this3.options.noClone) {
+            clonned = docs;
+          } else {
+            clonned = (0, _map3.default)(docs, function (doc) {
+              return _EJSON2.default.clone(doc);
+            });
+          }
 
-        return _this3.processPipeline(clonned);
-      }).then(function (docs) {
-        _this3._executing = null;
-        return docs;
-      });
+          return _this3.processPipeline(clonned);
+        }).then(function (docs) {
+          _this3._executing = null;
+          return docs;
+        });
+      }
 
       return this._executing;
     }

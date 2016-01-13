@@ -7,6 +7,7 @@ exports.default = Queue;
 /**
  * @return {Object}
  */
+/* istanbul ignore next */
 var LocalPromise = typeof Promise !== 'undefined' ? Promise : function () {
   return {
     then: function then() {
@@ -15,12 +16,14 @@ var LocalPromise = typeof Promise !== 'undefined' ? Promise : function () {
   };
 };
 
+/* istanbul ignore next */
 var noop = function noop() {};
 
 /**
  * @param {*} value
  * @returns {LocalPromise}
  */
+/* istanbul ignore next */
 var resolveWith = function resolveWith(value) {
   if (value && typeof value.then === 'function') {
     return value;
@@ -58,6 +61,7 @@ var resolveWith = function resolveWith(value) {
  *     doStuffWith(file);
  * });
  */
+/* istanbul ignore next */
 function Queue(maxPendingPromises, maxQueuedPromises) {
   this.pendingPromises = 0;
   this.maxPendingPromises = typeof maxPendingPromises !== 'undefined' ? maxPendingPromises : Infinity;
@@ -69,6 +73,7 @@ function Queue(maxPendingPromises, maxQueuedPromises) {
  * Defines promise promiseFactory
  * @param {Function} GlobalPromise
  */
+/* istanbul ignore next */
 Queue.configure = function (GlobalPromise) {
   LocalPromise = GlobalPromise;
 };
@@ -77,6 +82,7 @@ Queue.configure = function (GlobalPromise) {
  * @param {Function} promiseGenerator
  * @return {LocalPromise}
  */
+/* istanbul ignore next */
 Queue.prototype.add = function (promiseGenerator) {
   var self = this;
   return new LocalPromise(function (resolve, reject, notify) {
@@ -103,6 +109,7 @@ Queue.prototype.add = function (promiseGenerator) {
  *
  * @return {number}
  */
+/* istanbul ignore next */
 Queue.prototype.getPendingLength = function () {
   return this.pendingPromises;
 };
@@ -112,6 +119,7 @@ Queue.prototype.getPendingLength = function () {
  *
  * @return {number}
  */
+/* istanbul ignore next */
 Queue.prototype.getQueueLength = function () {
   return this.queue.length;
 };
@@ -120,6 +128,7 @@ Queue.prototype.getQueueLength = function () {
  * @returns {boolean} true if first item removed from queue
  * @private
  */
+/* istanbul ignore next */
 Queue.prototype._dequeue = function () {
   var self = this;
   if (this.pendingPromises >= this.maxPendingPromises) {

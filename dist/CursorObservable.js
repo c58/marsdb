@@ -134,6 +134,7 @@ var CursorObservable = (function (_Cursor) {
         _this2.db.removeListener('update', updateWrapper);
         _this2.db.removeListener('remove', updateWrapper);
         _this2.removeListener('update', listener);
+        _this2.removeListener('stop', stopper);
         _this2.emit('stopped', listener);
       };
 
@@ -297,13 +298,21 @@ var CursorObservable = (function (_Cursor) {
     }
   }], [{
     key: 'defaultDebounce',
-    value: function defaultDebounce(waitTime) {
-      _defaultDebounce = waitTime;
+    value: function defaultDebounce() {
+      if (arguments.length > 0) {
+        _defaultDebounce = arguments[0];
+      } else {
+        return _defaultDebounce;
+      }
     }
   }, {
     key: 'defaultBatchSize',
-    value: function defaultBatchSize(batchSize) {
-      _defaultBatchSize = batchSize;
+    value: function defaultBatchSize() {
+      if (arguments.length > 0) {
+        _defaultBatchSize = arguments[0];
+      } else {
+        return _defaultBatchSize;
+      }
     }
   }]);
 

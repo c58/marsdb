@@ -87,6 +87,7 @@ var Collection = exports.Collection = (function (_EventEmitter) {
 
     // Init managers
     var storageManagerClass = options.storageManager || _defaultStorageManager;
+    _this.cursorClass = options.cursorClass || _defaultCursorClass;
     _this.indexManager = new _IndexManager2.default(_this, options);
     _this.storageManager = new storageManagerClass(_this, options);
     _this.idGenerator = options.idGenerator || _defaultIdGenerator;
@@ -290,7 +291,7 @@ var Collection = exports.Collection = (function (_EventEmitter) {
     value: function find(query) {
       var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
-      return new _defaultCursorClass(this, query, options);
+      return new this.cursorClass(this, query, options);
     }
 
     /**
@@ -367,18 +368,30 @@ var Collection = exports.Collection = (function (_EventEmitter) {
     }
   }], [{
     key: 'defaultStorageManager',
-    value: function defaultStorageManager(managerClass) {
-      _defaultStorageManager = managerClass;
+    value: function defaultStorageManager() {
+      if (arguments.length > 0) {
+        _defaultStorageManager = arguments[0];
+      } else {
+        return _defaultStorageManager;
+      }
     }
   }, {
     key: 'defaultIdGenerator',
-    value: function defaultIdGenerator(generator) {
-      _defaultIdGenerator = generator;
+    value: function defaultIdGenerator() {
+      if (arguments.length > 0) {
+        _defaultIdGenerator = arguments[0];
+      } else {
+        return _defaultIdGenerator;
+      }
     }
   }, {
     key: 'defaultCursorClass',
-    value: function defaultCursorClass(cursorClass) {
-      _defaultCursorClass = cursorClass;
+    value: function defaultCursorClass() {
+      if (arguments.length > 0) {
+        _defaultCursorClass = arguments[0];
+      } else {
+        return _defaultCursorClass;
+      }
     }
   }]);
 

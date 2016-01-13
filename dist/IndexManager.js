@@ -49,6 +49,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
  * based.
  * By default it creates an index for `_id` field.
  */
+/* istanbul ignore next */
 
 var IndexManager = exports.IndexManager = (function () {
   function IndexManager(db) {

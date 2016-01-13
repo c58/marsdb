@@ -297,6 +297,7 @@ var Collection = exports.Collection = (function (_EventEmitter) {
 
     // Init managers
     var storageManagerClass = options.storageManager || _defaultStorageManager;
+    _this.cursorClass = options.cursorClass || _defaultCursorClass;
     _this.indexManager = new _IndexManager2.default(_this, options);
     _this.storageManager = new storageManagerClass(_this, options);
     _this.idGenerator = options.idGenerator || _defaultIdGenerator;
@@ -500,7 +501,7 @@ var Collection = exports.Collection = (function (_EventEmitter) {
     value: function find(query) {
       var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
-      return new _defaultCursorClass(this, query, options);
+      return new this.cursorClass(this, query, options);
     }
 
     /**
@@ -577,18 +578,30 @@ var Collection = exports.Collection = (function (_EventEmitter) {
     }
   }], [{
     key: 'defaultStorageManager',
-    value: function defaultStorageManager(managerClass) {
-      _defaultStorageManager = managerClass;
+    value: function defaultStorageManager() {
+      if (arguments.length > 0) {
+        _defaultStorageManager = arguments[0];
+      } else {
+        return _defaultStorageManager;
+      }
     }
   }, {
     key: 'defaultIdGenerator',
-    value: function defaultIdGenerator(generator) {
-      _defaultIdGenerator = generator;
+    value: function defaultIdGenerator() {
+      if (arguments.length > 0) {
+        _defaultIdGenerator = arguments[0];
+      } else {
+        return _defaultIdGenerator;
+      }
     }
   }, {
     key: 'defaultCursorClass',
-    value: function defaultCursorClass(cursorClass) {
-      _defaultCursorClass = cursorClass;
+    value: function defaultCursorClass() {
+      if (arguments.length > 0) {
+        _defaultCursorClass = arguments[0];
+      } else {
+        return _defaultCursorClass;
+      }
     }
   }]);
 
@@ -1036,23 +1049,25 @@ var Cursor = (function (_EventEmitter) {
 
       var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
-      this._executing = this._prepareCursor(options).then(function () {
-        return _this3._matchObjects();
-      }).then(function (docs) {
-        var clonned = undefined;
-        if (_this3.options.noClone) {
-          clonned = docs;
-        } else {
-          clonned = (0, _map3.default)(docs, function (doc) {
-            return _EJSON2.default.clone(doc);
-          });
-        }
+      if (!this._executing) {
+        this._executing = this._prepareCursor(options).then(function () {
+          return _this3._matchObjects();
+        }).then(function (docs) {
+          var clonned = undefined;
+          if (_this3.options.noClone) {
+            clonned = docs;
+          } else {
+            clonned = (0, _map3.default)(docs, function (doc) {
+              return _EJSON2.default.clone(doc);
+            });
+          }
 
-        return _this3.processPipeline(clonned);
-      }).then(function (docs) {
-        _this3._executing = null;
-        return docs;
-      });
+          return _this3.processPipeline(clonned);
+        }).then(function (docs) {
+          _this3._executing = null;
+          return docs;
+        });
+      }
 
       return this._executing;
     }
@@ -1293,6 +1308,7 @@ var CursorObservable = (function (_Cursor) {
         _this2.db.removeListener('update', updateWrapper);
         _this2.db.removeListener('remove', updateWrapper);
         _this2.removeListener('update', listener);
+        _this2.removeListener('stop', stopper);
         _this2.emit('stopped', listener);
       };
 
@@ -1456,13 +1472,21 @@ var CursorObservable = (function (_Cursor) {
     }
   }], [{
     key: 'defaultDebounce',
-    value: function defaultDebounce(waitTime) {
-      _defaultDebounce = waitTime;
+    value: function defaultDebounce() {
+      if (arguments.length > 0) {
+        _defaultDebounce = arguments[0];
+      } else {
+        return _defaultDebounce;
+      }
     }
   }, {
     key: 'defaultBatchSize',
-    value: function defaultBatchSize(batchSize) {
-      _defaultBatchSize = batchSize;
+    value: function defaultBatchSize() {
+      if (arguments.length > 0) {
+        _defaultBatchSize = arguments[0];
+      } else {
+        return _defaultBatchSize;
+      }
     }
   }]);
 
@@ -3462,10 +3486,6 @@ var _checkTypes = require('check-types');
 
 var _checkTypes2 = _interopRequireDefault(_checkTypes);
 
-var _keys2 = require('fast.js/object/keys');
-
-var _keys3 = _interopRequireDefault(_keys2);
-
 var _map2 = require('fast.js/map');
 
 var _map3 = _interopRequireDefault(_map2);
@@ -3525,7 +3545,7 @@ var DocumentRetriver = exports.DocumentRetriver = (function () {
       }
 
       // Retrive optimally
-      if (_checkTypes2.default.object(selectorIds) && (0, _keys3.default)(selectorIds).length > 0) {
+      if (_checkTypes2.default.array(selectorIds) && selectorIds.length > 0) {
         return this.retriveIds(selectorIds);
       } else {
         return this.retriveAll();
@@ -3593,7 +3613,7 @@ var DocumentRetriver = exports.DocumentRetriver = (function () {
 
 exports.default = DocumentRetriver;
 
-},{"./Document":6,"check-types":18,"fast.js/map":30,"fast.js/object/keys":33}],10:[function(require,module,exports){
+},{"./Document":6,"check-types":18,"fast.js/map":30}],10:[function(require,module,exports){
 'use strict';
 
 function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
@@ -4758,6 +4778,7 @@ function _classCallCheck(instance, Constructor) {
  * based.
  * By default it creates an index for `_id` field.
  */
+/* istanbul ignore next */
 
 var IndexManager = exports.IndexManager = (function () {
   function IndexManager(db) {
@@ -4991,6 +5012,7 @@ exports.default = Queue;
 /**
  * @return {Object}
  */
+/* istanbul ignore next */
 var LocalPromise = typeof Promise !== 'undefined' ? Promise : function () {
   return {
     then: function then() {
@@ -4999,12 +5021,14 @@ var LocalPromise = typeof Promise !== 'undefined' ? Promise : function () {
   };
 };
 
+/* istanbul ignore next */
 var noop = function noop() {};
 
 /**
  * @param {*} value
  * @returns {LocalPromise}
  */
+/* istanbul ignore next */
 var resolveWith = function resolveWith(value) {
   if (value && typeof value.then === 'function') {
     return value;
@@ -5042,6 +5066,7 @@ var resolveWith = function resolveWith(value) {
  *     doStuffWith(file);
  * });
  */
+/* istanbul ignore next */
 function Queue(maxPendingPromises, maxQueuedPromises) {
   this.pendingPromises = 0;
   this.maxPendingPromises = typeof maxPendingPromises !== 'undefined' ? maxPendingPromises : Infinity;
@@ -5053,6 +5078,7 @@ function Queue(maxPendingPromises, maxQueuedPromises) {
  * Defines promise promiseFactory
  * @param {Function} GlobalPromise
  */
+/* istanbul ignore next */
 Queue.configure = function (GlobalPromise) {
   LocalPromise = GlobalPromise;
 };
@@ -5061,6 +5087,7 @@ Queue.configure = function (GlobalPromise) {
  * @param {Function} promiseGenerator
  * @return {LocalPromise}
  */
+/* istanbul ignore next */
 Queue.prototype.add = function (promiseGenerator) {
   var self = this;
   return new LocalPromise(function (resolve, reject, notify) {
@@ -5087,6 +5114,7 @@ Queue.prototype.add = function (promiseGenerator) {
  *
  * @return {number}
  */
+/* istanbul ignore next */
 Queue.prototype.getPendingLength = function () {
   return this.pendingPromises;
 };
@@ -5096,6 +5124,7 @@ Queue.prototype.getPendingLength = function () {
  *
  * @return {number}
  */
+/* istanbul ignore next */
 Queue.prototype.getQueueLength = function () {
   return this.queue.length;
 };
@@ -5104,6 +5133,7 @@ Queue.prototype.getQueueLength = function () {
  * @returns {boolean} true if first item removed from queue
  * @private
  */
+/* istanbul ignore next */
 Queue.prototype._dequeue = function () {
   var self = this;
   if (this.pendingPromises >= this.maxPendingPromises) {
@@ -5432,6 +5462,7 @@ var StorageManager = exports.StorageManager = (function () {
       } else {
         this._loadedPromise = this._loadStorage();
       }
+      return this.loaded();
     }
   }, {
     key: 'destroy',
