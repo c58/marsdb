@@ -24,8 +24,30 @@ describe('CursorObservable', () => {
     ]);
   });
 
-  it('should be created with db and query', () => {
-    const cursor = new CursorObservable(db, {});
+  describe('#defaultDebounce', function () {
+    it('should return default 1000/60', function () {
+      CursorObservable.defaultDebounce().should.be.equal(1000/60);
+    });
+    it('should set default debounce time', function () {
+      const oldDebounce = CursorObservable.defaultDebounce();
+      const newDebouce = 100;
+      CursorObservable.defaultDebounce(newDebouce);
+      CursorObservable.defaultDebounce().should.be.equal(newDebouce);
+      CursorObservable.defaultDebounce(oldDebounce);
+    });
+  });
+
+  describe('#defaultBatchSize', function () {
+    it('should return default 10', function () {
+      CursorObservable.defaultBatchSize().should.be.equal(10);
+    });
+    it('should set default batch size', function () {
+      const oldBatchSize = CursorObservable.defaultBatchSize();
+      const newBatchSize = 100;
+      CursorObservable.defaultBatchSize(newBatchSize);
+      CursorObservable.defaultBatchSize().should.be.equal(newBatchSize);
+      CursorObservable.defaultBatchSize(oldBatchSize);
+    });
   });
 
   describe('#whenNotExecuting', function () {
@@ -52,6 +74,38 @@ describe('CursorObservable', () => {
           cursor._query.should.be.deep.equals({a: 2});
         });
       }).to.throw(Error);
+    });
+  });
+
+  describe('#stopObservers', function () {
+    it('should stop all listeners', function () {
+      const cursor = new CursorObservable(db);
+      const cb1 = sinon.spy();
+      const cb2 = sinon.spy();
+      cursor.on('stop', cb1);
+      cursor.on('stop', cb2);
+
+      cursor.emit('stop');
+      cb1.should.have.callCount(1);
+      cb2.should.have.callCount(1);
+      cursor.stopObservers();
+      cb1.should.have.callCount(2);
+      cb2.should.have.callCount(2);
+    });
+
+    it('should cancel any active updates', function (done) {
+      const cursor = new CursorObservable(db);
+      const cb1 = sinon.spy();
+      cursor.on('update', cb1);
+      cursor.debounce(10);
+      cursor.update();
+      cursor.update();
+      cb1.should.have.callCount(0);
+      cursor.stopObservers();
+      setTimeout(() => {
+        cb1.should.have.callCount(0);
+        done();
+      }, 30);
     });
   });
 

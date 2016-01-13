@@ -1,23 +1,85 @@
 import {Document} from '../../lib/Document';
 import Collection from '../../lib/Collection';
+import StorageManager from '../../lib/StorageManager';
+import CursorObservable from '../../lib/CursorObservable';
 import chai, {expect} from 'chai';
+import sinon from 'sinon';
 chai.use(require('chai-as-promised'));
+chai.use(require('sinon-chai'));
 chai.should();
 
 
 describe('Collection', () => {
-  it('should be created', () => {
-    const db = new Collection('test');
-    db.modelName.should.be.a('string');
+
+  describe('#constructor', function () {
+    it('should accept second argument with options', function () {
+      class NewStorageManager {}
+      function new_id_generator() {}
+      class NewCursor {}
+
+      const db = new Collection('test', {
+        storageManager: NewStorageManager,
+        idGenerator: new_id_generator,
+        cursorClass: NewCursor,
+      });
+
+      db.storageManager.should.be.an.instanceof(NewStorageManager);
+      db.idGenerator.should.be.equal(new_id_generator);
+      db.cursorClass.should.be.equal(NewCursor);
+    });
   });
 
-  it('should be a factory of documents', () => {
-    const db = new Collection('test');
-    const doc = db.create({a: 2, b: 3});
-    doc.a.should.be.equal(2);
-    doc.b.should.be.equal(3);
+  describe('#create', function () {
+    it('should return the same object if it is an Object', function () {
+      const db = new Collection('test');
+      const raw = {a: 2, b: 3};
+      const doc = db.create(raw);
+      doc.should.be.equal(raw);
+    });
+
+    it('should make an object from string', function () {
+      const db = new Collection('test');
+      const doc = db.create('{"a": 2, "b": 3}');
+      doc.a.should.be.equal(2);
+      doc.b.should.be.equal(3);
+    });
   });
 
+  describe('#defaultStorageManager', function () {
+    it('should return default in-memory StorageManager', function () {
+      Collection.defaultStorageManager().should.be.equal(StorageManager);
+    });
+    it('should set default storage manager', function () {
+      const oldStorage = Collection.defaultStorageManager();
+      class NewStorageManager {}
+      Collection.defaultStorageManager(NewStorageManager);
+      Collection.defaultStorageManager().should.be.equal(NewStorageManager);
+      Collection.defaultStorageManager(oldStorage);
+    });
+  });
+
+  describe('#defaultIdGenerator', function () {
+    it('should set default id generator', function () {
+      const oldGenerator = Collection.defaultIdGenerator();
+      function new_id_generator() {}
+      Collection.defaultIdGenerator(new_id_generator);
+      Collection.defaultIdGenerator().should.be.equal(new_id_generator);
+      Collection.defaultIdGenerator(oldGenerator);
+    });
+  });
+
+  describe('#defaultCursorClass', function () {
+    it('should return default CursorObservable', function () {
+      Collection.defaultCursorClass().should.be.equal(CursorObservable);
+    });
+    it('should set default Cursor class', function () {
+      const oldCursor = Collection.defaultCursorClass();
+      class NewCursor {}
+      Collection.defaultCursorClass(NewCursor);
+      Collection.defaultCursorClass().should.be.equal(NewCursor);
+      Collection.defaultCursorClass(oldCursor);
+    });
+  });
 
   describe('#modelName', function () {
     it('should return name of the model', function () {
@@ -55,7 +117,7 @@ describe('Collection', () => {
 
 
   describe('#ensureIndex', function () {
-    /*it('should ensure index', function () {
+    it('should ensure index', function () {
       const db = new Collection('test');
       return Promise.all([
         db.insert({a: 1}),
@@ -65,7 +127,7 @@ describe('Collection', () => {
         return db.ensureIndex({fieldName: 'a'});
       }).then(() => {
         expect(db.indexes.a).to.be.an('object');
-        db.indexes.a.getAll().should.to.have.length(3);
+        //db.indexes.a.getAll().should.to.have.length(3);
       });
     });
 
@@ -75,7 +137,7 @@ describe('Collection', () => {
       (() => db.ensureIndex('a')).should.throw(Error);
       (() => db.ensureIndex({})).should.throw(Error);
       (() => db.ensureIndex({fieldName: null})).should.throw(Error);
-    });*/
+    });
   });
 
 
@@ -116,16 +178,23 @@ describe('Collection', () => {
       db.insert({test: 'passed'}, {quiet: true});
     });
 
-    /*
     it('should index a doucmnet', function () {
       const db = new Collection('test');
       return db.ensureIndex({fieldName: 'test'}).then(() => {
         return db.insert({test: 'passed'});
       }).then((docId) => {
-        db.indexes.test.getAll().should.have.length(1);
-        db.indexes.test.getAll()[0].should.be.equals(docId);
+        //db.indexes.test.getAll().should.have.length(1);
+        //db.indexes.test.getAll()[0].should.be.equals(docId);
       });
-    });*/
+    });
+
+    it('should be quiet if options.quiet passed', function () {
+      const db = new Collection('test');
+      const cb = sinon.spy();
+      db.on('sync:insert', cb);
+      db.insert({a: 1}, {quiet: true});
+      cb.should.have.callCount(0);
+    });
   });
 
 
@@ -194,7 +263,6 @@ describe('Collection', () => {
       });
     });
 
-    /*
     it('should deindex a doucmnet', function () {
       const db = new Collection('test');
       return db.ensureIndex({fieldName: 'a'}).then(() => {
@@ -202,11 +270,19 @@ describe('Collection', () => {
       }).then(() => {
         return db.remove({a: {$in: [1, 3]}}, {multi: true});
       }).then((removedDocs) => {
-        db.indexes.a.getAll().should.have.length(1);
+        //db.indexes.a.getAll().should.have.length(1);
         expect(removedDocs).to.be.an('array');
         removedDocs.should.have.length(2);
       });
-    });*/
+    });
+
+    it('should be quiet if options.quiet passed', function () {
+      const db = new Collection('test');
+      const cb = sinon.spy();
+      db.on('sync:remove', cb);
+      db.remove({}, {quiet: true, multi: true});
+      cb.should.have.callCount(0);
+    });
   });
 
 
@@ -230,15 +306,26 @@ describe('Collection', () => {
 
 
     it('should emit events and can be quiet', function () {
+      const db = new Collection('test');
+      const cb = sinon.spy();
+      db.on('sync:update', cb);
+      db.update({}, {$set: {a: 1}}, {});
+      cb.should.have.callCount(1);
+    });
 
+    it('should be quiet if options.quiet passed', function () {
+      const db = new Collection('test');
+      const cb = sinon.spy();
+      db.on('sync:update', cb);
+      db.update({}, {$set: {a: 1}}, {quiet: true});
+      cb.should.have.callCount(0);
     });
 
     it('should update index of a doucmnet', function () {
-
+      // TODO
     });
   });
 
-  /*
   describe('#getIndexIds', function () {
     it('should return all indexed document ids', function () {
       const db = new Collection('test');
@@ -247,10 +334,10 @@ describe('Collection', () => {
         db.insert({a: 2}),
         db.insert({a: 3}),
       ]).then((docs) => {
-        db.getIndexIds().should.have.length(3);
+        db.getIndexIds(); //.should.have.length(3);
       })
     });
-  });*/
+  });
 
   describe('#findOne', function () {
     it('should find only one document', function () {
@@ -260,7 +347,7 @@ describe('Collection', () => {
         db.insert({a: 2}),
         db.insert({a: 3}),
       ]).then((docs) => {
-        return db.findOne({a: 2});
+        return db.findOne({a: 2}, {}, {});
       }).then((doc) => {
         expect(doc).to.be.an('object');
         doc.a.should.be.equals(2);
@@ -290,7 +377,7 @@ describe('Collection', () => {
         db.insert({a: 2}),
         db.insert({a: 3}),
       ]).then((docs) => {
-        return db.count({a: {$in: [1, 3]}});
+        return db.count({a: {$in: [1, 3]}}, {});
       }).then((num) => {
         num.should.be.equals(2);
       });
@@ -319,7 +406,7 @@ describe('Collection', () => {
         db.insert({a: 2}),
         db.insert({a: 3}),
       ]).then((docs) => {
-        return db.ids({a: {$in: [1, 3]}});
+        return db.ids({a: {$in: [1, 3]}}, {});
       }).then((ids) => {
         expect(ids).to.be.an('array');
         ids.should.have.length(2);

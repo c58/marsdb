@@ -1,12 +1,37 @@
 import StorageManager from '../../lib/StorageManager';
 import chai from 'chai';
+import sinon from 'sinon';
 chai.use(require('chai-as-promised'));
+chai.use(require('sinon-chai'));
 chai.should();
 
 
 describe('StorageManager', () => {
   it('should be created', () => {
     const db = new StorageManager();
+  });
+
+  it('should reload storage after running reloading', function () {
+    const db = new StorageManager();
+    const cb = sinon.spy();
+    return db.loaded().then(() => {
+      db.reload().then(cb);
+      db.reload().then(() => cb.should.have.callCount(1));
+      db.reload().then(() => cb.should.have.callCount(2));
+      db.reload().then(() => cb.should.have.callCount(3));
+      db.reload().then(() => cb.should.have.callCount(4));
+    })
+  });
+
+  it('should destroy storage', function () {
+    const db = new StorageManager();
+    return db.persist('a', {_id: 'a', a: 1}).then(() => {
+      return db.get('a').should.eventually.deep.equal({_id: 'a', a: 1});
+    })
+    .then(() => db.destroy())
+    .then(() => {
+      return db.get('a').should.eventually.deep.equal(undefined);
+    });
   });
 
   it('should be a able to persist', () => {

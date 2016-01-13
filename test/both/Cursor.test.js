@@ -28,8 +28,17 @@ describe('Cursor', () => {
 
 
   describe('#exec', function () {
-    it('should execute only with multiple calls', function () {
-      // TODO
+    it('should execute only once with multiple calls', function () {
+      const cursor = new Cursor(db);
+      cursor.find({b: {$gt: 4}}).skip(1).sort({b: 1});
+      const promise = cursor.exec();
+      cursor.exec().should.be.equal(promise);
+      cursor.exec().should.be.equal(promise);
+      return promise.then(() => {
+        const anotherPromise = cursor.exec()
+        anotherPromise.should.not.be.equal(promise);
+        return anotherPromise;
+      })
     });
 
     it('should clone docs by default', function () {
