@@ -25,14 +25,13 @@
   },
   "dependencies": {
     "check-types": "^5.1.0",
-    "core-js": "^2.0.1",
     "eventemitter3": "1.1.1",
     "fast.js": "^0.1.1",
     "geojson-utils": "^1.1.0",
-    "invariant": "^2.2.0",
-    "keymirror": "^0.1.1"
+    "invariant": "^2.2.0"
   },
   "devDependencies": {
+    "core-js": "^2.0.1",
     "lodash": "3.10.x",
     "babel-cli": "^6.3.17",
     "babel-eslint": "^5.0.0-beta6",

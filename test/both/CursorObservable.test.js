@@ -249,7 +249,7 @@ describe('CursorObservable', () => {
         });
     });
 
-    it('should update when join funciton call updater function', function (done) {
+    it('should update when join function call updater function', function (done) {
       var observerCalls = 0;
       db.find({$or: [{f: 1}, {f: 2}]})
         .joinAll((docs, updated) => {
