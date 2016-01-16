@@ -227,10 +227,10 @@ describe('CursorObservable', () => {
       var joinCalls = 0;
       db.find({$or: [{f: 1}, {f: 2}]})
         .joinAll((docs) => {
-          return db.find({b: 30}).observe(res => {
+          return db.find({b: 30}, {test: observerCalls}).observe(res => {
             if (res.length > 0) {
               joinCalls += 1;
-              joinCalls.should.be.lte(1);
+              joinCalls.should.be.lte(2);
             }
           });
         })
@@ -240,7 +240,7 @@ describe('CursorObservable', () => {
           observerCalls.should.be.lte(2);
           observerCalls++;
           if (observerCalls === 2) {
-            done();
+            setTimeout(done, 60);
           }
         }).then(() => {
           return db.insert({f: 1});
