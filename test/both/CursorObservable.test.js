@@ -110,6 +110,20 @@ describe('CursorObservable', () => {
   });
 
   describe('#observe', function () {
+    it('should return result of previous execution', function () {
+      const cursor = db.find({b: 1})
+      let result;
+      return cursor.observe((res) => {
+        result = res;
+      }).then(() => {
+        return cursor.observe((new_res) => {
+          new_res.should.be.equal(result);
+        }).then((new_res) => {
+          new_res.should.be.equal(result);
+        });
+      })
+    });
+
     it('should support multiple declarative style observing', function (done) {
       let calls = 0;
       const obsFn = () => {
@@ -326,7 +340,7 @@ describe('CursorObservable', () => {
       });
     });
 
-    it('should not update a cursor when updatedAt is equals', function (done) {
+    it('should NOT update a cursor when updatedAt is equals', function (done) {
       var calls = 0;
 
       db.update({f: 1}, {$set: {updatedAt: new Date(0)}}).then(() => {
