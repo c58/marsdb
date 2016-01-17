@@ -7,13 +7,13 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.Collection = undefined;
 
-var _forEach = require('fast.js/forEach');
-
-var _forEach2 = _interopRequireDefault(_forEach);
-
 var _map2 = require('fast.js/map');
 
 var _map3 = _interopRequireDefault(_map2);
+
+var _forEach = require('fast.js/forEach');
+
+var _forEach2 = _interopRequireDefault(_forEach);
 
 var _checkTypes = require('check-types');
 
@@ -22,14 +22,6 @@ var _checkTypes2 = _interopRequireDefault(_checkTypes);
 var _eventemitter = require('eventemitter3');
 
 var _eventemitter2 = _interopRequireDefault(_eventemitter);
-
-var _invariant = require('invariant');
-
-var _invariant2 = _interopRequireDefault(_invariant);
-
-var _DocumentModifier = require('./DocumentModifier');
-
-var _DocumentModifier2 = _interopRequireDefault(_DocumentModifier);
 
 var _IndexManager = require('./IndexManager');
 
@@ -42,6 +34,10 @@ var _StorageManager2 = _interopRequireDefault(_StorageManager);
 var _CursorObservable = require('./CursorObservable');
 
 var _CursorObservable2 = _interopRequireDefault(_CursorObservable);
+
+var _CollectionDelegate = require('./CollectionDelegate');
+
+var _CollectionDelegate2 = _interopRequireDefault(_CollectionDelegate);
 
 var _Random = require('./Random');
 
@@ -61,6 +57,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 // Defaults
 var _defaultRandomGenerator = new _Random2.default();
+var _defaultDelegate = _CollectionDelegate2.default;
 var _defaultCursorClass = _CursorObservable2.default;
 var _defaultStorageManager = _StorageManager2.default;
 var _defaultIdGenerator = function _defaultIdGenerator(modelName) {
@@ -82,15 +79,15 @@ var Collection = exports.Collection = (function (_EventEmitter) {
 
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Collection).call(this));
 
-    _this._methods = {};
     _this._modelName = name;
 
-    // Init managers
     var storageManagerClass = options.storageManager || _defaultStorageManager;
+    var delegateClass = options.delegate || _defaultDelegate;
     _this.cursorClass = options.cursorClass || _defaultCursorClass;
     _this.indexManager = new _IndexManager2.default(_this, options);
     _this.storageManager = new storageManagerClass(_this, options);
     _this.idGenerator = options.idGenerator || _defaultIdGenerator;
+    _this.delegate = new delegateClass(_this, options);
     return _this;
   }
 
@@ -104,6 +101,17 @@ var Collection = exports.Collection = (function (_EventEmitter) {
      */
     value: function create(raw) {
       return _checkTypes2.default.string(raw) ? _EJSON2.default.parse(raw) : raw;
+    }
+
+    /**
+     * Return all currently indexed ids
+     * @return {Array}
+     */
+
+  }, {
+    key: 'getIndexIds',
+    value: function getIndexIds() {
+      return this.indexes._id.getAll();
     }
 
     /**
@@ -143,26 +151,26 @@ var Collection = exports.Collection = (function (_EventEmitter) {
         this.emit('sync:insert', doc, randomId);
       }
 
-      // Add to indexes and persist
-      return this.indexManager.indexDocument(doc).then(function () {
-        return _this2.storageManager.persist(doc._id, doc).then(function () {
-          _this2.emit('insert', doc, null, randomId);
-          return doc._id;
-        });
+      return this.delegate.insert(doc, options).then(function (docId) {
+        _this2.emit('insert', doc, null, randomId);
+        return docId;
       });
     }
 
     /**
-     * Insert all documents in given list
+     * Just a sugar for mulpitle inserts. Wrap all inserts
+     * with a single Promise and return it.
      * @param  {Array} docs
-     * @param  {Boolean} quiet
+     * @param  {Object} options
      * @return {Promise}
      */
 
   }, {
     key: 'insertAll',
-    value: function insertAll(docs, options) {
+    value: function insertAll(docs) {
       var _this3 = this;
+
+      var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
       return Promise.all((0, _map3.default)(docs, function (d) {
         return _this3.insert(d, options);
@@ -185,29 +193,15 @@ var Collection = exports.Collection = (function (_EventEmitter) {
 
       var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
-      // Fire sync event
       if (!options.quiet) {
         this.emit('sync:remove', query, options);
       }
 
-      // Remove locally
-      return this.find(query).exec().then(function (docs) {
-        (0, _invariant2.default)(docs.length <= 1 || options.multi, 'remove(..): multi removing is not enabled by options.multi');
-
-        var removeStorgePromises = (0, _map3.default)(docs, function (d) {
-          return _this4.storageManager.delete(d._id);
+      return this.delegate.remove(query, options).then(function (removedDocs) {
+        (0, _forEach2.default)(removedDocs, function (d) {
+          return _this4.emit('remove', null, d);
         });
-        var removeIndexPromises = (0, _map3.default)(docs, function (d) {
-          return _this4.indexManager.deindexDocument(d);
-        });
-        var allPromises = removeStorgePromises.concat(removeIndexPromises);
-
-        return Promise.all(allPromises).then(function () {
-          (0, _forEach2.default)(docs, function (d) {
-            return _this4.emit('remove', null, d);
-          });
-          return docs;
-        });
+        return removedDocs;
       });
     }
 
@@ -228,52 +222,16 @@ var Collection = exports.Collection = (function (_EventEmitter) {
 
       var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
-      options.upsert = false;
-
-      // Fire sync event
       if (!options.quiet) {
         this.emit('sync:update', query, modifier, options);
       }
 
-      // Update locally
-      return new _DocumentModifier2.default(this, query).modify(modifier, options).then(function (result) {
-        var original = result.original;
-        var updated = result.updated;
-
-        updated = (0, _map3.default)(updated, function (x) {
-          return _this5.create(x);
+      return this.delegate.update(query, modifier, options).then(function (res) {
+        (0, _forEach2.default)(res.updated, function (d, i) {
+          _this5.emit('update', d, res.original[i]);
         });
-
-        var updateStorgePromises = (0, _map3.default)(updated, function (d) {
-          return _this5.storageManager.persist(d._id, d);
-        });
-        var updateIndexPromises = (0, _map3.default)(updated, function (d, i) {
-          return _this5.indexManager.reindexDocument(original[i], d);
-        });
-        var allPromises = updateStorgePromises.concat(updateIndexPromises);
-
-        return Promise.all(allPromises).then(function () {
-          (0, _forEach2.default)(updated, function (d, i) {
-            _this5.emit('update', d, original[i]);
-          });
-          return {
-            modified: updated.length,
-            original: original,
-            updated: updated
-          };
-        });
+        return res;
       });
-    }
-
-    /**
-     * Return all currently indexed ids
-     * @return {Array}
-     */
-
-  }, {
-    key: 'getIndexIds',
-    value: function getIndexIds() {
-      return this.indexes._id.getAll();
     }
 
     /**
@@ -291,7 +249,7 @@ var Collection = exports.Collection = (function (_EventEmitter) {
     value: function find(query) {
       var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
-      return new this.cursorClass(this, query, options);
+      return this.delegate.find(query, options);
     }
 
     /**
@@ -305,12 +263,10 @@ var Collection = exports.Collection = (function (_EventEmitter) {
 
   }, {
     key: 'findOne',
-    value: function findOne(query, sortObj) {
-      var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+    value: function findOne(query) {
+      var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
-      return this.find(query, options).sort(sortObj).limit(1).aggregate(function (docs) {
-        return docs[0];
-      });
+      return this.delegate.findOne(query, options);
     }
 
     /**
@@ -328,10 +284,7 @@ var Collection = exports.Collection = (function (_EventEmitter) {
     value: function count(query) {
       var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
-      options.noClone = true;
-      return this.find(query, options).aggregate(function (docs) {
-        return docs.length;
-      });
+      return this.delegate.count(query, options);
     }
 
     /**
@@ -346,10 +299,7 @@ var Collection = exports.Collection = (function (_EventEmitter) {
     value: function ids(query) {
       var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
-      options.noClone = true;
-      return this.find(query, options).map(function (doc) {
-        return doc._id;
-      });
+      return this.delegate.ids(query, options);
     }
   }, {
     key: 'modelName',
@@ -391,6 +341,15 @@ var Collection = exports.Collection = (function (_EventEmitter) {
         _defaultCursorClass = arguments[0];
       } else {
         return _defaultCursorClass;
+      }
+    }
+  }, {
+    key: 'defaultDelegate',
+    value: function defaultDelegate() {
+      if (arguments.length > 0) {
+        _defaultDelegate = arguments[0];
+      } else {
+        return _defaultDelegate;
       }
     }
   }]);

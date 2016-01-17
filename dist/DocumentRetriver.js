@@ -15,6 +15,10 @@ var _map2 = require('fast.js/map');
 
 var _map3 = _interopRequireDefault(_map2);
 
+var _filter2 = require('fast.js/array/filter');
+
+var _filter3 = _interopRequireDefault(_filter2);
+
 var _Document = require('./Document');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -85,7 +89,12 @@ var DocumentRetriver = exports.DocumentRetriver = (function () {
       return new Promise(function (resolve, reject) {
         var result = [];
         _this.db.storage.createReadStream().on('data', function (data) {
-          return result.push(_this.db.create(data.value));
+          // After deleting of an item some storages
+          // may return an undefined for a few times.
+          // We need to check it there.
+          if (data.value) {
+            result.push(_this.db.create(data.value));
+          }
         }).on('end', function () {
           return resolve(result);
         });
@@ -107,7 +116,11 @@ var DocumentRetriver = exports.DocumentRetriver = (function () {
       var retrPromises = (0, _map3.default)(ids, function (id) {
         return _this2.retriveOne(id);
       });
-      return Promise.all(retrPromises);
+      return Promise.all(retrPromises).then(function (docs) {
+        return (0, _filter3.default)(docs, function (d) {
+          return d;
+        });
+      });
     }
 
     /**
@@ -122,7 +135,10 @@ var DocumentRetriver = exports.DocumentRetriver = (function () {
       var _this3 = this;
 
       return this.db.storage.get(id).then(function (buf) {
-        return _this3.db.create(buf);
+        // Accepted only non-undefined documents
+        if (buf) {
+          return _this3.db.create(buf);
+        }
       });
     }
   }]);

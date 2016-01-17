@@ -62,6 +62,7 @@ var CursorObservable = (function (_Cursor) {
 
     _this.update = (0, _debounce2.default)((0, _bind3.default)(_this.update, _this), _defaultDebounce, _defaultBatchSize);
     _this.maybeUpdate = (0, _bind3.default)(_this.maybeUpdate, _this);
+    _this._latestResult = null;
     return _this;
   }
 
@@ -164,8 +165,16 @@ var CursorObservable = (function (_Cursor) {
       if (options.declare) {
         return this;
       } else {
-        var firstUpdatePromise = this.update.func(true);
-        return createStoppablePromise(firstUpdatePromise);
+        if (this._latestResult != null) {
+          var propagatePromise = this.whenNotExecuting().then(function () {
+            _this2._propagateUpdate(true);
+            return _this2._latestResult;
+          });
+          return createStoppablePromise(propagatePromise);
+        } else {
+          var firstUpdatePromise = this.update.func(true);
+          return createStoppablePromise(firstUpdatePromise);
+        }
       }
     }
 
@@ -231,9 +240,8 @@ var CursorObservable = (function (_Cursor) {
       // When it's an update operation we check four things
       // 1. Is a new doc or old doc matched by a query?
       // 2. Is a new doc has different number of fields then an old doc?
-      // 3. Is a new doc has a greater updatedAt time then an old doc?
-      // 4. Is a new doc not equals to an old doc?
-      var updatedInResult = removedFromResult || newDoc && oldDoc && (this._matcher.documentMatches(newDoc).result || this._matcher.documentMatches(oldDoc).result) && ((0, _keys3.default)(newDoc).length !== (0, _keys3.default)(oldDoc).length || newDoc.updatedAt && (!oldDoc.updatedAt || oldDoc.updatedAt && newDoc.updatedAt > oldDoc.updatedAt) || !_EJSON2.default.equals(newDoc, oldDoc));
+      // 3. Is a new doc not equals to an old doc?
+      var updatedInResult = removedFromResult || newDoc && oldDoc && (this._matcher.documentMatches(newDoc).result || this._matcher.documentMatches(oldDoc).result) && ((0, _keys3.default)(newDoc).length !== (0, _keys3.default)(oldDoc).length || !_EJSON2.default.equals(newDoc, oldDoc));
 
       // When it's an insert operation we just check
       // it's match a query

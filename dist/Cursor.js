@@ -33,10 +33,6 @@ var _invariant = require('invariant');
 
 var _invariant2 = _interopRequireDefault(_invariant);
 
-var _keymirror = require('keymirror');
-
-var _keymirror2 = _interopRequireDefault(_keymirror);
-
 var _DocumentRetriver = require('./DocumentRetriver');
 
 var _DocumentRetriver2 = _interopRequireDefault(_DocumentRetriver);
@@ -69,17 +65,17 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 var PIPLEINE_STOP_MARKER = {};
 
 // Pipeline processors definition
-var PIPELINE_TYPE = exports.PIPELINE_TYPE = (0, _keymirror2.default)({
-  Filter: null,
-  Sort: null,
-  Map: null,
-  Aggregate: null,
-  Reduce: null,
-  Join: null,
-  JoinEach: null,
-  JoinAll: null,
-  IfNotEmpty: null
-});
+var PIPELINE_TYPE = exports.PIPELINE_TYPE = {
+  Filter: 'Filter',
+  Sort: 'Sort',
+  Map: 'Map',
+  Aggregate: 'Aggregate',
+  Reduce: 'Reduce',
+  Join: 'Join',
+  JoinEach: 'JoinEach',
+  JoinAll: 'JoinAll',
+  IfNotEmpty: 'IfNotEmpty'
+};
 
 var PIPELINE_PROCESSORS = exports.PIPELINE_PROCESSORS = (_PIPELINE_PROCESSORS = {}, _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.Filter, function (docs, pipeObj) {
   return docs.filter(pipeObj.value);

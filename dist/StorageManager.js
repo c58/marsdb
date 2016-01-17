@@ -39,6 +39,7 @@ var StorageManager = exports.StorageManager = (function () {
     _classCallCheck(this, StorageManager);
 
     this.db = db;
+    this.options = options;
     this._queue = new _PromiseQueue2.default(1);
     this._storage = {};
     this.reload();

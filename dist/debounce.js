@@ -32,12 +32,12 @@ function debounce(func, wait, batchSize) {
             timeout = setTimeout(maybeResolve, wait);
             doNotResolve = false;
           } else {
+            resolve(func.apply(context, args));
             promise = null;
             callsCount = 0;
             timeout = null;
             doNotResolve = true;
             maybeResolve = null;
-            resolve(func.apply(context, args));
           }
         };
         maybeResolve();
