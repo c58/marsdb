@@ -60,6 +60,7 @@ var _defaultRandomGenerator = new _Random2.default();
 var _defaultDelegate = _CollectionDelegate2.default;
 var _defaultCursorClass = _CursorObservable2.default;
 var _defaultStorageManager = _StorageManager2.default;
+var _defaultIndexManager = _IndexManager2.default;
 var _defaultIdGenerator = function _defaultIdGenerator(modelName) {
   var nextSeed = _defaultRandomGenerator.hexString(20);
   var sequenceSeed = [nextSeed, '/collection/' + modelName];
@@ -83,8 +84,9 @@ var Collection = exports.Collection = (function (_EventEmitter) {
 
     var storageManagerClass = options.storageManager || _defaultStorageManager;
     var delegateClass = options.delegate || _defaultDelegate;
+    var indexManagerClass = options.indexManager || _defaultIndexManager;
     _this.cursorClass = options.cursorClass || _defaultCursorClass;
-    _this.indexManager = new _IndexManager2.default(_this, options);
+    _this.indexManager = new indexManagerClass(_this, options);
     _this.storageManager = new storageManagerClass(_this, options);
     _this.idGenerator = options.idGenerator || _defaultIdGenerator;
     _this.delegate = new delegateClass(_this, options);
@@ -350,6 +352,15 @@ var Collection = exports.Collection = (function (_EventEmitter) {
         _defaultDelegate = arguments[0];
       } else {
         return _defaultDelegate;
+      }
+    }
+  }, {
+    key: 'defaultIndexManager',
+    value: function defaultIndexManager() {
+      if (arguments.length > 0) {
+        _defaultIndexManager = arguments[0];
+      } else {
+        return _defaultIndexManager;
       }
     }
   }]);

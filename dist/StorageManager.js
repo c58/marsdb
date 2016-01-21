@@ -35,7 +35,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
  */
 
 var StorageManager = exports.StorageManager = (function () {
-  function StorageManager(db, options) {
+  function StorageManager(db) {
+    var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
     _classCallCheck(this, StorageManager);
 
     this.db = db;

@@ -270,6 +270,7 @@ var _defaultRandomGenerator = new _Random2.default();
 var _defaultDelegate = _CollectionDelegate2.default;
 var _defaultCursorClass = _CursorObservable2.default;
 var _defaultStorageManager = _StorageManager2.default;
+var _defaultIndexManager = _IndexManager2.default;
 var _defaultIdGenerator = function _defaultIdGenerator(modelName) {
   var nextSeed = _defaultRandomGenerator.hexString(20);
   var sequenceSeed = [nextSeed, '/collection/' + modelName];
@@ -293,8 +294,9 @@ var Collection = exports.Collection = (function (_EventEmitter) {
 
     var storageManagerClass = options.storageManager || _defaultStorageManager;
     var delegateClass = options.delegate || _defaultDelegate;
+    var indexManagerClass = options.indexManager || _defaultIndexManager;
     _this.cursorClass = options.cursorClass || _defaultCursorClass;
-    _this.indexManager = new _IndexManager2.default(_this, options);
+    _this.indexManager = new indexManagerClass(_this, options);
     _this.storageManager = new storageManagerClass(_this, options);
     _this.idGenerator = options.idGenerator || _defaultIdGenerator;
     _this.delegate = new delegateClass(_this, options);
@@ -562,6 +564,15 @@ var Collection = exports.Collection = (function (_EventEmitter) {
         return _defaultDelegate;
       }
     }
+  }, {
+    key: 'defaultIndexManager',
+    value: function defaultIndexManager() {
+      if (arguments.length > 0) {
+        _defaultIndexManager = arguments[0];
+      } else {
+        return _defaultIndexManager;
+      }
+    }
   }]);
 
   return Collection;
@@ -569,7 +580,7 @@ var Collection = exports.Collection = (function (_EventEmitter) {
 
 exports.default = Collection;
 
-},{"./CollectionDelegate":3,"./CursorObservable":6,"./EJSON":12,"./IndexManager":13,"./Random":15,"./StorageManager":16,"check-types":19,"eventemitter3":20,"fast.js/forEach":27,"fast.js/map":32}],3:[function(require,module,exports){
+},{"./CollectionDelegate":3,"./CursorObservable":6,"./EJSON":13,"./IndexManager":14,"./Random":16,"./StorageManager":17,"check-types":20,"eventemitter3":21,"fast.js/forEach":29,"fast.js/map":35}],3:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () {
@@ -591,16 +602,22 @@ var _map2 = require('fast.js/map');
 
 var _map3 = _interopRequireDefault(_map2);
 
-var _invariant = require('invariant');
-
-var _invariant2 = _interopRequireDefault(_invariant);
-
 var _DocumentModifier = require('./DocumentModifier');
 
 var _DocumentModifier2 = _interopRequireDefault(_DocumentModifier);
 
 function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : { default: obj };
+}
+
+function _toConsumableArray(arr) {
+  if (Array.isArray(arr)) {
+    for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) {
+      arr2[i] = arr[i];
+    }return arr2;
+  } else {
+    return Array.from(arr);
+  }
 }
 
 function _classCallCheck(instance, Constructor) {
@@ -636,42 +653,47 @@ var CollectionDelegate = exports.CollectionDelegate = (function () {
     }
   }, {
     key: 'remove',
-    value: function remove(query) {
+    value: function remove(query, _ref) {
       var _this2 = this;
 
-      var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+      var _ref$sort = _ref.sort;
+      var sort = _ref$sort === undefined ? { _id: 1 } : _ref$sort;
+      var _ref$multi = _ref.multi;
+      var multi = _ref$multi === undefined ? false : _ref$multi;
 
-      return this.find(query, { noClone: true }).then(function (docs) {
-        (0, _invariant2.default)(docs.length <= 1 || options.multi, 'remove(..): multi removing is not enabled by options.multi');
-
+      return this.find(query, { noClone: true }).sort(sort).then(function (docs) {
+        if (docs.length > 1 && !multi) {
+          docs = [docs[0]];
+        }
         var removeStorgePromises = (0, _map3.default)(docs, function (d) {
           return _this2.db.storageManager.delete(d._id);
         });
         var removeIndexPromises = (0, _map3.default)(docs, function (d) {
           return _this2.db.indexManager.deindexDocument(d);
         });
-        var allPromises = removeStorgePromises.concat(removeIndexPromises);
-
-        return Promise.all(allPromises).then(function () {
+        return Promise.all([].concat(_toConsumableArray(removeStorgePromises), _toConsumableArray(removeIndexPromises))).then(function () {
           return docs;
         });
       });
     }
   }, {
     key: 'update',
-    value: function update(query, modifier) {
+    value: function update(query, modifier, _ref2) {
       var _this3 = this;
 
-      var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+      var _ref2$sort = _ref2.sort;
+      var sort = _ref2$sort === undefined ? { _id: 1 } : _ref2$sort;
+      var _ref2$multi = _ref2.multi;
+      var multi = _ref2$multi === undefined ? false : _ref2$multi;
 
-      options.upsert = false;
-      return new _DocumentModifier2.default(this.db, query).modify(modifier, options).then(function (result) {
-        var original = result.original;
-        var updated = result.updated;
-
-        updated = (0, _map3.default)(updated, function (x) {
-          return _this3.db.create(x);
-        });
+      return this.find(query, { noClone: true }).sort(sort).then(function (docs) {
+        if (docs.length > 1 && !multi) {
+          docs = [docs[0]];
+        }
+        return new _DocumentModifier2.default(query).modify(docs, modifier);
+      }).then(function (_ref3) {
+        var original = _ref3.original;
+        var updated = _ref3.updated;
 
         var updateStorgePromises = (0, _map3.default)(updated, function (d) {
           return _this3.db.storageManager.persist(d._id, d);
@@ -679,9 +701,7 @@ var CollectionDelegate = exports.CollectionDelegate = (function () {
         var updateIndexPromises = (0, _map3.default)(updated, function (d, i) {
           return _this3.db.indexManager.reindexDocument(original[i], d);
         });
-        var allPromises = updateStorgePromises.concat(updateIndexPromises);
-
-        return Promise.all(allPromises).then(function () {
+        return Promise.all([].concat(_toConsumableArray(updateStorgePromises), _toConsumableArray(updateIndexPromises))).then(function () {
           return {
             modified: updated.length,
             original: original,
@@ -699,8 +719,8 @@ var CollectionDelegate = exports.CollectionDelegate = (function () {
     }
   }, {
     key: 'findOne',
-    value: function findOne(query, sortObj) {
-      var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+    value: function findOne(query) {
+      var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
       return this.find(query, options).aggregate(function (docs) {
         return docs[0];
@@ -733,7 +753,7 @@ var CollectionDelegate = exports.CollectionDelegate = (function () {
 
 exports.default = CollectionDelegate;
 
-},{"./DocumentModifier":9,"fast.js/map":32,"invariant":38}],4:[function(require,module,exports){
+},{"./DocumentModifier":9,"fast.js/map":35}],4:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () {
@@ -823,7 +843,7 @@ var CollectionIndex = exports.CollectionIndex = (function () {
 
 exports.default = CollectionIndex;
 
-},{"invariant":38}],5:[function(require,module,exports){
+},{"invariant":41}],5:[function(require,module,exports){
 'use strict';
 
 function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
@@ -853,6 +873,14 @@ var _forEach = require('fast.js/forEach');
 
 var _forEach2 = _interopRequireDefault(_forEach);
 
+var _filter2 = require('fast.js/array/filter');
+
+var _filter3 = _interopRequireDefault(_filter2);
+
+var _reduce2 = require('fast.js/array/reduce');
+
+var _reduce3 = _interopRequireDefault(_reduce2);
+
 var _map2 = require('fast.js/map');
 
 var _map3 = _interopRequireDefault(_map2);
@@ -880,6 +908,10 @@ var _DocumentMatcher2 = _interopRequireDefault(_DocumentMatcher);
 var _DocumentSorter = require('./DocumentSorter');
 
 var _DocumentSorter2 = _interopRequireDefault(_DocumentSorter);
+
+var _DocumentProjector = require('./DocumentProjector');
+
+var _DocumentProjector2 = _interopRequireDefault(_DocumentProjector);
 
 var _EJSON = require('./EJSON');
 
@@ -919,6 +951,9 @@ function _defineProperty(obj, key, value) {
   }return obj;
 }
 
+// UUID counter for all cursors
+var _currentCursorId = 0;
+
 // Maker used for stopping pipeline processing
 var PIPLEINE_STOP_MARKER = {};
 
@@ -936,15 +971,15 @@ var PIPELINE_TYPE = exports.PIPELINE_TYPE = {
 };
 
 var PIPELINE_PROCESSORS = exports.PIPELINE_PROCESSORS = (_PIPELINE_PROCESSORS = {}, _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.Filter, function (docs, pipeObj) {
-  return docs.filter(pipeObj.value);
+  return (0, _filter3.default)(docs, pipeObj.value);
 }), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.Sort, function (docs, pipeObj) {
   return docs.sort(pipeObj.value);
 }), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.Map, function (docs, pipeObj) {
-  return docs.map(pipeObj.value);
+  return (0, _map3.default)(docs, pipeObj.value);
 }), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.Aggregate, function (docs, pipeObj) {
   return pipeObj.value(docs);
 }), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.Reduce, function (docs, pipeObj) {
-  return docs.reduce(pipeObj.value, pipeObj.args[0]);
+  return (0, _reduce3.default)(docs, pipeObj.value, pipeObj.args[0]);
 }), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.Join, function (docs, pipeObj, cursor) {
   if (_checkTypes2.default.array(docs)) {
     return PIPELINE_PROCESSORS[PIPELINE_TYPE.JoinEach](docs, pipeObj, cursor);
@@ -1004,6 +1039,7 @@ var Cursor = (function (_EventEmitter) {
 
     _this.db = db;
     _this.options = options;
+    _this._id = _currentCursorId++;
     _this._query = query;
     _this._pipeline = [];
     _this._executing = null;
@@ -1033,8 +1069,19 @@ var Cursor = (function (_EventEmitter) {
     key: 'find',
     value: function find(query) {
       this._ensureNotExecuting();
-      this._query = query || this._query;
+      this._query = query;
       this._ensureMatcherSorter();
+      return this;
+    }
+  }, {
+    key: 'project',
+    value: function project(projection) {
+      this._ensureNotExecuting();
+      if (projection) {
+        this._projector = new _DocumentProjector2.default(projection);
+      } else {
+        this._projector = null;
+      }
       return this;
     }
   }, {
@@ -1166,21 +1213,20 @@ var Cursor = (function (_EventEmitter) {
     value: function exec() {
       var _this3 = this;
 
-      var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-
       if (!this._executing) {
-        this._executing = this._prepareCursor(options).then(function () {
-          return _this3._matchObjects();
-        }).then(function (docs) {
+        this._executing = this._matchObjects().then(function (docs) {
           var clonned = undefined;
           if (_this3.options.noClone) {
             clonned = docs;
           } else {
-            clonned = (0, _map3.default)(docs, function (doc) {
-              return _EJSON2.default.clone(doc);
-            });
+            if (!_this3._projector) {
+              clonned = (0, _map3.default)(docs, function (doc) {
+                return _EJSON2.default.clone(doc);
+              });
+            } else {
+              clonned = _this3._projector.project(docs);
+            }
           }
-
           return _this3.processPipeline(clonned);
         }).then(function (docs) {
           _this3._executing = null;
@@ -1199,13 +1245,6 @@ var Cursor = (function (_EventEmitter) {
     key: 'whenNotExecuting',
     value: function whenNotExecuting() {
       return Promise.resolve(this._executing);
-    }
-  }, {
-    key: '_prepareCursor',
-    value: function _prepareCursor() {
-      var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-
-      return Promise.resolve();
     }
   }, {
     key: '_matchObjects',
@@ -1266,7 +1305,7 @@ var Cursor = (function (_EventEmitter) {
 exports.Cursor = Cursor;
 exports.default = Cursor;
 
-},{"./DocumentMatcher":8,"./DocumentRetriver":10,"./DocumentSorter":11,"./EJSON":12,"check-types":19,"eventemitter3":20,"fast.js/forEach":27,"fast.js/function/bind":30,"fast.js/map":32,"invariant":38}],6:[function(require,module,exports){
+},{"./DocumentMatcher":8,"./DocumentProjector":10,"./DocumentRetriver":11,"./DocumentSorter":12,"./EJSON":13,"check-types":20,"eventemitter3":21,"fast.js/array/filter":23,"fast.js/array/reduce":27,"fast.js/forEach":29,"fast.js/function/bind":32,"fast.js/map":35,"invariant":41}],6:[function(require,module,exports){
 'use strict';
 
 function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
@@ -1356,6 +1395,7 @@ var CursorObservable = (function (_Cursor) {
     _this.update = (0, _debounce2.default)((0, _bind3.default)(_this.update, _this), _defaultDebounce, _defaultBatchSize);
     _this.maybeUpdate = (0, _bind3.default)(_this.maybeUpdate, _this);
     _this._latestResult = null;
+    _this._childrenCursors = {};
     return _this;
   }
 
@@ -1438,6 +1478,9 @@ var CursorObservable = (function (_Cursor) {
 
       var parentSetter = function parentSetter(cursor) {
         _this2._parentCursor = cursor;
+        if (cursor._trackChildCursor) {
+          cursor._trackChildCursor(cursor);
+        }
       };
 
       var cursorThenGenerator = function cursorThenGenerator(currPromise) {
@@ -1498,10 +1541,7 @@ var CursorObservable = (function (_Cursor) {
 
       var firstRun = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
 
-      return this.exec({
-        observable: true,
-        firstRun: firstRun
-      }).then(function (result) {
+      return this.exec().then(function (result) {
         _this3._latestResult = result;
         _this3._updateLatestIds();
         _this3._propagateUpdate(firstRun);
@@ -1597,6 +1637,23 @@ var CursorObservable = (function (_Cursor) {
         this._latestIds = new Set([this._latestResult._id]);
       }
     }
+
+    /**
+     * Tracks a child cursor for analysing all cursors
+     * in the query (cursors tree)
+     * @param  {Cursor} cursor
+     */
+
+  }, {
+    key: '_trackChildCursor',
+    value: function _trackChildCursor(cursor) {
+      var _this4 = this;
+
+      this._childrenCursors[cursor._id] = cursor;
+      cursor.once('stopped', function () {
+        return delete _this4._childrenCursors[cursor._id];
+      });
+    }
   }], [{
     key: 'defaultDebounce',
     value: function defaultDebounce() {
@@ -1623,10 +1680,8 @@ var CursorObservable = (function (_Cursor) {
 exports.CursorObservable = CursorObservable;
 exports.default = CursorObservable;
 
-},{"./Cursor":5,"./EJSON":12,"./debounce":17,"check-types":19,"fast.js/function/bind":30,"fast.js/map":32,"fast.js/object/keys":35}],7:[function(require,module,exports){
+},{"./Cursor":5,"./EJSON":13,"./debounce":18,"check-types":20,"fast.js/function/bind":32,"fast.js/map":35,"fast.js/object/keys":38}],7:[function(require,module,exports){
 'use strict';
-
-function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -1660,10 +1715,6 @@ function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : { default: obj };
 }
 
-function _typeof(obj) {
-  return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj === 'undefined' ? 'undefined' : _typeof2(obj);
-}
-
 /**
  * Return true if given selector is an
  * object id type (string or number)
@@ -1671,11 +1722,11 @@ function _typeof(obj) {
  * @return {Boolean}
  */
 function selectorIsId(selector) {
-  return typeof selector === 'string' || typeof selector === 'number';
+  return _checkTypes2.default.string(selector) || _checkTypes2.default.number(selector);
 }
 
 function selectorIsIdPerhapsAsObject(selector) {
-  return selectorIsId(selector) || selector && (typeof selector === 'undefined' ? 'undefined' : _typeof(selector)) === 'object' && selector._id && selectorIsId(selector._id) && (0, _keys3.default)(selector).length === 1;
+  return selectorIsId(selector) || selector && _checkTypes2.default.object(selector) && selector._id && selectorIsId(selector._id) && (0, _keys3.default)(selector).length === 1;
 }
 
 // Like _isArray, but doesn't regard polyfilled Uint8Arrays on old browsers as
@@ -1917,7 +1968,7 @@ var MongoTypeComp = exports.MongoTypeComp = {
   }
 };
 
-},{"./EJSON":12,"check-types":19,"fast.js/forEach":27,"fast.js/object/keys":35}],8:[function(require,module,exports){
+},{"./EJSON":13,"check-types":20,"fast.js/forEach":29,"fast.js/object/keys":38}],8:[function(require,module,exports){
 'use strict';
 
 function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
@@ -3001,7 +3052,7 @@ var andSomeMatchers = function andSomeMatchers(subMatchers) {
 var andDocumentMatchers = andSomeMatchers;
 var andBranchedMatchers = andSomeMatchers;
 
-},{"./Document":7,"./EJSON":12,"check-types":19,"fast.js/array/every":21,"fast.js/array/indexOf":24,"fast.js/array/some":26,"fast.js/forEach":27,"fast.js/map":32,"fast.js/object/keys":35,"geojson-utils":37}],9:[function(require,module,exports){
+},{"./Document":7,"./EJSON":13,"check-types":20,"fast.js/array/every":22,"fast.js/array/indexOf":25,"fast.js/array/some":28,"fast.js/forEach":29,"fast.js/map":35,"fast.js/object/keys":38,"geojson-utils":40}],9:[function(require,module,exports){
 'use strict';
 
 function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
@@ -3041,10 +3092,6 @@ var _EJSON = require('./EJSON');
 
 var _EJSON2 = _interopRequireDefault(_EJSON);
 
-var _DocumentRetriver = require('./DocumentRetriver');
-
-var _DocumentRetriver2 = _interopRequireDefault(_DocumentRetriver);
-
 var _DocumentMatcher = require('./DocumentMatcher');
 
 var _DocumentMatcher2 = _interopRequireDefault(_DocumentMatcher);
@@ -3070,41 +3117,38 @@ function _classCallCheck(instance, Constructor) {
 }
 
 var DocumentModifier = exports.DocumentModifier = (function () {
-  function DocumentModifier(db) {
-    var query = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+  function DocumentModifier() {
+    var query = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
     _classCallCheck(this, DocumentModifier);
 
-    this.db = db;
     this._matcher = new _DocumentMatcher2.default(query);
-    this._query = query;
   }
 
   _createClass(DocumentModifier, [{
     key: 'modify',
-    value: function modify(mod) {
+    value: function modify(docs, mod) {
       var _this = this;
 
-      var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+      var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
-      return new _DocumentRetriver2.default(this.db).retriveForQeury(this._query).then(function (docs) {
-        var oldResults = [];
-        var newResults = [];
-        (0, _forEach2.default)(docs, function (d) {
-          var match = _this._matcher.documentMatches(d);
-          if (match.result) {
-            var matchOpts = (0, _assign3.default)({ arrayIndices: match.arrayIndices }, options);
-            var newDoc = _this._modifyDocument(d, mod, matchOpts);
-            newResults.push(newDoc);
-            oldResults.push(d);
-          }
-        });
+      var oldResults = [];
+      var newResults = [];
 
-        return {
-          updated: newResults,
-          original: oldResults
-        };
+      (0, _forEach2.default)(docs, function (d) {
+        var match = _this._matcher.documentMatches(d);
+        if (match.result) {
+          var matchOpts = (0, _assign3.default)({ arrayIndices: match.arrayIndices }, options);
+          var newDoc = _this._modifyDocument(d, mod, matchOpts);
+          newResults.push(newDoc);
+          oldResults.push(d);
+        }
       });
+
+      return {
+        updated: newResults,
+        original: oldResults
+      };
     }
 
     // XXX need a strategy for passing the binding of $ into this
@@ -3131,9 +3175,7 @@ var DocumentModifier = exports.DocumentModifier = (function () {
 
       // Make sure the caller can't mutate our data structures.
       mod = _EJSON2.default.clone(mod);
-
       var isModifier = (0, _Document.isOperatorObject)(mod);
-
       var newDoc;
 
       if (!isModifier) {
@@ -3591,7 +3633,394 @@ var MODIFIERS = {
   }
 };
 
-},{"./Document":7,"./DocumentMatcher":8,"./DocumentRetriver":10,"./DocumentSorter":11,"./EJSON":12,"check-types":19,"fast.js/array/every":21,"fast.js/forEach":27,"fast.js/object/assign":33}],10:[function(require,module,exports){
+},{"./Document":7,"./DocumentMatcher":8,"./DocumentSorter":12,"./EJSON":13,"check-types":20,"fast.js/array/every":22,"fast.js/forEach":29,"fast.js/object/assign":36}],10:[function(require,module,exports){
+'use strict';
+
+function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
+
+var _createClass = (function () {
+  function defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }return function (Constructor, protoProps, staticProps) {
+    if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
+  };
+})();
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.compileProjection = compileProjection;
+exports.checkSupportedProjection = checkSupportedProjection;
+exports.projectionDetails = projectionDetails;
+exports.pathsToTree = pathsToTree;
+exports.combineImportantPathsIntoProjection = combineImportantPathsIntoProjection;
+exports.combineMatcherWithProjection = combineMatcherWithProjection;
+exports.combineSorterWithProjection = combineSorterWithProjection;
+
+var _checkTypes = require('check-types');
+
+var _checkTypes2 = _interopRequireDefault(_checkTypes);
+
+var _forEach = require('fast.js/forEach');
+
+var _forEach2 = _interopRequireDefault(_forEach);
+
+var _keys2 = require('fast.js/object/keys');
+
+var _keys3 = _interopRequireDefault(_keys2);
+
+var _assign2 = require('fast.js/object/assign');
+
+var _assign3 = _interopRequireDefault(_assign2);
+
+var _every2 = require('fast.js/array/every');
+
+var _every3 = _interopRequireDefault(_every2);
+
+var _filter2 = require('fast.js/array/filter');
+
+var _filter3 = _interopRequireDefault(_filter2);
+
+var _map2 = require('fast.js/map');
+
+var _map3 = _interopRequireDefault(_map2);
+
+var _indexOf2 = require('fast.js/array/indexOf');
+
+var _indexOf3 = _interopRequireDefault(_indexOf2);
+
+var _EJSON = require('./EJSON');
+
+var _EJSON2 = _interopRequireDefault(_EJSON);
+
+var _Document = require('./Document');
+
+function _interopRequireDefault(obj) {
+  return obj && obj.__esModule ? obj : { default: obj };
+}
+
+function _typeof(obj) {
+  return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
+}
+
+function _classCallCheck(instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError("Cannot call a class as a function");
+  }
+}
+
+// Internals
+function _has(obj, key) {
+  return _checkTypes2.default.object(obj) && obj.hasOwnProperty(key);
+}
+
+/**
+ * A wrapper around pojection functions.
+ */
+
+var DocumentProjector = (function () {
+  function DocumentProjector(fields) {
+    _classCallCheck(this, DocumentProjector);
+
+    this.fields = fields;
+    this._projector = compileProjection(fields);
+  }
+
+  _createClass(DocumentProjector, [{
+    key: 'project',
+    value: function project(docs) {
+      var _this = this;
+
+      if (_checkTypes2.default.array(docs)) {
+        return (0, _map3.default)(docs, function (doc) {
+          return _this._projector(doc);
+        });
+      } else {
+        return this._projector(docs);
+      }
+    }
+  }]);
+
+  return DocumentProjector;
+})();
+
+// Knows how to compile a fields projection to a predicate function.
+// @returns - Function: a closure that filters out an object according to the
+//            fields projection rules:
+//            @param obj - Object: MongoDB-styled document
+//            @returns - Object: a document with the fields filtered out
+//                       according to projection rules. Doesn't retain subfields
+//                       of passed argument.
+
+exports.default = DocumentProjector;
+function compileProjection(fields) {
+  checkSupportedProjection(fields);
+
+  var _idProjection = fields._id === undefined ? true : fields._id;
+  var details = projectionDetails(fields);
+
+  // returns transformed doc according to ruleTree
+  var transform = function transform(doc, ruleTree) {
+    // Special case for 'sets'
+    if (_checkTypes2.default.array(doc)) {
+      return (0, _map3.default)(doc, function (subdoc) {
+        return transform(subdoc, ruleTree);
+      });
+    }
+
+    var res = details.including ? {} : _EJSON2.default.clone(doc);
+    (0, _forEach2.default)(ruleTree, function (rule, key) {
+      if (!_has(doc, key)) {
+        return;
+      }
+      if (_checkTypes2.default.object(rule)) {
+        // For sub-objects/subsets we branch
+        if (_checkTypes2.default.object(doc[key]) || _checkTypes2.default.array(doc[key])) {
+          res[key] = transform(doc[key], rule);
+        }
+        // Otherwise we don't even touch this subfield
+      } else if (details.including) {
+          res[key] = _EJSON2.default.clone(doc[key]);
+        } else {
+          delete res[key];
+        }
+    });
+
+    return res;
+  };
+
+  return function (obj) {
+    var res = transform(obj, details.tree);
+    if (_idProjection && _has(obj, '_id')) {
+      res._id = obj._id;
+    }
+    if (!_idProjection && _has(res, '_id')) {
+      delete res._id;
+    }
+    return res;
+  };
+}
+
+// Rise an exception if fields object contains
+// some unsupported fields or values
+function checkSupportedProjection(fields) {
+  if (!_checkTypes2.default.object(fields) || _checkTypes2.default.array(fields)) {
+    throw Error('fields option must be an object');
+  }
+
+  (0, _forEach2.default)(fields, function (val, keyPath) {
+    var valKeys = (0, _keys3.default)(val);
+    if ((0, _indexOf3.default)(keyPath.split('.'), '$') >= 0) {
+      throw Error('Minimongo doesn\'t support $ operator in projections yet.');
+    }
+    if ((typeof val === 'undefined' ? 'undefined' : _typeof(val)) === 'object' && ((0, _indexOf3.default)(valKeys, '$elemMatch') >= 0 || (0, _indexOf3.default)(valKeys, '$meta') >= 0 || (0, _indexOf3.default)(valKeys, '$slice') >= 0)) {
+      throw Error('Minimongo doesn\'t support operators in projections yet.');
+    }
+    if ((0, _indexOf3.default)([1, 0, true, false], val) === -1) {
+      throw Error('Projection values should be one of 1, 0, true, or false');
+    }
+  });
+}
+
+// Traverses the keys of passed projection and constructs a tree where all
+// leaves are either all True or all False
+// @returns Object:
+//  - tree - Object - tree representation of keys involved in projection
+//  (exception for '_id' as it is a special case handled separately)
+//  - including - Boolean - 'take only certain fields' type of projection
+function projectionDetails(fields) {
+  // Find the non-_id keys (_id is handled specially because it is included unless
+  // explicitly excluded). Sort the keys, so that our code to detect overlaps
+  // like 'foo' and 'foo.bar' can assume that 'foo' comes first.
+  var fieldsKeys = (0, _keys3.default)(fields).sort();
+
+  // If _id is the only field in the projection, do not remove it, since it is
+  // required to determine if this is an exclusion or exclusion. Also keep an
+  // inclusive _id, since inclusive _id follows the normal rules about mixing
+  // inclusive and exclusive fields. If _id is not the only field in the
+  // projection and is exclusive, remove it so it can be handled later by a
+  // special case, since exclusive _id is always allowed.
+  if (fieldsKeys.length > 0 && !(fieldsKeys.length === 1 && fieldsKeys[0] === '_id') && !((0, _indexOf3.default)(fieldsKeys, '_id') >= 0 && fields._id)) {
+    fieldsKeys = (0, _filter3.default)(fieldsKeys, function (key) {
+      return key !== '_id';
+    });
+  }
+
+  var including = null; // Unknown
+
+  (0, _forEach2.default)(fieldsKeys, function (keyPath) {
+    var rule = !!fields[keyPath];
+    if (including === null) {
+      including = rule;
+    }
+    if (including !== rule) {
+      // This error message is copied from MongoDB shell
+      throw Error('You cannot currently mix including and excluding fields.');
+    }
+  });
+
+  var projectionRulesTree = pathsToTree(fieldsKeys, function (path) {
+    return including;
+  }, function (node, path, fullPath) {
+    // Check passed projection fields' keys: If you have two rules such as
+    // 'foo.bar' and 'foo.bar.baz', then the result becomes ambiguous. If
+    // that happens, there is a probability you are doing something wrong,
+    // framework should notify you about such mistake earlier on cursor
+    // compilation step than later during runtime.  Note, that real mongo
+    // doesn't do anything about it and the later rule appears in projection
+    // project, more priority it takes.
+    //
+    // Example, assume following in mongo shell:
+    // > db.coll.insert({ a: { b: 23, c: 44 } })
+    // > db.coll.find({}, { 'a': 1, 'a.b': 1 })
+    // { '_id' : ObjectId('520bfe456024608e8ef24af3'), 'a' : { 'b' : 23 } }
+    // > db.coll.find({}, { 'a.b': 1, 'a': 1 })
+    // { '_id' : ObjectId('520bfe456024608e8ef24af3'), 'a' : { 'b' : 23, 'c' : 44 } }
+    //
+    // Note, how second time the return set of keys is different.
+
+    var currentPath = fullPath;
+    var anotherPath = path;
+    throw Error('both ' + currentPath + ' and ' + anotherPath + ' found in fields option, using both of them may trigger ' + 'unexpected behavior. Did you mean to use only one of them?');
+  });
+
+  return {
+    tree: projectionRulesTree,
+    including: including
+  };
+}
+
+// paths - Array: list of mongo style paths
+// newLeafFn - Function: of form function(path) should return a scalar value to
+//                       put into list created for that path
+// conflictFn - Function: of form function(node, path, fullPath) is called
+//                        when building a tree path for 'fullPath' node on
+//                        'path' was already a leaf with a value. Must return a
+//                        conflict resolution.
+// initial tree - Optional Object: starting tree.
+// @returns - Object: tree represented as a set of nested objects
+function pathsToTree(paths, newLeafFn, conflictFn, tree) {
+  tree = tree || {};
+  (0, _forEach2.default)(paths, function (keyPath) {
+    var treePos = tree;
+    var pathArr = keyPath.split('.');
+
+    // use _.all just for iteration with break
+    var success = (0, _every3.default)(pathArr.slice(0, -1), function (key, idx) {
+      if (!_has(treePos, key)) {
+        treePos[key] = {};
+      } else if (!_checkTypes2.default.object(treePos[key])) {
+        treePos[key] = conflictFn(treePos[key], pathArr.slice(0, idx + 1).join('.'), keyPath);
+        // break out of loop if we are failing for this path
+        if (!_checkTypes2.default.object(treePos[key])) {
+          return false;
+        }
+      }
+
+      treePos = treePos[key];
+      return true;
+    });
+
+    if (success) {
+      var lastKey = pathArr[pathArr.length - 1];
+      if (!_has(treePos, lastKey)) {
+        treePos[lastKey] = newLeafFn(keyPath);
+      } else {
+        treePos[lastKey] = conflictFn(treePos[lastKey], keyPath, keyPath);
+      }
+    }
+  });
+
+  return tree;
+}
+
+// By given paths array and projection object returns
+// new projection object combined with paths.
+function combineImportantPathsIntoProjection(paths, projection) {
+  var prjDetails = projectionDetails(projection);
+  var tree = prjDetails.tree;
+  var mergedProjection = {};
+
+  // merge the paths to include
+  tree = pathsToTree(paths, function (path) {
+    return true;
+  }, function (node, path, fullPath) {
+    return true;
+  }, tree);
+  mergedProjection = treeToPaths(tree);
+  if (prjDetails.including) {
+    // both selector and projection are pointing on fields to include
+    // so we can just return the merged tree
+    return mergedProjection;
+  } else {
+    // selector is pointing at fields to include
+    // projection is pointing at fields to exclude
+    // make sure we don't exclude important paths
+    var mergedExclProjection = {};
+    (0, _forEach2.default)(mergedProjection, function (incl, path) {
+      if (!incl) {
+        mergedExclProjection[path] = false;
+      }
+    });
+
+    return mergedExclProjection;
+  }
+}
+
+// Knows how to combine a mongo selector and a fields projection to a new fields
+// projection taking into account active fields from the passed selector.
+// @returns Object - projection object (same as fields option of mongo cursor)
+function combineMatcherWithProjection(matcher, projection) {
+  var selectorPaths = _pathsElidingNumericKeys(matcher._getPaths());
+
+  // Special case for $where operator in the selector - projection should depend
+  // on all fields of the document. getSelectorPaths returns a list of paths
+  // selector depends on. If one of the paths is '' (empty string) representing
+  // the root or the whole document, complete projection should be returned.
+  if ((0, _indexOf3.default)(selectorPaths, '') >= 0) {
+    return {};
+  }
+
+  return combineImportantPathsIntoProjection(selectorPaths, projection);
+}
+
+// Knows how to combine a mongo selector and a fields projection to a new fields
+// projection taking into account active fields from the passed selector.
+// @returns Object - projection object (same as fields option of mongo cursor)
+function combineSorterWithProjection(sorter, projection) {
+  var specPaths = _pathsElidingNumericKeys(sorter._getPaths());
+  return combineImportantPathsIntoProjection(specPaths, projection);
+}
+
+// Internal utils
+var _pathsElidingNumericKeys = function _pathsElidingNumericKeys(paths) {
+  return (0, _map3.default)(paths, function (path) {
+    return (0, _filter3.default)(path.split('.'), function (k) {
+      return !(0, _Document.isNumericKey)(k);
+    }).join('.');
+  });
+};
+
+// Returns a set of key paths similar to
+// { 'foo.bar': 1, 'a.b.c': 1 }
+var treeToPaths = function treeToPaths(tree, prefix) {
+  prefix = prefix || '';
+  var result = {};
+
+  (0, _forEach2.default)(tree, function (val, key) {
+    if (_checkTypes2.default.object(val)) {
+      (0, _assign3.default)(result, treeToPaths(val, prefix + key + '.'));
+    } else {
+      result[prefix + key] = val;
+    }
+  });
+
+  return result;
+};
+
+},{"./Document":7,"./EJSON":13,"check-types":20,"fast.js/array/every":22,"fast.js/array/filter":23,"fast.js/array/indexOf":25,"fast.js/forEach":29,"fast.js/map":35,"fast.js/object/assign":36,"fast.js/object/keys":38}],11:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () {
@@ -3756,7 +4185,7 @@ var DocumentRetriver = exports.DocumentRetriver = (function () {
 
 exports.default = DocumentRetriver;
 
-},{"./Document":7,"check-types":19,"fast.js/array/filter":22,"fast.js/map":32}],11:[function(require,module,exports){
+},{"./Document":7,"check-types":20,"fast.js/array/filter":23,"fast.js/map":35}],12:[function(require,module,exports){
 'use strict';
 
 function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
@@ -4268,7 +4697,7 @@ var composeComparators = function composeComparators(comparatorArray) {
   };
 };
 
-},{"./Document":7,"./DocumentMatcher":8,"check-types":19,"fast.js/array/every":21,"fast.js/array/indexOf":24,"fast.js/forEach":27,"fast.js/map":32,"fast.js/object/keys":35}],12:[function(require,module,exports){
+},{"./Document":7,"./DocumentMatcher":8,"check-types":20,"fast.js/array/every":22,"fast.js/array/indexOf":25,"fast.js/forEach":29,"fast.js/map":35,"fast.js/object/keys":38}],13:[function(require,module,exports){
 'use strict';
 
 function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
@@ -4855,7 +5284,7 @@ var EJSON = exports.EJSON = (function () {
 
 exports.default = new EJSON();
 
-},{"./Base64":1,"check-types":19,"fast.js/array/some":26,"fast.js/forEach":27,"fast.js/object/keys":35}],13:[function(require,module,exports){
+},{"./Base64":1,"check-types":20,"fast.js/array/some":28,"fast.js/forEach":29,"fast.js/object/keys":38}],14:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () {
@@ -5145,7 +5574,7 @@ var IndexManager = exports.IndexManager = (function () {
 
 exports.default = IndexManager;
 
-},{"./CollectionIndex":4,"./DocumentRetriver":10,"./PromiseQueue":14,"fast.js/forEach":27,"fast.js/function/bind":30,"fast.js/map":32,"fast.js/object/keys":35,"invariant":38}],14:[function(require,module,exports){
+},{"./CollectionIndex":4,"./DocumentRetriver":11,"./PromiseQueue":15,"fast.js/forEach":29,"fast.js/function/bind":32,"fast.js/map":35,"fast.js/object/keys":38,"invariant":41}],15:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -5319,7 +5748,7 @@ Queue.prototype._dequeue = function () {
   return true;
 };
 
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () {
@@ -5527,7 +5956,7 @@ var Random = exports.Random = (function () {
 
 exports.default = Random;
 
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () {
@@ -5579,7 +6008,9 @@ function _classCallCheck(instance, Constructor) {
  */
 
 var StorageManager = exports.StorageManager = (function () {
-  function StorageManager(db, options) {
+  function StorageManager(db) {
+    var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
     _classCallCheck(this, StorageManager);
 
     this.db = db;
@@ -5671,7 +6102,7 @@ var StorageManager = exports.StorageManager = (function () {
 
 exports.default = StorageManager;
 
-},{"./EJSON":12,"./PromiseQueue":14,"eventemitter3":20,"fast.js/forEach":27}],17:[function(require,module,exports){
+},{"./EJSON":13,"./PromiseQueue":15,"eventemitter3":21,"fast.js/forEach":29}],18:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -5752,7 +6183,7 @@ function debounce(func, wait, batchSize) {
   return debouncer;
 }
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 'use strict';
 
 var EventEmitter = require('eventemitter3');
@@ -5777,7 +6208,7 @@ module.exports = {
   debounce: debounce
 };
 
-},{"./dist/Base64":1,"./dist/Collection":2,"./dist/CursorObservable":6,"./dist/EJSON":12,"./dist/Random":15,"./dist/StorageManager":16,"./dist/debounce":17,"eventemitter3":20}],19:[function(require,module,exports){
+},{"./dist/Base64":1,"./dist/Collection":2,"./dist/CursorObservable":6,"./dist/EJSON":13,"./dist/Random":16,"./dist/StorageManager":17,"./dist/debounce":18,"eventemitter3":21}],20:[function(require,module,exports){
 /*globals define, module, Symbol */
 
 (function (globals) {
@@ -6712,7 +7143,7 @@ module.exports = {
   }
 }(this));
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 'use strict';
 
 //
@@ -6976,7 +7407,7 @@ if ('undefined' !== typeof module) {
   module.exports = EventEmitter;
 }
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 'use strict';
 
 var bindInternal3 = require('../function/bindInternal3');
@@ -7003,7 +7434,7 @@ module.exports = function fastEvery (subject, fn, thisContext) {
   return true;
 };
 
-},{"../function/bindInternal3":31}],22:[function(require,module,exports){
+},{"../function/bindInternal3":33}],23:[function(require,module,exports){
 'use strict';
 
 var bindInternal3 = require('../function/bindInternal3');
@@ -7031,7 +7462,7 @@ module.exports = function fastFilter (subject, fn, thisContext) {
   return result;
 };
 
-},{"../function/bindInternal3":31}],23:[function(require,module,exports){
+},{"../function/bindInternal3":33}],24:[function(require,module,exports){
 'use strict';
 
 var bindInternal3 = require('../function/bindInternal3');
@@ -7054,7 +7485,7 @@ module.exports = function fastForEach (subject, fn, thisContext) {
   }
 };
 
-},{"../function/bindInternal3":31}],24:[function(require,module,exports){
+},{"../function/bindInternal3":33}],25:[function(require,module,exports){
 'use strict';
 
 /**
@@ -7089,7 +7520,7 @@ module.exports = function fastIndexOf (subject, target, fromIndex) {
   return -1;
 };
 
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 'use strict';
 
 var bindInternal3 = require('../function/bindInternal3');
@@ -7115,7 +7546,44 @@ module.exports = function fastMap (subject, fn, thisContext) {
   return result;
 };
 
-},{"../function/bindInternal3":31}],26:[function(require,module,exports){
+},{"../function/bindInternal3":33}],27:[function(require,module,exports){
+'use strict';
+
+var bindInternal4 = require('../function/bindInternal4');
+
+/**
+ * # Reduce
+ *
+ * A fast `.reduce()` implementation.
+ *
+ * @param  {Array}    subject      The array (or array-like) to reduce.
+ * @param  {Function} fn           The reducer function.
+ * @param  {mixed}    initialValue The initial value for the reducer, defaults to subject[0].
+ * @param  {Object}   thisContext  The context for the reducer.
+ * @return {mixed}                 The final result.
+ */
+module.exports = function fastReduce (subject, fn, initialValue, thisContext) {
+  var length = subject.length,
+      iterator = thisContext !== undefined ? bindInternal4(fn, thisContext) : fn,
+      i, result;
+
+  if (initialValue === undefined) {
+    i = 1;
+    result = subject[0];
+  }
+  else {
+    i = 0;
+    result = initialValue;
+  }
+
+  for (; i < length; i++) {
+    result = iterator(result, subject[i], i, subject);
+  }
+
+  return result;
+};
+
+},{"../function/bindInternal4":34}],28:[function(require,module,exports){
 'use strict';
 
 var bindInternal3 = require('../function/bindInternal3');
@@ -7142,7 +7610,7 @@ module.exports = function fastSome (subject, fn, thisContext) {
   return false;
 };
 
-},{"../function/bindInternal3":31}],27:[function(require,module,exports){
+},{"../function/bindInternal3":33}],29:[function(require,module,exports){
 'use strict';
 
 var forEachArray = require('./array/forEach'),
@@ -7165,7 +7633,7 @@ module.exports = function fastForEach (subject, fn, thisContext) {
     return forEachObject(subject, fn, thisContext);
   }
 };
-},{"./array/forEach":23,"./object/forEach":34}],28:[function(require,module,exports){
+},{"./array/forEach":24,"./object/forEach":37}],30:[function(require,module,exports){
 'use strict';
 
 /**
@@ -7196,7 +7664,7 @@ module.exports = function applyNoContext (subject, args) {
   }
 };
 
-},{}],29:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 'use strict';
 
 /**
@@ -7227,7 +7695,7 @@ module.exports = function applyWithContext (subject, thisContext, args) {
   }
 };
 
-},{}],30:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 'use strict';
 
 var applyWithContext = require('./applyWithContext');
@@ -7300,7 +7768,7 @@ module.exports = function fastBind (fn, thisContext) {
   }
 };
 
-},{"./applyNoContext":28,"./applyWithContext":29}],31:[function(require,module,exports){
+},{"./applyNoContext":30,"./applyWithContext":31}],33:[function(require,module,exports){
 'use strict';
 
 /**
@@ -7313,7 +7781,20 @@ module.exports = function bindInternal3 (func, thisContext) {
   };
 };
 
-},{}],32:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
+'use strict';
+
+/**
+ * Internal helper to bind a function known to have 4 arguments
+ * to a given context.
+ */
+module.exports = function bindInternal4 (func, thisContext) {
+  return function (a, b, c, d) {
+    return func.call(thisContext, a, b, c, d);
+  };
+};
+
+},{}],35:[function(require,module,exports){
 'use strict';
 
 var mapArray = require('./array/map'),
@@ -7337,7 +7818,7 @@ module.exports = function fastMap (subject, fn, thisContext) {
     return mapObject(subject, fn, thisContext);
   }
 };
-},{"./array/map":25,"./object/map":36}],33:[function(require,module,exports){
+},{"./array/map":26,"./object/map":39}],36:[function(require,module,exports){
 'use strict';
 
 /**
@@ -7373,7 +7854,7 @@ module.exports = function fastAssign (target) {
   return target;
 };
 
-},{}],34:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 'use strict';
 
 var bindInternal3 = require('../function/bindInternal3');
@@ -7398,7 +7879,7 @@ module.exports = function fastForEachObject (subject, fn, thisContext) {
   }
 };
 
-},{"../function/bindInternal3":31}],35:[function(require,module,exports){
+},{"../function/bindInternal3":33}],38:[function(require,module,exports){
 'use strict';
 
 /**
@@ -7416,7 +7897,7 @@ module.exports = typeof Object.keys === "function" ? Object.keys : /* istanbul i
   }
   return keys;
 };
-},{}],36:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 'use strict';
 
 var bindInternal3 = require('../function/bindInternal3');
@@ -7444,7 +7925,7 @@ module.exports = function fastMapObject (subject, fn, thisContext) {
   return result;
 };
 
-},{"../function/bindInternal3":31}],37:[function(require,module,exports){
+},{"../function/bindInternal3":33}],40:[function(require,module,exports){
 (function () {
   var gju = this.gju = {};
 
@@ -7854,7 +8335,7 @@ module.exports = function fastMapObject (subject, fn, thisContext) {
 
 })();
 
-},{}],38:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -7907,5 +8388,5 @@ var invariant = function(condition, format, a, b, c, d, e, f) {
 
 module.exports = invariant;
 
-},{}]},{},[18])(18)
+},{}]},{},[19])(19)
 });

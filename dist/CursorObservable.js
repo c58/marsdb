@@ -63,6 +63,7 @@ var CursorObservable = (function (_Cursor) {
     _this.update = (0, _debounce2.default)((0, _bind3.default)(_this.update, _this), _defaultDebounce, _defaultBatchSize);
     _this.maybeUpdate = (0, _bind3.default)(_this.maybeUpdate, _this);
     _this._latestResult = null;
+    _this._childrenCursors = {};
     return _this;
   }
 
@@ -145,6 +146,9 @@ var CursorObservable = (function (_Cursor) {
 
       var parentSetter = function parentSetter(cursor) {
         _this2._parentCursor = cursor;
+        if (cursor._trackChildCursor) {
+          cursor._trackChildCursor(cursor);
+        }
       };
 
       var cursorThenGenerator = function cursorThenGenerator(currPromise) {
@@ -205,10 +209,7 @@ var CursorObservable = (function (_Cursor) {
 
       var firstRun = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
 
-      return this.exec({
-        observable: true,
-        firstRun: firstRun
-      }).then(function (result) {
+      return this.exec().then(function (result) {
         _this3._latestResult = result;
         _this3._updateLatestIds();
         _this3._propagateUpdate(firstRun);
@@ -303,6 +304,23 @@ var CursorObservable = (function (_Cursor) {
       } else if (this._latestResult && this._latestResult._id) {
         this._latestIds = new Set([this._latestResult._id]);
       }
+    }
+
+    /**
+     * Tracks a child cursor for analysing all cursors
+     * in the query (cursors tree)
+     * @param  {Cursor} cursor
+     */
+
+  }, {
+    key: '_trackChildCursor',
+    value: function _trackChildCursor(cursor) {
+      var _this4 = this;
+
+      this._childrenCursors[cursor._id] = cursor;
+      cursor.once('stopped', function () {
+        return delete _this4._childrenCursors[cursor._id];
+      });
     }
   }], [{
     key: 'defaultDebounce',

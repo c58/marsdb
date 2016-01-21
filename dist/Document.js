@@ -30,8 +30,6 @@ var _EJSON2 = _interopRequireDefault(_EJSON);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
-
 /**
  * Return true if given selector is an
  * object id type (string or number)
@@ -39,11 +37,11 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
  * @return {Boolean}
  */
 function selectorIsId(selector) {
-  return typeof selector === 'string' || typeof selector === 'number';
+  return _checkTypes2.default.string(selector) || _checkTypes2.default.number(selector);
 }
 
 function selectorIsIdPerhapsAsObject(selector) {
-  return selectorIsId(selector) || selector && (typeof selector === 'undefined' ? 'undefined' : _typeof(selector)) === 'object' && selector._id && selectorIsId(selector._id) && (0, _keys3.default)(selector).length === 1;
+  return selectorIsId(selector) || selector && _checkTypes2.default.object(selector) && selector._id && selectorIsId(selector._id) && (0, _keys3.default)(selector).length === 1;
 }
 
 // Like _isArray, but doesn't regard polyfilled Uint8Arrays on old browsers as

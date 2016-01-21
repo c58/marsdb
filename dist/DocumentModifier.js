@@ -27,10 +27,6 @@ var _EJSON = require('./EJSON');
 
 var _EJSON2 = _interopRequireDefault(_EJSON);
 
-var _DocumentRetriver = require('./DocumentRetriver');
-
-var _DocumentRetriver2 = _interopRequireDefault(_DocumentRetriver);
-
 var _DocumentMatcher = require('./DocumentMatcher');
 
 var _DocumentMatcher2 = _interopRequireDefault(_DocumentMatcher);
@@ -48,41 +44,38 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var DocumentModifier = exports.DocumentModifier = (function () {
-  function DocumentModifier(db) {
-    var query = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+  function DocumentModifier() {
+    var query = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
     _classCallCheck(this, DocumentModifier);
 
-    this.db = db;
     this._matcher = new _DocumentMatcher2.default(query);
-    this._query = query;
   }
 
   _createClass(DocumentModifier, [{
     key: 'modify',
-    value: function modify(mod) {
+    value: function modify(docs, mod) {
       var _this = this;
 
-      var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+      var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
-      return new _DocumentRetriver2.default(this.db).retriveForQeury(this._query).then(function (docs) {
-        var oldResults = [];
-        var newResults = [];
-        (0, _forEach2.default)(docs, function (d) {
-          var match = _this._matcher.documentMatches(d);
-          if (match.result) {
-            var matchOpts = (0, _assign3.default)({ arrayIndices: match.arrayIndices }, options);
-            var newDoc = _this._modifyDocument(d, mod, matchOpts);
-            newResults.push(newDoc);
-            oldResults.push(d);
-          }
-        });
+      var oldResults = [];
+      var newResults = [];
 
-        return {
-          updated: newResults,
-          original: oldResults
-        };
+      (0, _forEach2.default)(docs, function (d) {
+        var match = _this._matcher.documentMatches(d);
+        if (match.result) {
+          var matchOpts = (0, _assign3.default)({ arrayIndices: match.arrayIndices }, options);
+          var newDoc = _this._modifyDocument(d, mod, matchOpts);
+          newResults.push(newDoc);
+          oldResults.push(d);
+        }
       });
+
+      return {
+        updated: newResults,
+        original: oldResults
+      };
     }
 
     // XXX need a strategy for passing the binding of $ into this
@@ -109,9 +102,7 @@ var DocumentModifier = exports.DocumentModifier = (function () {
 
       // Make sure the caller can't mutate our data structures.
       mod = _EJSON2.default.clone(mod);
-
       var isModifier = (0, _Document.isOperatorObject)(mod);
-
       var newDoc;
 
       if (!isModifier) {

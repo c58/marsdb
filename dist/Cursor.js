@@ -17,6 +17,14 @@ var _forEach = require('fast.js/forEach');
 
 var _forEach2 = _interopRequireDefault(_forEach);
 
+var _filter2 = require('fast.js/array/filter');
+
+var _filter3 = _interopRequireDefault(_filter2);
+
+var _reduce2 = require('fast.js/array/reduce');
+
+var _reduce3 = _interopRequireDefault(_reduce2);
+
 var _map2 = require('fast.js/map');
 
 var _map3 = _interopRequireDefault(_map2);
@@ -45,6 +53,10 @@ var _DocumentSorter = require('./DocumentSorter');
 
 var _DocumentSorter2 = _interopRequireDefault(_DocumentSorter);
 
+var _DocumentProjector = require('./DocumentProjector');
+
+var _DocumentProjector2 = _interopRequireDefault(_DocumentProjector);
+
 var _EJSON = require('./EJSON');
 
 var _EJSON2 = _interopRequireDefault(_EJSON);
@@ -60,6 +72,9 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+// UUID counter for all cursors
+var _currentCursorId = 0;
 
 // Maker used for stopping pipeline processing
 var PIPLEINE_STOP_MARKER = {};
@@ -78,15 +93,15 @@ var PIPELINE_TYPE = exports.PIPELINE_TYPE = {
 };
 
 var PIPELINE_PROCESSORS = exports.PIPELINE_PROCESSORS = (_PIPELINE_PROCESSORS = {}, _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.Filter, function (docs, pipeObj) {
-  return docs.filter(pipeObj.value);
+  return (0, _filter3.default)(docs, pipeObj.value);
 }), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.Sort, function (docs, pipeObj) {
   return docs.sort(pipeObj.value);
 }), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.Map, function (docs, pipeObj) {
-  return docs.map(pipeObj.value);
+  return (0, _map3.default)(docs, pipeObj.value);
 }), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.Aggregate, function (docs, pipeObj) {
   return pipeObj.value(docs);
 }), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.Reduce, function (docs, pipeObj) {
-  return docs.reduce(pipeObj.value, pipeObj.args[0]);
+  return (0, _reduce3.default)(docs, pipeObj.value, pipeObj.args[0]);
 }), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.Join, function (docs, pipeObj, cursor) {
   if (_checkTypes2.default.array(docs)) {
     return PIPELINE_PROCESSORS[PIPELINE_TYPE.JoinEach](docs, pipeObj, cursor);
@@ -146,6 +161,7 @@ var Cursor = (function (_EventEmitter) {
 
     _this.db = db;
     _this.options = options;
+    _this._id = _currentCursorId++;
     _this._query = query;
     _this._pipeline = [];
     _this._executing = null;
@@ -175,8 +191,19 @@ var Cursor = (function (_EventEmitter) {
     key: 'find',
     value: function find(query) {
       this._ensureNotExecuting();
-      this._query = query || this._query;
+      this._query = query;
       this._ensureMatcherSorter();
+      return this;
+    }
+  }, {
+    key: 'project',
+    value: function project(projection) {
+      this._ensureNotExecuting();
+      if (projection) {
+        this._projector = new _DocumentProjector2.default(projection);
+      } else {
+        this._projector = null;
+      }
       return this;
     }
   }, {
@@ -308,21 +335,20 @@ var Cursor = (function (_EventEmitter) {
     value: function exec() {
       var _this3 = this;
 
-      var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-
       if (!this._executing) {
-        this._executing = this._prepareCursor(options).then(function () {
-          return _this3._matchObjects();
-        }).then(function (docs) {
+        this._executing = this._matchObjects().then(function (docs) {
           var clonned = undefined;
           if (_this3.options.noClone) {
             clonned = docs;
           } else {
-            clonned = (0, _map3.default)(docs, function (doc) {
-              return _EJSON2.default.clone(doc);
-            });
+            if (!_this3._projector) {
+              clonned = (0, _map3.default)(docs, function (doc) {
+                return _EJSON2.default.clone(doc);
+              });
+            } else {
+              clonned = _this3._projector.project(docs);
+            }
           }
-
           return _this3.processPipeline(clonned);
         }).then(function (docs) {
           _this3._executing = null;
@@ -341,13 +367,6 @@ var Cursor = (function (_EventEmitter) {
     key: 'whenNotExecuting',
     value: function whenNotExecuting() {
       return Promise.resolve(this._executing);
-    }
-  }, {
-    key: '_prepareCursor',
-    value: function _prepareCursor() {
-      var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-
-      return Promise.resolve();
     }
   }, {
     key: '_matchObjects',

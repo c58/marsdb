@@ -11,15 +11,13 @@ var _map2 = require('fast.js/map');
 
 var _map3 = _interopRequireDefault(_map2);
 
-var _invariant = require('invariant');
-
-var _invariant2 = _interopRequireDefault(_invariant);
-
 var _DocumentModifier = require('./DocumentModifier');
 
 var _DocumentModifier2 = _interopRequireDefault(_DocumentModifier);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -50,42 +48,47 @@ var CollectionDelegate = exports.CollectionDelegate = (function () {
     }
   }, {
     key: 'remove',
-    value: function remove(query) {
+    value: function remove(query, _ref) {
       var _this2 = this;
 
-      var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+      var _ref$sort = _ref.sort;
+      var sort = _ref$sort === undefined ? { _id: 1 } : _ref$sort;
+      var _ref$multi = _ref.multi;
+      var multi = _ref$multi === undefined ? false : _ref$multi;
 
-      return this.find(query, { noClone: true }).then(function (docs) {
-        (0, _invariant2.default)(docs.length <= 1 || options.multi, 'remove(..): multi removing is not enabled by options.multi');
-
+      return this.find(query, { noClone: true }).sort(sort).then(function (docs) {
+        if (docs.length > 1 && !multi) {
+          docs = [docs[0]];
+        }
         var removeStorgePromises = (0, _map3.default)(docs, function (d) {
           return _this2.db.storageManager.delete(d._id);
         });
         var removeIndexPromises = (0, _map3.default)(docs, function (d) {
           return _this2.db.indexManager.deindexDocument(d);
         });
-        var allPromises = removeStorgePromises.concat(removeIndexPromises);
-
-        return Promise.all(allPromises).then(function () {
+        return Promise.all([].concat(_toConsumableArray(removeStorgePromises), _toConsumableArray(removeIndexPromises))).then(function () {
           return docs;
         });
       });
     }
   }, {
     key: 'update',
-    value: function update(query, modifier) {
+    value: function update(query, modifier, _ref2) {
       var _this3 = this;
 
-      var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+      var _ref2$sort = _ref2.sort;
+      var sort = _ref2$sort === undefined ? { _id: 1 } : _ref2$sort;
+      var _ref2$multi = _ref2.multi;
+      var multi = _ref2$multi === undefined ? false : _ref2$multi;
 
-      options.upsert = false;
-      return new _DocumentModifier2.default(this.db, query).modify(modifier, options).then(function (result) {
-        var original = result.original;
-        var updated = result.updated;
-
-        updated = (0, _map3.default)(updated, function (x) {
-          return _this3.db.create(x);
-        });
+      return this.find(query, { noClone: true }).sort(sort).then(function (docs) {
+        if (docs.length > 1 && !multi) {
+          docs = [docs[0]];
+        }
+        return new _DocumentModifier2.default(query).modify(docs, modifier);
+      }).then(function (_ref3) {
+        var original = _ref3.original;
+        var updated = _ref3.updated;
 
         var updateStorgePromises = (0, _map3.default)(updated, function (d) {
           return _this3.db.storageManager.persist(d._id, d);
@@ -93,9 +96,7 @@ var CollectionDelegate = exports.CollectionDelegate = (function () {
         var updateIndexPromises = (0, _map3.default)(updated, function (d, i) {
           return _this3.db.indexManager.reindexDocument(original[i], d);
         });
-        var allPromises = updateStorgePromises.concat(updateIndexPromises);
-
-        return Promise.all(allPromises).then(function () {
+        return Promise.all([].concat(_toConsumableArray(updateStorgePromises), _toConsumableArray(updateIndexPromises))).then(function () {
           return {
             modified: updated.length,
             original: original,
@@ -113,8 +114,8 @@ var CollectionDelegate = exports.CollectionDelegate = (function () {
     }
   }, {
     key: 'findOne',
-    value: function findOne(query, sortObj) {
-      var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+    value: function findOne(query) {
+      var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
       return this.find(query, options).aggregate(function (docs) {
         return docs[0];
