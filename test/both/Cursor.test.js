@@ -1,6 +1,8 @@
 import Collection from '../../lib/Collection';
 import Cursor from '../../lib/Cursor';
-import chai from 'chai';
+import Random from '../../lib/Random';
+import chai, {assert, expect} from 'chai';
+import _ from 'lodash';
 chai.use(require('chai-as-promised'));
 chai.should();
 
@@ -454,4 +456,153 @@ describe('Cursor', () => {
     });
   });
 
+
+  describe('#project', function () {
+    let db2;
+    beforeEach(function () {
+      db2 = new Collection('another');
+      const rand = new Random();
+      return Promise.all(_.times(30, function (i) {
+        return db2.insert({
+          something: rand.id(),
+          anything: {
+            foo: "bar",
+            cool: "hot"
+          },
+          nothing: i,
+          i: i
+        });
+      }));
+    });
+
+    it('should fetch with some projection', function () {
+      return db2.find({}).project({
+        'something': 1,
+        'anything.foo': 1
+      }).then(fetchResults => {
+        assert.isTrue(_.all(fetchResults, function (x) {
+          return x &&
+                 x.something &&
+                 x.anything &&
+                 x.anything.foo &&
+                 x.anything.foo === "bar" &&
+                 !_.has(x, 'nothing') &&
+                 !_.has(x.anything, 'cool');
+        }));
+      })
+    });
+
+    it('should exclude fields even fields used in a selector', function () {
+      return db2.find({
+        nothing: { $gte: 5 }
+      }).project({ nothing: 0 })
+      .then((fetchResults) => {
+        assert.isTrue(_.all(fetchResults, function (x) {
+          return x &&
+                 x.something &&
+                 x.anything &&
+                 x.anything.foo === "bar" &&
+                 x.anything.cool === "hot" &&
+                 !_.has(x, 'nothing') &&
+                 x.i &&
+                 x.i >= 5;
+        }));
+        assert.isTrue(fetchResults.length === 25);
+      })
+
+    });
+
+    it('should sort based on excluded fields and use skip and limit well', function () {
+      return db2.find({}).skip(10).limit(10).sort({nothing: 1})
+      .project({ i: 1, something: 1}).then((fetchResults) => {
+        assert.isTrue(_.all(fetchResults, function (x) {
+          return x &&
+                 x.something &&
+                 x.i >= 10 && x.i < 20;
+        }));
+
+        _.each(fetchResults, function (x, i, arr) {
+          if (!i) return;
+          assert.isTrue(x.i === arr[i-1].i + 1);
+        });
+      });
+    });
+
+    it('should rise an exception if used unsupported operations', function () {
+      assert.throws(function () {
+        db2.find({}).project(function(){});
+      });
+      assert.throws(function () {
+        db2.find({}).project({ 'grades': 121 });
+      });
+      assert.throws(function () {
+        db2.find({}).project({ 'grades.$': 1 });
+      });
+      assert.throws(function () {
+        db2.find({}).project({ grades: { $elemMatch: { mean: 70 } } } );
+      });
+      assert.throws(function () {
+        db2.find({}).project({ grades: { $slice: [20, 10] } });
+      });
+    });
+
+
+    it('should properly project arrays', function () {
+      // Insert a test object with two set fields
+      return db2.remove({}, {multi: true}).then(() => {
+        return db2.insert({
+          setA: [{
+            fieldA: 42,
+            fieldB: 33
+          }, {
+            fieldA: "the good",
+            fieldB: "the bad",
+            fieldC: "the ugly"
+          }],
+          setB: [{
+            anotherA: { },
+            anotherB: "meh"
+          }, {
+            anotherA: 1234,
+            anotherB: 431
+          }]
+        }).then(() => {
+          var equalNonStrict = function (a, b, desc) {
+            assert.isTrue(_.isEqual(a, b), desc);
+          };
+
+          var testForProjection = function (projection, expected) {
+            return db2.find({}).project(projection).then((fetched) => {
+              equalNonStrict(fetched[0], expected, "failed sub-set projection: " +
+                                              JSON.stringify(projection));
+            });
+          };
+
+          return Promise.all([
+            testForProjection({ 'setA.fieldA': 1, 'setB.anotherB': 1, _id: 0 },
+                              {
+                                setA: [{ fieldA: 42 }, { fieldA: "the good" }],
+                                setB: [{ anotherB: "meh" }, { anotherB: 431 }]
+                              }),
+            testForProjection({ 'setA.fieldA': 0, 'setB.anotherA': 0, _id: 0 },
+                              {
+                                setA: [{fieldB:33}, {fieldB:"the bad",fieldC:"the ugly"}],
+                                setB: [{ anotherB: "meh" }, { anotherB: 431 }]
+                              }),
+          ]).then(() => {
+            return db2.remove({});
+          }).then(() => {
+            return db2.insert({a:[[{b:1,c:2},{b:2,c:4}],{b:3,c:5},[{b:4, c:9}]]});
+          }).then(() => {
+            return Promise.all([
+              testForProjection({ 'a.b': 1, _id: 0 },
+                            {a: [ [ { b: 1 }, { b: 2 } ], { b: 3 }, [ { b: 4 } ] ] }),
+              testForProjection({ 'a.b': 0, _id: 0 },
+                                {a: [ [ { c: 2 }, { c: 4 } ], { c: 5 }, [ { c: 9 } ] ] }),
+            ]);
+          });
+        });
+      });
+    });
+  });
 });

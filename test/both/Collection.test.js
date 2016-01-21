@@ -234,11 +234,18 @@ describe('Collection', () => {
       });
     });
 
-    it('should throw an error if remove multiple without option multi', function () {
+    it('should remove only first document if multi not specified', function () {
       const db = new Collection('test');
       return db.insertAll([{a: 1}, {a: 2}, {a: 3}]).then((docIds) => {
-        return db.remove({a: {$in: [1, 3]}}).should.eventually.rejectedWith(Error);
-      })
+        return db.remove({a: {$in: [3, 1]}});
+      }).then((res) => {
+        res.should.have.length(1);
+        return db.find().then((docs) => {
+          docs.should.have.length(2);
+          docs[0].a.should.not.be.equal(res[0].a);
+          docs[1].a.should.not.be.equal(res[0].a);
+        })
+      });
     });
 
     it('should emit events "remove" and "sync:remove"', function (done) {
@@ -283,6 +290,21 @@ describe('Collection', () => {
       db.remove({}, {quiet: true, multi: true});
       cb.should.have.callCount(0);
     });
+
+    it('should remove by primitive id type', function () {
+      const db = new Collection('test');
+      return db.insertAll([{a: 1, _id: '1'}, {a: 2, _id: 2}])
+      .then(() => {
+        return db.remove('1');
+      }).then((removedDocs) => {
+        removedDocs.should.have.length(1);
+        removedDocs[0].should.be.deep.equal({a: 1, _id: '1'});
+        return db.remove(2);
+      }).then((removedDocs) => {
+        removedDocs.should.have.length(1);
+        removedDocs[0].should.be.deep.equal({a: 2, _id: 2});
+      });
+    });
   });
 
 
@@ -304,7 +326,6 @@ describe('Collection', () => {
       });
     });
 
-
     it('should emit events and can be quiet', function () {
       const db = new Collection('test');
       const cb = sinon.spy();
@@ -323,6 +344,21 @@ describe('Collection', () => {
 
     it('should update index of a doucmnet', function () {
       // TODO
+    });
+
+    it('should update by primitive id type', function () {
+      const db = new Collection('test');
+      return db.insertAll([{a: 1, _id: '1'}, {a: 2, _id: 2}])
+      .then(() => {
+        return db.update('1', {$set: {a: 3}});
+      }).then((res) => {
+        res.updated.should.have.length(1);
+        res.updated[0].should.be.deep.equal({a: 3, _id: '1'});
+        return db.update(2, {$set: {a: 4}});
+      }).then((res) => {
+        res.updated.should.have.length(1);
+        res.updated[0].should.be.deep.equal({a: 4, _id: 2});
+      });
     });
   });
 
@@ -366,6 +402,19 @@ describe('Collection', () => {
         expect(doc).to.be.an('undefined');
       });
     });
+
+    it('should find one by primitive id type', function () {
+      const db = new Collection('test');
+      return db.insertAll([{a: 1, _id: '1'}, {a: 2, _id: 2}])
+      .then(() => {
+        return db.findOne('1');
+      }).then((res) => {
+        res.should.be.deep.equal({a: 1, _id: '1'});
+        return db.findOne(2);
+      }).then((res) => {
+        res.should.be.deep.equal({a: 2, _id: 2});
+      });
+    });
   });
 
 
@@ -395,6 +444,25 @@ describe('Collection', () => {
         num.should.be.equals(0);
       });
     });
+
+    it('should count by primitive id type', function () {
+      const db = new Collection('test');
+      return db.insertAll([{a: 1, _id: '1'}, {a: 2, _id: 2}])
+      .then(() => {
+        return db.count('1');
+      }).then((res) => {
+        res.should.be.deep.equal(1);
+        return db.count(2);
+      }).then((res) => {
+        res.should.be.deep.equal(1);
+        return db.count('2');
+      }).then((res) => {
+        res.should.be.deep.equal(0);
+        return db.count(1);
+      }).then((res) => {
+        res.should.be.deep.equal(0);
+      });
+    });
   });
 
 
@@ -410,6 +478,25 @@ describe('Collection', () => {
       }).then((ids) => {
         expect(ids).to.be.an('array');
         ids.should.have.length(2);
+      });
+    });
+
+    it('should return ids by primitive id type', function () {
+      const db = new Collection('test');
+      return Promise.all([
+        db.insert({a: 1, _id: 1}),
+        db.insert({a: 2, _id: 2}),
+        db.insert({a: 3, _id: 3}),
+      ]).then((docs) => {
+        return db.ids(1);
+      }).then((ids) => {
+        expect(ids).to.be.an('array');
+        ids.should.have.length(1);
+        ids[0].should.be.equal(1);
+        return db.ids('1');
+      }).then((ids) => {
+        expect(ids).to.be.an('array');
+        ids.should.have.length(0);
       });
     });
   });
