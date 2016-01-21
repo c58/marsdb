@@ -3811,7 +3811,7 @@ function checkSupportedProjection(fields) {
   }
 
   (0, _forEach2.default)(fields, function (val, keyPath) {
-    var valKeys = (0, _keys3.default)(val);
+    var valKeys = _checkTypes2.default.object(val) && (0, _keys3.default)(val) || [];
     if ((0, _indexOf3.default)(keyPath.split('.'), '$') >= 0) {
       throw Error('Minimongo doesn\'t support $ operator in projections yet.');
     }
