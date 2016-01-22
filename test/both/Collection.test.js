@@ -116,31 +116,6 @@ describe('Collection', () => {
   });
 
 
-  describe('#ensureIndex', function () {
-    it('should ensure index', function () {
-      const db = new Collection('test');
-      return Promise.all([
-        db.insert({a: 1}),
-        db.insert({a: 2}),
-        db.insert({a: 3}),
-      ]).then((docs) => {
-        return db.ensureIndex({fieldName: 'a'});
-      }).then(() => {
-        expect(db.indexes.a).to.be.an('object');
-        //db.indexes.a.getAll().should.to.have.length(3);
-      });
-    });
-
-    it('should rise an exception if key is null/undefined', function () {
-      const db = new Collection('test');
-      (() => db.ensureIndex(null)).should.throw(Error);
-      (() => db.ensureIndex('a')).should.throw(Error);
-      (() => db.ensureIndex({})).should.throw(Error);
-      (() => db.ensureIndex({fieldName: null})).should.throw(Error);
-    });
-  });
-
-
   describe('#insert', function () {
     it('should insert document and return new document id', function () {
       const db = new Collection('test');
@@ -176,16 +151,6 @@ describe('Collection', () => {
         throw new Error();
       })
       db.insert({test: 'passed'}, {quiet: true});
-    });
-
-    it('should index a doucmnet', function () {
-      const db = new Collection('test');
-      return db.ensureIndex({fieldName: 'test'}).then(() => {
-        return db.insert({test: 'passed'});
-      }).then((docId) => {
-        //db.indexes.test.getAll().should.have.length(1);
-        //db.indexes.test.getAll()[0].should.be.equals(docId);
-      });
     });
 
     it('should be quiet if options.quiet passed', function () {
@@ -272,9 +237,7 @@ describe('Collection', () => {
 
     it('should deindex a doucmnet', function () {
       const db = new Collection('test');
-      return db.ensureIndex({fieldName: 'a'}).then(() => {
-        return db.insertAll([{a: 1}, {a: 2}, {a: 3}]);
-      }).then(() => {
+      return db.insertAll([{a: 1}, {a: 2}, {a: 3}]).then(() => {
         return db.remove({a: {$in: [1, 3]}}, {multi: true});
       }).then((removedDocs) => {
         //db.indexes.a.getAll().should.have.length(1);
@@ -311,9 +274,7 @@ describe('Collection', () => {
   describe('#update', function () {
     it('should update a document', function () {
       const db = new Collection('test');
-      return db.ensureIndex({fieldName: 'a'}).then(() => {
-        return db.insertAll([{a: 1}, {a: 2}, {a: 3}]);
-      }).then(() => {
+      return db.insertAll([{a: 1}, {a: 2}, {a: 3}]).then(() => {
         return db.update({a: 1}, {$set: {a: 4}});
       }).then((result) => {
         result.modified.should.be.equals(1);
@@ -359,19 +320,6 @@ describe('Collection', () => {
         res.updated.should.have.length(1);
         res.updated[0].should.be.deep.equal({a: 4, _id: 2});
       });
-    });
-  });
-
-  describe('#getIndexIds', function () {
-    it('should return all indexed document ids', function () {
-      const db = new Collection('test');
-      return Promise.all([
-        db.insert({a: 1}),
-        db.insert({a: 2}),
-        db.insert({a: 3}),
-      ]).then((docs) => {
-        db.getIndexIds(); //.should.have.length(3);
-      })
     });
   });
 
