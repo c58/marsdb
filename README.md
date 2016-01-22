@@ -34,10 +34,10 @@ You can use it in any JS environment (Browser, Electron, NW.js, Node.js).
 ## Storage implementations
 
 * In-memory (built-in default)
-* [LocalForage](https://github.com/c58/marsdb-localforage)
-* [LocalStorage](https://github.com/c58/marsdb-localstorage)
-* [LevelUP](https://github.com/c58/marsdb-levelup)
-* [MongoDB](https://github.com/c58/marsdb-mongo)
+* [LocalForage](https://github.com/c58/marsdb-localforage) – fastest in-browser storage (InexedDB, WebSQL and fallback to localStorage)
+* [LocalStorage](https://github.com/c58/marsdb-localstorage) – not recommendet, better prefer LocalForage
+* [LevelUP](https://github.com/c58/marsdb-levelup) – lightweight server-less Node.js storage
+* [MongoDB](https://github.com/c58/marsdb-mongo) – use MarsDB as a sugar upon MongoDB
 
 ## Client-Server
 
