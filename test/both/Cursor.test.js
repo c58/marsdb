@@ -9,7 +9,6 @@ chai.should();
 
 describe('Cursor', () => {
   let db;
-
   beforeEach(function () {
     db = new Collection('test');
 
@@ -24,21 +23,30 @@ describe('Cursor', () => {
     ]);
   });
 
-  it('should be created with db and query', () => {
-    const cursor = new Cursor(db, {});
-  });
-
 
   describe('#exec', function () {
-    it('should execute only once with multiple calls', function () {
+    it('should on first call execute query, on next calls wait until first executed', function () {
       const cursor = new Cursor(db);
       cursor.find({b: {$gt: 4}}).skip(1).sort({b: 1});
       const promise = cursor.exec();
-      cursor.exec().should.be.equal(promise);
-      cursor.exec().should.be.equal(promise);
+      const pendingPromise = cursor.exec();
+      promise.should.be.not.equal(pendingPromise);
+      cursor.exec().should.be.equal(pendingPromise);
+      cursor.exec().should.be.equal(pendingPromise);
+      cursor.exec().should.be.equal(pendingPromise);
+      cursor.exec().should.be.equal(pendingPromise);
       return promise.then(() => {
         const anotherPromise = cursor.exec()
         anotherPromise.should.not.be.equal(promise);
+        anotherPromise.should.be.equal(pendingPromise);
+        return anotherPromise;
+      }).then(() => {
+        const anotherPromise = cursor.exec()
+        anotherPromise.should.not.be.equal(pendingPromise);
+        cursor.exec().should.be.equal(anotherPromise);
+        cursor.exec().should.be.equal(anotherPromise);
+        cursor.exec().should.be.equal(anotherPromise);
+        cursor.exec().should.be.equal(anotherPromise);
         return anotherPromise;
       })
     });
