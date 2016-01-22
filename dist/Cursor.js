@@ -336,23 +336,15 @@ var Cursor = (function (_EventEmitter) {
       var _this3 = this;
 
       if (!this._executing) {
-        this._executing = this._matchObjects().then(function (docs) {
-          var clonned = undefined;
-          if (_this3.options.noClone) {
-            clonned = docs;
-          } else {
-            if (!_this3._projector) {
-              clonned = (0, _map3.default)(docs, function (doc) {
-                return _EJSON2.default.clone(doc);
-              });
-            } else {
-              clonned = _this3._projector.project(docs);
-            }
-          }
-          return _this3.processPipeline(clonned);
-        }).then(function (docs) {
+        this._executing = this._doExec();
+        this.whenNotExecuting().then(function () {
           _this3._executing = null;
-          return docs;
+        });
+      } else if (!this._execPending) {
+        this._execPending = true;
+        this._executing = this.whenNotExecuting().then(function () {
+          _this3._execPending = false;
+          return _this3.exec();
         });
       }
 
@@ -366,23 +358,52 @@ var Cursor = (function (_EventEmitter) {
   }, {
     key: 'whenNotExecuting',
     value: function whenNotExecuting() {
-      return Promise.resolve(this._executing);
+      return Promise.resolve(this._executing).then(function (value) {
+        return Promise.resolve().then(function () {
+          return value;
+        });
+      }, function (err) {
+        return Promise.resolve().then(function () {
+          throw err;
+        });
+      });
+    }
+  }, {
+    key: '_doExec',
+    value: function _doExec() {
+      var _this4 = this;
+
+      return this._matchObjects().then(function (docs) {
+        var clonned = undefined;
+        if (_this4.options.noClone) {
+          clonned = docs;
+        } else {
+          if (!_this4._projector) {
+            clonned = (0, _map3.default)(docs, function (doc) {
+              return _EJSON2.default.clone(doc);
+            });
+          } else {
+            clonned = _this4._projector.project(docs);
+          }
+        }
+        return _this4.processPipeline(clonned);
+      });
     }
   }, {
     key: '_matchObjects',
     value: function _matchObjects() {
-      var _this4 = this;
+      var _this5 = this;
 
       return new _DocumentRetriver2.default(this.db).retriveForQeury(this._query).then(function (docs) {
         var results = [];
-        var withFastLimit = _this4._limit && !_this4._skip && !_this4._sorter;
+        var withFastLimit = _this5._limit && !_this5._skip && !_this5._sorter;
 
         (0, _forEach2.default)(docs, function (d) {
-          var match = _this4._matcher.documentMatches(d);
+          var match = _this5._matcher.documentMatches(d);
           if (match.result) {
             results.push(d);
           }
-          if (withFastLimit && results.length === _this4._limit) {
+          if (withFastLimit && results.length === _this5._limit) {
             return false;
           }
         });
@@ -391,12 +412,12 @@ var Cursor = (function (_EventEmitter) {
           return results;
         }
 
-        if (_this4._sorter) {
-          var comparator = _this4._sorter.getComparator();
+        if (_this5._sorter) {
+          var comparator = _this5._sorter.getComparator();
           results.sort(comparator);
         }
 
-        return _this4.processSkipLimits(results);
+        return _this5.processSkipLimits(results);
       });
     }
   }, {

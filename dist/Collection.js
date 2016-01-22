@@ -27,6 +27,10 @@ var _IndexManager = require('./IndexManager');
 
 var _IndexManager2 = _interopRequireDefault(_IndexManager);
 
+var _PromiseQueue = require('./PromiseQueue');
+
+var _PromiseQueue2 = _interopRequireDefault(_PromiseQueue);
+
 var _StorageManager = require('./StorageManager');
 
 var _StorageManager2 = _interopRequireDefault(_StorageManager);
@@ -81,14 +85,15 @@ var Collection = exports.Collection = (function (_EventEmitter) {
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Collection).call(this));
 
     _this._modelName = name;
+    _this._writeQueue = new _PromiseQueue2.default(options.writeConcurrency || 2);
 
     var storageManagerClass = options.storageManager || _defaultStorageManager;
     var delegateClass = options.delegate || _defaultDelegate;
     var indexManagerClass = options.indexManager || _defaultIndexManager;
     _this.cursorClass = options.cursorClass || _defaultCursorClass;
+    _this.idGenerator = options.idGenerator || _defaultIdGenerator;
     _this.indexManager = new indexManagerClass(_this, options);
     _this.storageManager = new storageManagerClass(_this, options);
-    _this.idGenerator = options.idGenerator || _defaultIdGenerator;
     _this.delegate = new delegateClass(_this, options);
     return _this;
   }
@@ -103,29 +108,6 @@ var Collection = exports.Collection = (function (_EventEmitter) {
      */
     value: function create(raw) {
       return _checkTypes2.default.string(raw) ? _EJSON2.default.parse(raw) : raw;
-    }
-
-    /**
-     * Return all currently indexed ids
-     * @return {Array}
-     */
-
-  }, {
-    key: 'getIndexIds',
-    value: function getIndexIds() {
-      return this.indexes._id.getAll();
-    }
-
-    /**
-     * Ensures index by delegating to IndexManager.
-     * @param  {String} key
-     * @return {Promise}
-     */
-
-  }, {
-    key: 'ensureIndex',
-    value: function ensureIndex(key) {
-      return this.indexManager.ensureIndex(key);
     }
 
     /**
@@ -148,14 +130,19 @@ var Collection = exports.Collection = (function (_EventEmitter) {
       doc = this.create(doc);
       doc._id = doc._id || randomId.value;
 
-      // Fire sync event
-      if (!options.quiet) {
-        this.emit('sync:insert', doc, randomId);
-      }
-
-      return this.delegate.insert(doc, options).then(function (docId) {
-        _this2.emit('insert', doc, null, randomId);
-        return docId;
+      return this._writeQueue.add(function () {
+        return new Promise(function (resolve, reject) {
+          _this2.emit('beforeInsert', doc, randomId);
+          if (!options.quiet) {
+            _this2.emit('sync:insert', doc, randomId);
+          }
+          resolve();
+        }).then(function () {
+          return _this2.delegate.insert(doc, options).then(function (docId) {
+            _this2.emit('insert', doc, null, randomId);
+            return docId;
+          });
+        });
       });
     }
 
@@ -195,15 +182,21 @@ var Collection = exports.Collection = (function (_EventEmitter) {
 
       var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
-      if (!options.quiet) {
-        this.emit('sync:remove', query, options);
-      }
-
-      return this.delegate.remove(query, options).then(function (removedDocs) {
-        (0, _forEach2.default)(removedDocs, function (d) {
-          return _this4.emit('remove', null, d);
+      return this._writeQueue.add(function () {
+        return new Promise(function (resolve, reject) {
+          _this4.emit('beforeRemove', query, options);
+          if (!options.quiet) {
+            _this4.emit('sync:remove', query, options);
+          }
+          resolve();
+        }).then(function () {
+          return _this4.delegate.remove(query, options).then(function (removedDocs) {
+            (0, _forEach2.default)(removedDocs, function (d) {
+              return _this4.emit('remove', null, d);
+            });
+            return removedDocs;
+          });
         });
-        return removedDocs;
       });
     }
 
@@ -224,15 +217,21 @@ var Collection = exports.Collection = (function (_EventEmitter) {
 
       var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
-      if (!options.quiet) {
-        this.emit('sync:update', query, modifier, options);
-      }
-
-      return this.delegate.update(query, modifier, options).then(function (res) {
-        (0, _forEach2.default)(res.updated, function (d, i) {
-          _this5.emit('update', d, res.original[i]);
+      return this._writeQueue.add(function () {
+        return new Promise(function (resolve, reject) {
+          _this5.emit('beforeUpdate', query, modifier, options);
+          if (!options.quiet) {
+            _this5.emit('sync:update', query, modifier, options);
+          }
+          resolve();
+        }).then(function () {
+          return _this5.delegate.update(query, modifier, options).then(function (res) {
+            (0, _forEach2.default)(res.updated, function (d, i) {
+              _this5.emit('update', d, res.original[i]);
+            });
+            return res;
+          });
         });
-        return res;
       });
     }
 

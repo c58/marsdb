@@ -223,6 +223,10 @@ var _IndexManager = require('./IndexManager');
 
 var _IndexManager2 = _interopRequireDefault(_IndexManager);
 
+var _PromiseQueue = require('./PromiseQueue');
+
+var _PromiseQueue2 = _interopRequireDefault(_PromiseQueue);
+
 var _StorageManager = require('./StorageManager');
 
 var _StorageManager2 = _interopRequireDefault(_StorageManager);
@@ -291,14 +295,15 @@ var Collection = exports.Collection = (function (_EventEmitter) {
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Collection).call(this));
 
     _this._modelName = name;
+    _this._writeQueue = new _PromiseQueue2.default(options.writeConcurrency || 2);
 
     var storageManagerClass = options.storageManager || _defaultStorageManager;
     var delegateClass = options.delegate || _defaultDelegate;
     var indexManagerClass = options.indexManager || _defaultIndexManager;
     _this.cursorClass = options.cursorClass || _defaultCursorClass;
+    _this.idGenerator = options.idGenerator || _defaultIdGenerator;
     _this.indexManager = new indexManagerClass(_this, options);
     _this.storageManager = new storageManagerClass(_this, options);
-    _this.idGenerator = options.idGenerator || _defaultIdGenerator;
     _this.delegate = new delegateClass(_this, options);
     return _this;
   }
@@ -313,29 +318,6 @@ var Collection = exports.Collection = (function (_EventEmitter) {
      */
     value: function create(raw) {
       return _checkTypes2.default.string(raw) ? _EJSON2.default.parse(raw) : raw;
-    }
-
-    /**
-     * Return all currently indexed ids
-     * @return {Array}
-     */
-
-  }, {
-    key: 'getIndexIds',
-    value: function getIndexIds() {
-      return this.indexes._id.getAll();
-    }
-
-    /**
-     * Ensures index by delegating to IndexManager.
-     * @param  {String} key
-     * @return {Promise}
-     */
-
-  }, {
-    key: 'ensureIndex',
-    value: function ensureIndex(key) {
-      return this.indexManager.ensureIndex(key);
     }
 
     /**
@@ -358,14 +340,19 @@ var Collection = exports.Collection = (function (_EventEmitter) {
       doc = this.create(doc);
       doc._id = doc._id || randomId.value;
 
-      // Fire sync event
-      if (!options.quiet) {
-        this.emit('sync:insert', doc, randomId);
-      }
-
-      return this.delegate.insert(doc, options).then(function (docId) {
-        _this2.emit('insert', doc, null, randomId);
-        return docId;
+      return this._writeQueue.add(function () {
+        return new Promise(function (resolve, reject) {
+          _this2.emit('beforeInsert', doc, randomId);
+          if (!options.quiet) {
+            _this2.emit('sync:insert', doc, randomId);
+          }
+          resolve();
+        }).then(function () {
+          return _this2.delegate.insert(doc, options).then(function (docId) {
+            _this2.emit('insert', doc, null, randomId);
+            return docId;
+          });
+        });
       });
     }
 
@@ -405,15 +392,21 @@ var Collection = exports.Collection = (function (_EventEmitter) {
 
       var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
-      if (!options.quiet) {
-        this.emit('sync:remove', query, options);
-      }
-
-      return this.delegate.remove(query, options).then(function (removedDocs) {
-        (0, _forEach2.default)(removedDocs, function (d) {
-          return _this4.emit('remove', null, d);
+      return this._writeQueue.add(function () {
+        return new Promise(function (resolve, reject) {
+          _this4.emit('beforeRemove', query, options);
+          if (!options.quiet) {
+            _this4.emit('sync:remove', query, options);
+          }
+          resolve();
+        }).then(function () {
+          return _this4.delegate.remove(query, options).then(function (removedDocs) {
+            (0, _forEach2.default)(removedDocs, function (d) {
+              return _this4.emit('remove', null, d);
+            });
+            return removedDocs;
+          });
         });
-        return removedDocs;
       });
     }
 
@@ -434,15 +427,21 @@ var Collection = exports.Collection = (function (_EventEmitter) {
 
       var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
-      if (!options.quiet) {
-        this.emit('sync:update', query, modifier, options);
-      }
-
-      return this.delegate.update(query, modifier, options).then(function (res) {
-        (0, _forEach2.default)(res.updated, function (d, i) {
-          _this5.emit('update', d, res.original[i]);
+      return this._writeQueue.add(function () {
+        return new Promise(function (resolve, reject) {
+          _this5.emit('beforeUpdate', query, modifier, options);
+          if (!options.quiet) {
+            _this5.emit('sync:update', query, modifier, options);
+          }
+          resolve();
+        }).then(function () {
+          return _this5.delegate.update(query, modifier, options).then(function (res) {
+            (0, _forEach2.default)(res.updated, function (d, i) {
+              _this5.emit('update', d, res.original[i]);
+            });
+            return res;
+          });
         });
-        return res;
       });
     }
 
@@ -580,7 +579,7 @@ var Collection = exports.Collection = (function (_EventEmitter) {
 
 exports.default = Collection;
 
-},{"./CollectionDelegate":3,"./CursorObservable":6,"./EJSON":13,"./IndexManager":14,"./Random":16,"./StorageManager":17,"check-types":20,"eventemitter3":21,"fast.js/forEach":29,"fast.js/map":35}],3:[function(require,module,exports){
+},{"./CollectionDelegate":3,"./CursorObservable":6,"./EJSON":13,"./IndexManager":14,"./PromiseQueue":15,"./Random":16,"./StorageManager":17,"check-types":20,"eventemitter3":21,"fast.js/forEach":29,"fast.js/map":35}],3:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () {
@@ -1214,23 +1213,15 @@ var Cursor = (function (_EventEmitter) {
       var _this3 = this;
 
       if (!this._executing) {
-        this._executing = this._matchObjects().then(function (docs) {
-          var clonned = undefined;
-          if (_this3.options.noClone) {
-            clonned = docs;
-          } else {
-            if (!_this3._projector) {
-              clonned = (0, _map3.default)(docs, function (doc) {
-                return _EJSON2.default.clone(doc);
-              });
-            } else {
-              clonned = _this3._projector.project(docs);
-            }
-          }
-          return _this3.processPipeline(clonned);
-        }).then(function (docs) {
+        this._executing = this._doExec();
+        this.whenNotExecuting().then(function () {
           _this3._executing = null;
-          return docs;
+        });
+      } else if (!this._execPending) {
+        this._execPending = true;
+        this._executing = this.whenNotExecuting().then(function () {
+          _this3._execPending = false;
+          return _this3.exec();
         });
       }
 
@@ -1244,23 +1235,52 @@ var Cursor = (function (_EventEmitter) {
   }, {
     key: 'whenNotExecuting',
     value: function whenNotExecuting() {
-      return Promise.resolve(this._executing);
+      return Promise.resolve(this._executing).then(function (value) {
+        return Promise.resolve().then(function () {
+          return value;
+        });
+      }, function (err) {
+        return Promise.resolve().then(function () {
+          throw err;
+        });
+      });
+    }
+  }, {
+    key: '_doExec',
+    value: function _doExec() {
+      var _this4 = this;
+
+      return this._matchObjects().then(function (docs) {
+        var clonned = undefined;
+        if (_this4.options.noClone) {
+          clonned = docs;
+        } else {
+          if (!_this4._projector) {
+            clonned = (0, _map3.default)(docs, function (doc) {
+              return _EJSON2.default.clone(doc);
+            });
+          } else {
+            clonned = _this4._projector.project(docs);
+          }
+        }
+        return _this4.processPipeline(clonned);
+      });
     }
   }, {
     key: '_matchObjects',
     value: function _matchObjects() {
-      var _this4 = this;
+      var _this5 = this;
 
       return new _DocumentRetriver2.default(this.db).retriveForQeury(this._query).then(function (docs) {
         var results = [];
-        var withFastLimit = _this4._limit && !_this4._skip && !_this4._sorter;
+        var withFastLimit = _this5._limit && !_this5._skip && !_this5._sorter;
 
         (0, _forEach2.default)(docs, function (d) {
-          var match = _this4._matcher.documentMatches(d);
+          var match = _this5._matcher.documentMatches(d);
           if (match.result) {
             results.push(d);
           }
-          if (withFastLimit && results.length === _this4._limit) {
+          if (withFastLimit && results.length === _this5._limit) {
             return false;
           }
         });
@@ -1269,12 +1289,12 @@ var Cursor = (function (_EventEmitter) {
           return results;
         }
 
-        if (_this4._sorter) {
-          var comparator = _this4._sorter.getComparator();
+        if (_this5._sorter) {
+          var comparator = _this5._sorter.getComparator();
           results.sort(comparator);
         }
 
-        return _this4.processSkipLimits(results);
+        return _this5.processSkipLimits(results);
       });
     }
   }, {
