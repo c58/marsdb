@@ -39,9 +39,9 @@ You can use it in any JS environment (Browser, Electron, NW.js, Node.js).
 * [LevelUP](https://github.com/c58/marsdb-levelup)
 * [MongoDB](https://github.com/c58/marsdb-mongo)
 
-## Server-side synchronizers
+## Client-Server
 
-* [Meteor](https://github.com/c58/marsdb-meteor)
+* **Meteor compitable** [Cleint](https://github.com/c58/marsdb-sync-client) / [Server](https://github.com/c58/marsdb-sync-server)
 * REST (pull-request if you need it ;))
 
 ## Examples
