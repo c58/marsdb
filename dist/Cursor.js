@@ -172,7 +172,6 @@ var Cursor = (function (_EventEmitter) {
   _createClass(Cursor, [{
     key: 'skip',
     value: function skip(_skip) {
-      this._ensureNotExecuting();
       (0, _invariant2.default)(_skip >= 0 || typeof _skip === 'undefined', 'skip(...): skip must be a positive number');
 
       this._skip = _skip;
@@ -181,7 +180,6 @@ var Cursor = (function (_EventEmitter) {
   }, {
     key: 'limit',
     value: function limit(_limit) {
-      this._ensureNotExecuting();
       (0, _invariant2.default)(_limit >= 0 || typeof _limit === 'undefined', 'limit(...): limit must be a positive number');
 
       this._limit = _limit;
@@ -190,7 +188,6 @@ var Cursor = (function (_EventEmitter) {
   }, {
     key: 'find',
     value: function find(query) {
-      this._ensureNotExecuting();
       this._query = query;
       this._ensureMatcherSorter();
       return this;
@@ -198,7 +195,6 @@ var Cursor = (function (_EventEmitter) {
   }, {
     key: 'project',
     value: function project(projection) {
-      this._ensureNotExecuting();
       if (projection) {
         this._projector = new _DocumentProjector2.default(projection);
       } else {
@@ -209,7 +205,6 @@ var Cursor = (function (_EventEmitter) {
   }, {
     key: 'sort',
     value: function sort(sortObj) {
-      this._ensureNotExecuting();
       (0, _invariant2.default)((typeof sortObj === 'undefined' ? 'undefined' : _typeof(sortObj)) === 'object' || typeof sortObj === 'undefined' || Array.isArray(sortObj), 'sort(...): argument must be an object');
 
       this._sort = sortObj;
@@ -289,7 +284,6 @@ var Cursor = (function (_EventEmitter) {
   }, {
     key: 'addPipeline',
     value: function addPipeline(type, val) {
-      this._ensureNotExecuting();
       (0, _invariant2.default)(type && PIPELINE_TYPE[type], 'Unknown pipeline processor type %s', type);
 
       for (var _len = arguments.length, args = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
@@ -335,20 +329,21 @@ var Cursor = (function (_EventEmitter) {
     value: function exec() {
       var _this3 = this;
 
-      if (!this._executing) {
-        this._executing = this._doExec();
-        this.whenNotExecuting().then(function () {
-          _this3._executing = null;
-        });
-      } else if (!this._execPending) {
-        this._execPending = true;
-        this._executing = this.whenNotExecuting().then(function () {
-          _this3._execPending = false;
-          return _this3.exec();
-        });
-      }
-
-      return this._executing;
+      return this._matchObjects().then(function (docs) {
+        var clonned = undefined;
+        if (_this3.options.noClone) {
+          clonned = docs;
+        } else {
+          if (!_this3._projector) {
+            clonned = (0, _map3.default)(docs, function (doc) {
+              return _EJSON2.default.clone(doc);
+            });
+          } else {
+            clonned = _this3._projector.project(docs);
+          }
+        }
+        return _this3.processPipeline(clonned);
+      });
     }
   }, {
     key: 'then',
@@ -356,54 +351,20 @@ var Cursor = (function (_EventEmitter) {
       return this.exec().then(resolve, reject);
     }
   }, {
-    key: 'whenNotExecuting',
-    value: function whenNotExecuting() {
-      return Promise.resolve(this._executing).then(function (value) {
-        return Promise.resolve().then(function () {
-          return value;
-        });
-      }, function (err) {
-        return Promise.resolve().then(function () {
-          throw err;
-        });
-      });
-    }
-  }, {
-    key: '_doExec',
-    value: function _doExec() {
-      var _this4 = this;
-
-      return this._matchObjects().then(function (docs) {
-        var clonned = undefined;
-        if (_this4.options.noClone) {
-          clonned = docs;
-        } else {
-          if (!_this4._projector) {
-            clonned = (0, _map3.default)(docs, function (doc) {
-              return _EJSON2.default.clone(doc);
-            });
-          } else {
-            clonned = _this4._projector.project(docs);
-          }
-        }
-        return _this4.processPipeline(clonned);
-      });
-    }
-  }, {
     key: '_matchObjects',
     value: function _matchObjects() {
-      var _this5 = this;
+      var _this4 = this;
 
       return new _DocumentRetriver2.default(this.db).retriveForQeury(this._query).then(function (docs) {
         var results = [];
-        var withFastLimit = _this5._limit && !_this5._skip && !_this5._sorter;
+        var withFastLimit = _this4._limit && !_this4._skip && !_this4._sorter;
 
         (0, _forEach2.default)(docs, function (d) {
-          var match = _this5._matcher.documentMatches(d);
+          var match = _this4._matcher.documentMatches(d);
           if (match.result) {
             results.push(d);
           }
-          if (withFastLimit && results.length === _this5._limit) {
+          if (withFastLimit && results.length === _this4._limit) {
             return false;
           }
         });
@@ -412,12 +373,12 @@ var Cursor = (function (_EventEmitter) {
           return results;
         }
 
-        if (_this5._sorter) {
-          var comparator = _this5._sorter.getComparator();
+        if (_this4._sorter) {
+          var comparator = _this4._sorter.getComparator();
           results.sort(comparator);
         }
 
-        return _this5.processSkipLimits(results);
+        return _this4.processSkipLimits(results);
       });
     }
   }, {
@@ -429,16 +390,6 @@ var Cursor = (function (_EventEmitter) {
       if (this._matcher.hasGeoQuery || this._sort) {
         this._sorter = new _DocumentSorter2.default(this._sort || [], { matcher: this._matcher });
       }
-    }
-  }, {
-    key: '_ensureNotExecuting',
-    value: function _ensureNotExecuting() {
-      (0, _invariant2.default)(!this.isExecuting, '_ensureNotExecuting(...): cursor is executing, cursor is immutable!');
-    }
-  }, {
-    key: 'isExecuting',
-    get: function get() {
-      return !!this._executing;
     }
   }]);
 

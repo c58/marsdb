@@ -1049,7 +1049,6 @@ var Cursor = (function (_EventEmitter) {
   _createClass(Cursor, [{
     key: 'skip',
     value: function skip(_skip) {
-      this._ensureNotExecuting();
       (0, _invariant2.default)(_skip >= 0 || typeof _skip === 'undefined', 'skip(...): skip must be a positive number');
 
       this._skip = _skip;
@@ -1058,7 +1057,6 @@ var Cursor = (function (_EventEmitter) {
   }, {
     key: 'limit',
     value: function limit(_limit) {
-      this._ensureNotExecuting();
       (0, _invariant2.default)(_limit >= 0 || typeof _limit === 'undefined', 'limit(...): limit must be a positive number');
 
       this._limit = _limit;
@@ -1067,7 +1065,6 @@ var Cursor = (function (_EventEmitter) {
   }, {
     key: 'find',
     value: function find(query) {
-      this._ensureNotExecuting();
       this._query = query;
       this._ensureMatcherSorter();
       return this;
@@ -1075,7 +1072,6 @@ var Cursor = (function (_EventEmitter) {
   }, {
     key: 'project',
     value: function project(projection) {
-      this._ensureNotExecuting();
       if (projection) {
         this._projector = new _DocumentProjector2.default(projection);
       } else {
@@ -1086,7 +1082,6 @@ var Cursor = (function (_EventEmitter) {
   }, {
     key: 'sort',
     value: function sort(sortObj) {
-      this._ensureNotExecuting();
       (0, _invariant2.default)((typeof sortObj === 'undefined' ? 'undefined' : _typeof(sortObj)) === 'object' || typeof sortObj === 'undefined' || Array.isArray(sortObj), 'sort(...): argument must be an object');
 
       this._sort = sortObj;
@@ -1166,7 +1161,6 @@ var Cursor = (function (_EventEmitter) {
   }, {
     key: 'addPipeline',
     value: function addPipeline(type, val) {
-      this._ensureNotExecuting();
       (0, _invariant2.default)(type && PIPELINE_TYPE[type], 'Unknown pipeline processor type %s', type);
 
       for (var _len = arguments.length, args = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
@@ -1212,20 +1206,21 @@ var Cursor = (function (_EventEmitter) {
     value: function exec() {
       var _this3 = this;
 
-      if (!this._executing) {
-        this._executing = this._doExec();
-        this.whenNotExecuting().then(function () {
-          _this3._executing = null;
-        });
-      } else if (!this._execPending) {
-        this._execPending = true;
-        this._executing = this.whenNotExecuting().then(function () {
-          _this3._execPending = false;
-          return _this3.exec();
-        });
-      }
-
-      return this._executing;
+      return this._matchObjects().then(function (docs) {
+        var clonned = undefined;
+        if (_this3.options.noClone) {
+          clonned = docs;
+        } else {
+          if (!_this3._projector) {
+            clonned = (0, _map3.default)(docs, function (doc) {
+              return _EJSON2.default.clone(doc);
+            });
+          } else {
+            clonned = _this3._projector.project(docs);
+          }
+        }
+        return _this3.processPipeline(clonned);
+      });
     }
   }, {
     key: 'then',
@@ -1233,54 +1228,20 @@ var Cursor = (function (_EventEmitter) {
       return this.exec().then(resolve, reject);
     }
   }, {
-    key: 'whenNotExecuting',
-    value: function whenNotExecuting() {
-      return Promise.resolve(this._executing).then(function (value) {
-        return Promise.resolve().then(function () {
-          return value;
-        });
-      }, function (err) {
-        return Promise.resolve().then(function () {
-          throw err;
-        });
-      });
-    }
-  }, {
-    key: '_doExec',
-    value: function _doExec() {
-      var _this4 = this;
-
-      return this._matchObjects().then(function (docs) {
-        var clonned = undefined;
-        if (_this4.options.noClone) {
-          clonned = docs;
-        } else {
-          if (!_this4._projector) {
-            clonned = (0, _map3.default)(docs, function (doc) {
-              return _EJSON2.default.clone(doc);
-            });
-          } else {
-            clonned = _this4._projector.project(docs);
-          }
-        }
-        return _this4.processPipeline(clonned);
-      });
-    }
-  }, {
     key: '_matchObjects',
     value: function _matchObjects() {
-      var _this5 = this;
+      var _this4 = this;
 
       return new _DocumentRetriver2.default(this.db).retriveForQeury(this._query).then(function (docs) {
         var results = [];
-        var withFastLimit = _this5._limit && !_this5._skip && !_this5._sorter;
+        var withFastLimit = _this4._limit && !_this4._skip && !_this4._sorter;
 
         (0, _forEach2.default)(docs, function (d) {
-          var match = _this5._matcher.documentMatches(d);
+          var match = _this4._matcher.documentMatches(d);
           if (match.result) {
             results.push(d);
           }
-          if (withFastLimit && results.length === _this5._limit) {
+          if (withFastLimit && results.length === _this4._limit) {
             return false;
           }
         });
@@ -1289,12 +1250,12 @@ var Cursor = (function (_EventEmitter) {
           return results;
         }
 
-        if (_this5._sorter) {
-          var comparator = _this5._sorter.getComparator();
+        if (_this4._sorter) {
+          var comparator = _this4._sorter.getComparator();
           results.sort(comparator);
         }
 
-        return _this5.processSkipLimits(results);
+        return _this4.processSkipLimits(results);
       });
     }
   }, {
@@ -1306,16 +1267,6 @@ var Cursor = (function (_EventEmitter) {
       if (this._matcher.hasGeoQuery || this._sort) {
         this._sorter = new _DocumentSorter2.default(this._sort || [], { matcher: this._matcher });
       }
-    }
-  }, {
-    key: '_ensureNotExecuting',
-    value: function _ensureNotExecuting() {
-      (0, _invariant2.default)(!this.isExecuting, '_ensureNotExecuting(...): cursor is executing, cursor is immutable!');
-    }
-  }, {
-    key: 'isExecuting',
-    get: function get() {
-      return !!this._executing;
     }
   }]);
 
@@ -1356,6 +1307,10 @@ var _checkTypes2 = _interopRequireDefault(_checkTypes);
 var _map2 = require('fast.js/map');
 
 var _map3 = _interopRequireDefault(_map2);
+
+var _forEach = require('fast.js/forEach');
+
+var _forEach2 = _interopRequireDefault(_forEach);
 
 var _keys2 = require('fast.js/object/keys');
 
@@ -1414,8 +1369,11 @@ var CursorObservable = (function (_Cursor) {
 
     _this.update = (0, _debounce2.default)((0, _bind3.default)(_this.update, _this), _defaultDebounce, _defaultBatchSize);
     _this.maybeUpdate = (0, _bind3.default)(_this.maybeUpdate, _this);
+
     _this._latestResult = null;
     _this._childrenCursors = {};
+    _this._parentCursors = {};
+    _this._observers = 0;
     return _this;
   }
 
@@ -1455,15 +1413,8 @@ var CursorObservable = (function (_Cursor) {
      * It is been resolved when first result of cursor is ready and
      * after first observe listener call.
      *
-     * if `options.declare` is true, then initial update of
-     * the cursor is not initiated and function will return
-     * `this` instead promise. It means, that you can't stop
-     * observer by a stopper object. Use `stopObservers()`
-     * function instead.
-     *
      * @param  {Function}
      * @param  {Object} options
-     * @param  {Boolean} options.declare
      * @return {Stopper}
      */
 
@@ -1483,23 +1434,32 @@ var CursorObservable = (function (_Cursor) {
       this.db.on('update', updateWrapper);
       this.db.on('remove', updateWrapper);
 
+      var running = true;
       var stopper = function stopper() {
-        _this2.db.removeListener('insert', updateWrapper);
-        _this2.db.removeListener('update', updateWrapper);
-        _this2.db.removeListener('remove', updateWrapper);
-        _this2.removeListener('update', listener);
-        _this2.removeListener('stop', stopper);
-        _this2.emit('stopped', listener);
+        if (running) {
+          _this2.db.removeListener('insert', updateWrapper);
+          _this2.db.removeListener('update', updateWrapper);
+          _this2.db.removeListener('remove', updateWrapper);
+          _this2.removeListener('update', listener);
+          _this2.removeListener('stop', stopper);
+
+          running = false;
+          _this2._observers -= 1;
+          if (_this2._observers === 0) {
+            _this2.emit('stopped');
+          }
+        }
       };
 
+      this._observers += 1;
       listener = this._prepareListener(listener);
       this.on('update', listener);
       this.on('stop', stopper);
 
-      var parentSetter = function parentSetter(cursor) {
-        _this2._parentCursor = cursor;
-        if (cursor._trackChildCursor) {
-          cursor._trackChildCursor(cursor);
+      var parentSetter = function parentSetter(parentCursor) {
+        _this2._trackParentCursor(parentCursor);
+        if (parentCursor._trackChildCursor) {
+          parentCursor._trackChildCursor(_this2);
         }
       };
 
@@ -1518,20 +1478,12 @@ var CursorObservable = (function (_Cursor) {
         };
       };
 
-      if (options.declare) {
-        return this;
-      } else {
-        if (this._latestResult != null) {
-          var propagatePromise = this.whenNotExecuting().then(function () {
-            _this2._propagateUpdate(true);
-            return _this2._latestResult;
-          });
-          return createStoppablePromise(propagatePromise);
-        } else {
-          var firstUpdatePromise = this.update.func(true);
-          return createStoppablePromise(firstUpdatePromise);
-        }
+      if (!this._updatePromise) {
+        this.update.func(true);
+      } else if (this._latestResult !== null) {
+        listener(this._latestResult);
       }
+      return createStoppablePromise(this._updatePromise);
     }
 
     /**
@@ -1561,12 +1513,15 @@ var CursorObservable = (function (_Cursor) {
 
       var firstRun = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
 
-      return this.exec().then(function (result) {
-        _this3._latestResult = result;
-        _this3._updateLatestIds();
-        _this3._propagateUpdate(firstRun);
-        return result;
+      this._updatePromise = Promise.resolve(this._updatePromise).then(function () {
+        return _this3.exec().then(function (result) {
+          _this3._latestResult = result;
+          _this3._updateLatestIds();
+          _this3._propagateUpdate(firstRun);
+          return result;
+        });
       });
+      return this._updatePromise;
     }
 
     /**
@@ -1586,9 +1541,14 @@ var CursorObservable = (function (_Cursor) {
   }, {
     key: 'maybeUpdate',
     value: function maybeUpdate(newDoc, oldDoc) {
+      // When no newDoc and no oldDoc provided then
+      // it's a special case when no data about update
+      // available and we always need to update a cursor
+      var alwaysUpdateCursor = newDoc === null && oldDoc === null;
+
       // When it's remove operation we just check
       // that it's in our latest result ids list
-      var removedFromResult = !newDoc && oldDoc && (!this._latestIds || this._latestIds.has(oldDoc._id));
+      var removedFromResult = alwaysUpdateCursor || !newDoc && oldDoc && (!this._latestIds || this._latestIds.has(oldDoc._id));
 
       // When it's an update operation we check four things
       // 1. Is a new doc or old doc matched by a query?
@@ -1636,8 +1596,13 @@ var CursorObservable = (function (_Cursor) {
       var firstRun = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
 
       this.emit('update', this._latestResult, firstRun);
-      if (!firstRun && this._parentCursor && this._parentCursor._propagateUpdate) {
-        this._parentCursor._propagateUpdate(false);
+
+      if (!firstRun) {
+        (0, _forEach2.default)(this._parentCursors, function (v, k) {
+          if (v._propagateUpdate) {
+            v._propagateUpdate(false);
+          }
+        });
       }
     }
 
@@ -1666,13 +1631,31 @@ var CursorObservable = (function (_Cursor) {
 
   }, {
     key: '_trackChildCursor',
-    value: function _trackChildCursor(cursor) {
+    value: function _trackChildCursor(childCursor) {
       var _this4 = this;
 
-      this._childrenCursors[cursor._id] = cursor;
-      cursor.once('stopped', function () {
-        return delete _this4._childrenCursors[cursor._id];
-      });
+      this._childrenCursors[childCursor._id] = childCursor;
+      var cleaner = function cleaner() {
+        return delete _this4._childrenCursors[childCursor._id];
+      };
+      childCursor.once('stopped', cleaner);
+    }
+
+    /**
+     * Tracks a parent cursor for propagating update event
+     * @param  {Cursor} cursor
+     */
+
+  }, {
+    key: '_trackParentCursor',
+    value: function _trackParentCursor(parentCursor) {
+      var _this5 = this;
+
+      this._parentCursors[parentCursor._id] = parentCursor;
+      var cleaner = function cleaner() {
+        return delete _this5._parentCursors[parentCursor._id];
+      };
+      parentCursor.once('stopped', cleaner);
     }
   }], [{
     key: 'defaultDebounce',
@@ -1700,7 +1683,7 @@ var CursorObservable = (function (_Cursor) {
 exports.CursorObservable = CursorObservable;
 exports.default = CursorObservable;
 
-},{"./Cursor":5,"./EJSON":13,"./debounce":18,"check-types":20,"fast.js/function/bind":32,"fast.js/map":35,"fast.js/object/keys":38}],7:[function(require,module,exports){
+},{"./Cursor":5,"./EJSON":13,"./debounce":18,"check-types":20,"fast.js/forEach":29,"fast.js/function/bind":32,"fast.js/map":35,"fast.js/object/keys":38}],7:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {

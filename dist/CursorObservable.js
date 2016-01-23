@@ -19,6 +19,10 @@ var _map2 = require('fast.js/map');
 
 var _map3 = _interopRequireDefault(_map2);
 
+var _forEach = require('fast.js/forEach');
+
+var _forEach2 = _interopRequireDefault(_forEach);
+
 var _keys2 = require('fast.js/object/keys');
 
 var _keys3 = _interopRequireDefault(_keys2);
@@ -62,8 +66,11 @@ var CursorObservable = (function (_Cursor) {
 
     _this.update = (0, _debounce2.default)((0, _bind3.default)(_this.update, _this), _defaultDebounce, _defaultBatchSize);
     _this.maybeUpdate = (0, _bind3.default)(_this.maybeUpdate, _this);
+
     _this._latestResult = null;
     _this._childrenCursors = {};
+    _this._parentCursors = {};
+    _this._observers = 0;
     return _this;
   }
 
@@ -103,15 +110,8 @@ var CursorObservable = (function (_Cursor) {
      * It is been resolved when first result of cursor is ready and
      * after first observe listener call.
      *
-     * if `options.declare` is true, then initial update of
-     * the cursor is not initiated and function will return
-     * `this` instead promise. It means, that you can't stop
-     * observer by a stopper object. Use `stopObservers()`
-     * function instead.
-     *
      * @param  {Function}
      * @param  {Object} options
-     * @param  {Boolean} options.declare
      * @return {Stopper}
      */
 
@@ -131,23 +131,32 @@ var CursorObservable = (function (_Cursor) {
       this.db.on('update', updateWrapper);
       this.db.on('remove', updateWrapper);
 
+      var running = true;
       var stopper = function stopper() {
-        _this2.db.removeListener('insert', updateWrapper);
-        _this2.db.removeListener('update', updateWrapper);
-        _this2.db.removeListener('remove', updateWrapper);
-        _this2.removeListener('update', listener);
-        _this2.removeListener('stop', stopper);
-        _this2.emit('stopped', listener);
+        if (running) {
+          _this2.db.removeListener('insert', updateWrapper);
+          _this2.db.removeListener('update', updateWrapper);
+          _this2.db.removeListener('remove', updateWrapper);
+          _this2.removeListener('update', listener);
+          _this2.removeListener('stop', stopper);
+
+          running = false;
+          _this2._observers -= 1;
+          if (_this2._observers === 0) {
+            _this2.emit('stopped');
+          }
+        }
       };
 
+      this._observers += 1;
       listener = this._prepareListener(listener);
       this.on('update', listener);
       this.on('stop', stopper);
 
-      var parentSetter = function parentSetter(cursor) {
-        _this2._parentCursor = cursor;
-        if (cursor._trackChildCursor) {
-          cursor._trackChildCursor(cursor);
+      var parentSetter = function parentSetter(parentCursor) {
+        _this2._trackParentCursor(parentCursor);
+        if (parentCursor._trackChildCursor) {
+          parentCursor._trackChildCursor(_this2);
         }
       };
 
@@ -166,20 +175,12 @@ var CursorObservable = (function (_Cursor) {
         };
       };
 
-      if (options.declare) {
-        return this;
-      } else {
-        if (this._latestResult != null) {
-          var propagatePromise = this.whenNotExecuting().then(function () {
-            _this2._propagateUpdate(true);
-            return _this2._latestResult;
-          });
-          return createStoppablePromise(propagatePromise);
-        } else {
-          var firstUpdatePromise = this.update.func(true);
-          return createStoppablePromise(firstUpdatePromise);
-        }
+      if (!this._updatePromise) {
+        this.update.func(true);
+      } else if (this._latestResult !== null) {
+        listener(this._latestResult);
       }
+      return createStoppablePromise(this._updatePromise);
     }
 
     /**
@@ -209,12 +210,15 @@ var CursorObservable = (function (_Cursor) {
 
       var firstRun = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
 
-      return this.exec().then(function (result) {
-        _this3._latestResult = result;
-        _this3._updateLatestIds();
-        _this3._propagateUpdate(firstRun);
-        return result;
+      this._updatePromise = Promise.resolve(this._updatePromise).then(function () {
+        return _this3.exec().then(function (result) {
+          _this3._latestResult = result;
+          _this3._updateLatestIds();
+          _this3._propagateUpdate(firstRun);
+          return result;
+        });
       });
+      return this._updatePromise;
     }
 
     /**
@@ -234,9 +238,14 @@ var CursorObservable = (function (_Cursor) {
   }, {
     key: 'maybeUpdate',
     value: function maybeUpdate(newDoc, oldDoc) {
+      // When no newDoc and no oldDoc provided then
+      // it's a special case when no data about update
+      // available and we always need to update a cursor
+      var alwaysUpdateCursor = newDoc === null && oldDoc === null;
+
       // When it's remove operation we just check
       // that it's in our latest result ids list
-      var removedFromResult = !newDoc && oldDoc && (!this._latestIds || this._latestIds.has(oldDoc._id));
+      var removedFromResult = alwaysUpdateCursor || !newDoc && oldDoc && (!this._latestIds || this._latestIds.has(oldDoc._id));
 
       // When it's an update operation we check four things
       // 1. Is a new doc or old doc matched by a query?
@@ -284,8 +293,13 @@ var CursorObservable = (function (_Cursor) {
       var firstRun = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
 
       this.emit('update', this._latestResult, firstRun);
-      if (!firstRun && this._parentCursor && this._parentCursor._propagateUpdate) {
-        this._parentCursor._propagateUpdate(false);
+
+      if (!firstRun) {
+        (0, _forEach2.default)(this._parentCursors, function (v, k) {
+          if (v._propagateUpdate) {
+            v._propagateUpdate(false);
+          }
+        });
       }
     }
 
@@ -314,13 +328,31 @@ var CursorObservable = (function (_Cursor) {
 
   }, {
     key: '_trackChildCursor',
-    value: function _trackChildCursor(cursor) {
+    value: function _trackChildCursor(childCursor) {
       var _this4 = this;
 
-      this._childrenCursors[cursor._id] = cursor;
-      cursor.once('stopped', function () {
-        return delete _this4._childrenCursors[cursor._id];
-      });
+      this._childrenCursors[childCursor._id] = childCursor;
+      var cleaner = function cleaner() {
+        return delete _this4._childrenCursors[childCursor._id];
+      };
+      childCursor.once('stopped', cleaner);
+    }
+
+    /**
+     * Tracks a parent cursor for propagating update event
+     * @param  {Cursor} cursor
+     */
+
+  }, {
+    key: '_trackParentCursor',
+    value: function _trackParentCursor(parentCursor) {
+      var _this5 = this;
+
+      this._parentCursors[parentCursor._id] = parentCursor;
+      var cleaner = function cleaner() {
+        return delete _this5._parentCursors[parentCursor._id];
+      };
+      parentCursor.once('stopped', cleaner);
     }
   }], [{
     key: 'defaultDebounce',
