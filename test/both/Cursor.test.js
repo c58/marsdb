@@ -25,28 +25,14 @@ describe('Cursor', () => {
 
 
   describe('#exec', function () {
-    it('should on first call execute query, on next calls wait until first executed', function () {
+    it('should create new execution on each call', function () {
       const cursor = new Cursor(db);
       cursor.find({b: {$gt: 4}}).skip(1).sort({b: 1});
       const promise = cursor.exec();
-      const pendingPromise = cursor.exec();
-      promise.should.be.not.equal(pendingPromise);
-      cursor.exec().should.be.equal(pendingPromise);
-      cursor.exec().should.be.equal(pendingPromise);
-      cursor.exec().should.be.equal(pendingPromise);
-      cursor.exec().should.be.equal(pendingPromise);
+      cursor.exec().should.not.be.equal(promise);
       return promise.then(() => {
         const anotherPromise = cursor.exec()
         anotherPromise.should.not.be.equal(promise);
-        anotherPromise.should.be.equal(pendingPromise);
-        return anotherPromise;
-      }).then(() => {
-        const anotherPromise = cursor.exec()
-        anotherPromise.should.not.be.equal(pendingPromise);
-        cursor.exec().should.be.equal(anotherPromise);
-        cursor.exec().should.be.equal(anotherPromise);
-        cursor.exec().should.be.equal(anotherPromise);
-        cursor.exec().should.be.equal(anotherPromise);
         return anotherPromise;
       })
     });

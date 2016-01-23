@@ -50,33 +50,6 @@ describe('CursorObservable', () => {
     });
   });
 
-  describe('#whenNotExecuting', function () {
-    it('should wait until request processed', function (done) {
-      const cursor = db.find({a: 1});
-      cursor.then(() => {
-        cursor._query.should.be.deep.equals({a: 1});
-      });
-      cursor.whenNotExecuting().then(() => {
-        cursor.find({a: 2}).then(() => {
-          cursor._query.should.be.deep.equals({a: 2});
-          done();
-        });
-      })
-    });
-
-    it('should rise an exception when try to change cursor while executing', function () {
-      const cursor = db.find({a: 1});
-      cursor.then(() => {
-        cursor._query.should.be.deep.equals({a: 1});
-      });
-      expect(() => {
-        cursor.find({a: 2}).then(() => {
-          cursor._query.should.be.deep.equals({a: 2});
-        });
-      }).to.throw(Error);
-    });
-  });
-
   describe('#stopObservers', function () {
     it('should stop all listeners', function () {
       const cursor = new CursorObservable(db);
@@ -110,6 +83,18 @@ describe('CursorObservable', () => {
   });
 
   describe('#observe', function () {
+    it('should generate `stopped` event when all observers stopped', function () {
+      const cursor = db.find({b: 1})
+      const cb = sinon.spy();
+      cursor.on('stopped', cb);
+      const obs1 = cursor.observe(() => {});
+      const obs2 = cursor.observe(() => {});
+      obs1.stop();
+      cb.should.have.callCount(0);
+      obs2.stop();
+      cb.should.have.callCount(1);
+    });
+
     it('should return result of previous execution', function () {
       const cursor = db.find({b: 1})
       let result;
@@ -121,24 +106,6 @@ describe('CursorObservable', () => {
         }).then((new_res) => {
           new_res.should.be.equal(result);
         });
-      })
-    });
-
-    it('should support multiple declarative style observing', function (done) {
-      let calls = 0;
-      const obsFn = () => {
-        calls += 1;
-        if (calls > 1) {
-          done();
-        }
-      }
-      const cursor = db.find({b: 1})
-      .observe(obsFn, {declare: true})
-      .observe(obsFn, {declare: true})
-
-      cursor.then(() => {
-        calls.should.be.equals(0);
-        cursor.update(true);
       })
     });
 
