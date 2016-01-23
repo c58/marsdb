@@ -41,7 +41,7 @@ You can use it in any JS environment (Browser, Electron, NW.js, Node.js).
 
 ## Client-Server
 
-* **Meteor compitable** [Cleint](https://github.com/c58/marsdb-sync-client) / [Server](https://github.com/c58/marsdb-sync-server)
+* **Meteor compatible** [Client](https://github.com/c58/marsdb-sync-client) / [Server](https://github.com/c58/marsdb-sync-server)
 * REST (pull-request if you need it ;))
 
 ## Examples
