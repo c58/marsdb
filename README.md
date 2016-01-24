@@ -31,13 +31,14 @@ You can use it in any JS environment (Browser, Electron, NW.js, Node.js).
 * [React](https://github.com/c58/marsdb-react)
 * [AngularJS 1.x](https://github.com/c58/marsdb-angular)
 
-## Storage implementations
+## Plugins
 
 * In-memory (built-in default)
 * [LocalForage](https://github.com/c58/marsdb-localforage) – fastest in-browser storage (InexedDB, WebSQL and fallback to localStorage)
 * [LocalStorage](https://github.com/c58/marsdb-localstorage) – not recommended, better prefer LocalForage
 * [LevelUP](https://github.com/c58/marsdb-levelup) – lightweight server-less Node.js storage
-* [MongoDB](https://github.com/c58/marsdb-mongo) – use MarsDB as a sugar upon MongoDB
+* [MongoDB](https://github.com/c58/marsdb-mongo) – use MarsDB for comfortable work with MongoDB
+* [Validation](https://github.com/c58/marsdb-validation) – validate objects with Mongoose
 
 ## Client-Server
 
