@@ -40,7 +40,7 @@ You can use it in any JS environment (Browser, Electron, NW.js, Node.js).
 * [LevelUP storage](https://github.com/c58/marsdb-levelup) – lightweight server-less Node.js storage
 * [MongoDB wrapper](https://github.com/c58/marsdb-mongo) – use MarsDB for comfortable work with MongoDB
 * [Validation via Mongoose](https://github.com/c58/marsdb-validation) – validate objects with Mongoose
-* **Meteor compatible** [Client](https://github.com/c58/marsdb-sync-client) / [Server](https://github.com/c58/marsdb-sync-server) syncronizer
+* **Meteor compatible** [Client](https://github.com/c58/marsdb-sync-client) / [Server](https://github.com/c58/marsdb-sync-server) synchronizer
 
 ## Examples
 
