@@ -10,7 +10,7 @@
 [![Join the chat at https://gitter.im/c58/marsdb](https://badges.gitter.im/c58/marsdb.svg)](https://gitter.im/c58/marsdb?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 MarsDB is a lightweight client-side database.
-It's based on a Meteor’s **minimongo** matching/modifying implementation. It's carefully written on **ES6**, have a **Promise based** interface and may be backed with any storage implementation ([see storages](https://github.com/c58/marsdb#storage-implementations)). It's also supports **observable** cursors.
+It's based on a Meteor’s **minimongo** matching/modifying implementation. It's carefully written on **ES6**, have a **Promise based** interface and may be backed with any storage implementation ([see plugins](https://github.com/c58/marsdb#plugins)). It's also supports **observable** cursors.
 
 MarsDB supports any kind of find/update/remove operations that Meteor’s minimongo does. So, go to the Meteor docs for supported query/modifier operations.
 
@@ -20,6 +20,7 @@ You can use it in any JS environment (Browser, Electron, NW.js, Node.js).
 
 * **Promise based API**
 * **Carefully written on ES6**
+* **Very very flexible** – just take a look to the [plugins section](https://github.com/c58/marsdb#plugins)
 * **Supports many of MongoDB query/modify operations** – thanks to a Meteor’s minimongo
 * **Flexible pipeline** – map, reduce, custom sorting function, filtering. All with a sexy JS interface (no ugly mongo’s aggregation language)
 * **Persistence API** – all collections can be stored (and restored) with any kind of storage (in-memory, LocalStorage, LevelUP, etc)
@@ -39,11 +40,7 @@ You can use it in any JS environment (Browser, Electron, NW.js, Node.js).
 * [LevelUP](https://github.com/c58/marsdb-levelup) – lightweight server-less Node.js storage
 * [MongoDB](https://github.com/c58/marsdb-mongo) – use MarsDB for comfortable work with MongoDB
 * [Validation](https://github.com/c58/marsdb-validation) – validate objects with Mongoose
-
-## Client-Server
-
-* **Meteor compatible** [Client](https://github.com/c58/marsdb-sync-client) / [Server](https://github.com/c58/marsdb-sync-server)
-* REST (pull-request if you need it ;))
+* **Meteor compatible** [Client](https://github.com/c58/marsdb-sync-client) / [Server](https://github.com/c58/marsdb-sync-server) syncronizer
 
 ## Examples
 

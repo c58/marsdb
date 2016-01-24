@@ -91,7 +91,9 @@ gulp.task('build:browser', ['build:node'], function() {
     b.transform(transform);
   });
 
-  return b.bundle()
+  return b
+    .exclude('crypto')
+    .bundle()
     .pipe(source(config.browser.bundleName))
     .pipe(buffer())
     .pipe(gulp.dest(config.build))
