@@ -1,6 +1,151 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Mars = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
+function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
+
+var _createClass = (function () {
+  function defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }return function (Constructor, protoProps, staticProps) {
+    if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
+  };
+})();
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _eventemitter = require('eventemitter3');
+
+var _eventemitter2 = _interopRequireDefault(_eventemitter);
+
+function _interopRequireDefault(obj) {
+  return obj && obj.__esModule ? obj : { default: obj };
+}
+
+function _classCallCheck(instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError("Cannot call a class as a function");
+  }
+}
+
+function _possibleConstructorReturn(self, call) {
+  if (!self) {
+    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+  }return call && ((typeof call === "undefined" ? "undefined" : _typeof(call)) === "object" || typeof call === "function") ? call : self;
+}
+
+function _inherits(subClass, superClass) {
+  if (typeof superClass !== "function" && superClass !== null) {
+    throw new TypeError("Super expression must either be null or a function, not " + (typeof superClass === "undefined" ? "undefined" : _typeof(superClass)));
+  }subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } });if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
+}
+
+/**
+ * Extension of a regular EventEmitter that provides a method
+ * that returns a Promise then resolved when all listeners of the event
+ * will be resolved.
+ */
+/* istanbul ignore next */
+
+var AsyncEventEmitter = (function (_EventEmitter) {
+  _inherits(AsyncEventEmitter, _EventEmitter);
+
+  function AsyncEventEmitter() {
+    _classCallCheck(this, AsyncEventEmitter);
+
+    return _possibleConstructorReturn(this, Object.getPrototypeOf(AsyncEventEmitter).apply(this, arguments));
+  }
+
+  _createClass(AsyncEventEmitter, [{
+    key: 'emitAsync',
+
+    /**
+     * Emit an event and return a Promise that will be resolved
+     * when all listeren's Promises will be resolved.
+     * @param  {String} event
+     * @return {Promise}
+     */
+    value: function emitAsync(event, a1, a2, a3, a4, a5) {
+      var prefix = _eventemitter2.default.prefixed;
+      var evt = prefix ? prefix + event : event;
+
+      if (!this._events || !this._events[evt]) {
+        return Promise.resolve();
+      }
+
+      var i = undefined;
+      var listeners = this._events[evt];
+      var len = arguments.length;
+      var args = undefined;
+
+      if ('function' === typeof listeners.fn) {
+        if (listeners.once) {
+          this.removeListener(event, listeners.fn, undefined, true);
+        }
+
+        switch (len) {
+          case 1:
+            return Promise.resolve(listeners.fn.call(listeners.context));
+          case 2:
+            return Promise.resolve(listeners.fn.call(listeners.context, a1));
+          case 3:
+            return Promise.resolve(listeners.fn.call(listeners.context, a1, a2));
+          case 4:
+            return Promise.resolve(listeners.fn.call(listeners.context, a1, a2, a3));
+          case 5:
+            return Promise.resolve(listeners.fn.call(listeners.context, a1, a2, a3, a4));
+          case 6:
+            return Promise.resolve(listeners.fn.call(listeners.context, a1, a2, a3, a4, a5));
+        }
+
+        for (i = 1, args = new Array(len - 1); i < len; i++) {
+          args[i - 1] = arguments[i];
+        }
+
+        return Promise.resolve(listeners.fn.apply(listeners.context, args));
+      } else {
+        var promises = [];
+        var length = listeners.length;
+        var j = undefined;
+
+        for (i = 0; i < length; i++) {
+          if (listeners[i].once) {
+            this.removeListener(event, listeners[i].fn, undefined, true);
+          }
+
+          switch (len) {
+            case 1:
+              promises.push(Promise.resolve(listeners[i].fn.call(listeners[i].context)));break;
+            case 2:
+              promises.push(Promise.resolve(listeners[i].fn.call(listeners[i].context, a1)));break;
+            case 3:
+              promises.push(Promise.resolve(listeners[i].fn.call(listeners[i].context, a1, a2)));break;
+            default:
+              if (!args) {
+                for (j = 1, args = new Array(len - 1); j < len; j++) {
+                  args[j - 1] = arguments[j];
+                }
+              }
+              promises.push(Promise.resolve(listeners[i].fn.apply(listeners[i].context, args)));
+          }
+        }
+
+        return Promise.all(promises);
+      }
+    }
+  }]);
+
+  return AsyncEventEmitter;
+})(_eventemitter2.default);
+
+exports.default = AsyncEventEmitter;
+
+},{"eventemitter3":22}],2:[function(require,module,exports){
+'use strict';
+
 var _createClass = (function () {
   function defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
@@ -183,7 +328,7 @@ var Base64 = exports.Base64 = (function () {
 
 exports.default = new Base64();
 
-},{}],2:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 'use strict';
 
 function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
@@ -578,7 +723,7 @@ var Collection = exports.Collection = (function (_EventEmitter) {
 
 exports.default = Collection;
 
-},{"./CollectionDelegate":3,"./CursorObservable":6,"./EJSON":13,"./IndexManager":14,"./PromiseQueue":15,"./Random":16,"./StorageManager":17,"check-types":20,"eventemitter3":21,"fast.js/forEach":29,"fast.js/map":36}],3:[function(require,module,exports){
+},{"./CollectionDelegate":4,"./CursorObservable":7,"./EJSON":14,"./IndexManager":15,"./PromiseQueue":16,"./Random":17,"./StorageManager":18,"check-types":21,"eventemitter3":22,"fast.js/forEach":30,"fast.js/map":37}],4:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () {
@@ -751,7 +896,7 @@ var CollectionDelegate = exports.CollectionDelegate = (function () {
 
 exports.default = CollectionDelegate;
 
-},{"./DocumentModifier":9,"fast.js/map":36}],4:[function(require,module,exports){
+},{"./DocumentModifier":10,"fast.js/map":37}],5:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () {
@@ -841,7 +986,7 @@ var CollectionIndex = exports.CollectionIndex = (function () {
 
 exports.default = CollectionIndex;
 
-},{"invariant":42}],5:[function(require,module,exports){
+},{"invariant":43}],6:[function(require,module,exports){
 'use strict';
 
 function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
@@ -879,6 +1024,10 @@ var _reduce2 = require('fast.js/array/reduce');
 
 var _reduce3 = _interopRequireDefault(_reduce2);
 
+var _assign2 = require('fast.js/object/assign');
+
+var _assign3 = _interopRequireDefault(_assign2);
+
 var _map2 = require('fast.js/map');
 
 var _map3 = _interopRequireDefault(_map2);
@@ -887,9 +1036,9 @@ var _checkTypes = require('check-types');
 
 var _checkTypes2 = _interopRequireDefault(_checkTypes);
 
-var _eventemitter = require('eventemitter3');
+var _AsyncEventEmitter2 = require('./AsyncEventEmitter');
 
-var _eventemitter2 = _interopRequireDefault(_eventemitter);
+var _AsyncEventEmitter3 = _interopRequireDefault(_AsyncEventEmitter2);
 
 var _invariant = require('invariant');
 
@@ -998,15 +1147,18 @@ var PIPELINE_PROCESSORS = exports.PIPELINE_PROCESSORS = (_PIPELINE_PROCESSORS = 
 
   var res = pipeObj.value(docs, updatedFn, i, len);
   res = _checkTypes2.default.array(res) ? res : [res];
-
-  (0, _forEach2.default)(res, function (observeStopper) {
-    if (_checkTypes2.default.object(observeStopper) && observeStopper.then) {
-      if (observeStopper.parent) {
-        observeStopper.parent(cursor);
-        cursor.once('stopped', observeStopper.stop);
-        cursor.once('cursorChanged', observeStopper.stop);
-      }
+  res = (0, _map3.default)(res, function (val) {
+    var cursorPromise = undefined;
+    if (val instanceof Cursor) {
+      cursorPromise = val.exec();
+    } else if (_checkTypes2.default.object(val) && val.cursor && val.then) {
+      cursorPromise = val;
     }
+    if (cursorPromise) {
+      cursorPromise.cursor._trackParentCursor(cursor);
+      cursor._trackChildCursorPromise(cursorPromise);
+    }
+    return cursorPromise || val;
   });
 
   return Promise.all(res).then(function () {
@@ -1024,8 +1176,8 @@ var PIPELINE_PROCESSORS = exports.PIPELINE_PROCESSORS = (_PIPELINE_PROCESSORS = 
  * fully customizable response
  */
 
-var Cursor = (function (_EventEmitter) {
-  _inherits(Cursor, _EventEmitter);
+var Cursor = (function (_AsyncEventEmitter) {
+  _inherits(Cursor, _AsyncEventEmitter);
 
   function Cursor(db) {
     var query = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
@@ -1041,6 +1193,8 @@ var Cursor = (function (_EventEmitter) {
     _this._query = query;
     _this._pipeline = [];
     _this._executing = null;
+    _this._childrenCursors = {};
+    _this._parentCursors = {};
     _this._ensureMatcherSorter();
     return _this;
   }
@@ -1203,6 +1357,16 @@ var Cursor = (function (_EventEmitter) {
   }, {
     key: 'exec',
     value: function exec() {
+      return this._createCursorPromise(this._doExecute());
+    }
+  }, {
+    key: 'then',
+    value: function then(resolve, reject) {
+      return this.exec().then(resolve, reject);
+    }
+  }, {
+    key: '_doExecute',
+    value: function _doExecute() {
       var _this3 = this;
 
       return this._matchObjects().then(function (docs) {
@@ -1220,11 +1384,6 @@ var Cursor = (function (_EventEmitter) {
         }
         return _this3.processPipeline(clonned);
       });
-    }
-  }, {
-    key: 'then',
-    value: function then(resolve, reject) {
-      return this.exec().then(resolve, reject);
     }
   }, {
     key: '_matchObjects',
@@ -1267,15 +1426,40 @@ var Cursor = (function (_EventEmitter) {
         this._sorter = new _DocumentSorter2.default(this._sort || [], { matcher: this._matcher });
       }
     }
+  }, {
+    key: '_trackChildCursorPromise',
+    value: function _trackChildCursorPromise(cursorPromise) {
+      var cursor = cursorPromise.cursor;
+      this._childrenCursors[cursor._id] = cursor;
+    }
+  }, {
+    key: '_trackParentCursor',
+    value: function _trackParentCursor(cursor) {
+      this._parentCursors[cursor._id] = cursor;
+    }
+  }, {
+    key: '_createCursorPromise',
+    value: function _createCursorPromise(promise) {
+      var _this5 = this;
+
+      var mixin = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+      return (0, _assign3.default)({
+        cursor: this,
+        then: function then(successFn, failFn) {
+          return _this5._createCursorPromise(promise.then(successFn, failFn), mixin);
+        }
+      }, mixin);
+    }
   }]);
 
   return Cursor;
-})(_eventemitter2.default);
+})(_AsyncEventEmitter3.default);
 
 exports.Cursor = Cursor;
 exports.default = Cursor;
 
-},{"./DocumentMatcher":8,"./DocumentProjector":10,"./DocumentRetriver":11,"./DocumentSorter":12,"./EJSON":13,"check-types":20,"eventemitter3":21,"fast.js/array/filter":23,"fast.js/array/reduce":27,"fast.js/forEach":29,"fast.js/function/bind":32,"fast.js/map":36,"invariant":42}],6:[function(require,module,exports){
+},{"./AsyncEventEmitter":1,"./DocumentMatcher":9,"./DocumentProjector":11,"./DocumentRetriver":12,"./DocumentSorter":13,"./EJSON":14,"check-types":21,"fast.js/array/filter":24,"fast.js/array/reduce":28,"fast.js/forEach":30,"fast.js/function/bind":33,"fast.js/map":37,"fast.js/object/assign":38,"invariant":43}],7:[function(require,module,exports){
 'use strict';
 
 function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
@@ -1289,6 +1473,22 @@ var _createClass = (function () {
     if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
   };
 })();
+
+var _get = function get(object, property, receiver) {
+  if (object === null) object = Function.prototype;var desc = Object.getOwnPropertyDescriptor(object, property);if (desc === undefined) {
+    var parent = Object.getPrototypeOf(object);if (parent === null) {
+      return undefined;
+    } else {
+      return get(parent, property, receiver);
+    }
+  } else if ("value" in desc) {
+    return desc.value;
+  } else {
+    var getter = desc.get;if (getter === undefined) {
+      return undefined;
+    }return getter.call(receiver);
+  }
+};
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -1306,14 +1506,6 @@ var _checkTypes2 = _interopRequireDefault(_checkTypes);
 var _map2 = require('fast.js/map');
 
 var _map3 = _interopRequireDefault(_map2);
-
-var _forEach = require('fast.js/forEach');
-
-var _forEach2 = _interopRequireDefault(_forEach);
-
-var _keys2 = require('fast.js/object/keys');
-
-var _keys3 = _interopRequireDefault(_keys2);
 
 var _Cursor2 = require('./Cursor');
 
@@ -1352,6 +1544,7 @@ function _inherits(subClass, superClass) {
 // Defaults
 var _defaultDebounce = 1000 / 60;
 var _defaultBatchSize = 10;
+var _noop = function _noop() {};
 
 /**
  * Observable cursor is used for making request auto-updatable
@@ -1366,12 +1559,10 @@ var CursorObservable = (function (_Cursor) {
 
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(CursorObservable).call(this, db, query, options));
 
-    _this.update = (0, _debounce2.default)((0, _bind3.default)(_this.update, _this), _defaultDebounce, _defaultBatchSize);
     _this.maybeUpdate = (0, _bind3.default)(_this.maybeUpdate, _this);
-
+    _this._propagateUpdate = (0, _debounce2.default)((0, _bind3.default)(_this._propagateUpdate, _this), 0, 0);
+    _this._doUpdate = (0, _debounce2.default)((0, _bind3.default)(_this._doUpdate, _this), _defaultDebounce, _defaultBatchSize);
     _this._latestResult = null;
-    _this._childrenCursors = {};
-    _this._parentCursors = {};
     _this._observers = 0;
     return _this;
   }
@@ -1389,7 +1580,7 @@ var CursorObservable = (function (_Cursor) {
      * @return {CursorObservable}
      */
     value: function batchSize(_batchSize) {
-      this.update.updateBatchSize(_batchSize);
+      this._doUpdate.updateBatchSize(_batchSize);
       return this;
     }
 
@@ -1402,7 +1593,7 @@ var CursorObservable = (function (_Cursor) {
   }, {
     key: 'debounce',
     value: function debounce(waitTime) {
-      this.update.updateWait(waitTime);
+      this._doUpdate.updateWait(waitTime);
       return this;
     }
 
@@ -1419,9 +1610,10 @@ var CursorObservable = (function (_Cursor) {
 
   }, {
     key: 'observe',
-    value: function observe(listener) {
+    value: function observe() {
       var _this2 = this;
 
+      var listener = arguments.length <= 0 || arguments[0] === undefined ? _noop : arguments[0];
       var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
       // Make new wrapper for make possible to observe
@@ -1429,62 +1621,43 @@ var CursorObservable = (function (_Cursor) {
       var updateWrapper = function updateWrapper(a, b) {
         return _this2.maybeUpdate(a, b);
       };
+
       this.db.on('insert', updateWrapper);
       this.db.on('update', updateWrapper);
       this.db.on('remove', updateWrapper);
 
       var running = true;
-      var stopper = function stopper() {
+      var self = this;
+      function stopper() {
         if (running) {
-          _this2.db.removeListener('insert', updateWrapper);
-          _this2.db.removeListener('update', updateWrapper);
-          _this2.db.removeListener('remove', updateWrapper);
-          _this2.removeListener('update', listener);
-          _this2.removeListener('stop', stopper);
+          self.db.removeListener('insert', updateWrapper);
+          self.db.removeListener('update', updateWrapper);
+          self.db.removeListener('remove', updateWrapper);
+          self.removeListener('update', listener);
+          self.removeListener('stop', stopper);
 
           running = false;
-          _this2._observers -= 1;
-          if (_this2._observers === 0) {
-            _this2._latestResult = null;
-            _this2._latestIds = null;
-            _this2.emit('stopped');
+          self._observers -= 1;
+          if (self._observers === 0) {
+            self._latestResult = null;
+            self._latestIds = null;
+            self.emit('stopped');
           }
         }
-      };
+      }
 
       this._observers += 1;
-      listener = this._prepareListener(listener);
       this.on('update', listener);
       this.on('stop', stopper);
 
-      var parentSetter = function parentSetter(parentCursor) {
-        _this2._trackParentCursor(parentCursor);
-        if (parentCursor._trackChildCursor) {
-          parentCursor._trackChildCursor(_this2);
-        }
-      };
-
-      var cursorThenGenerator = function cursorThenGenerator(currPromise) {
-        return function (successFn, failFn) {
-          successFn = _this2._prepareListener(successFn);
-          return createStoppablePromise(currPromise.then(successFn, failFn));
-        };
-      };
-
-      var createStoppablePromise = function createStoppablePromise(currPromise) {
-        return {
-          parent: parentSetter,
-          stop: stopper,
-          then: cursorThenGenerator(currPromise)
-        };
-      };
-
       if (!this._updatePromise) {
-        this.update.func(true);
+        this.update(true, true);
       } else if (this._latestResult !== null) {
         listener(this._latestResult);
       }
-      return createStoppablePromise(this._updatePromise);
+
+      var cursorPromiseMixin = { stop: stopper };
+      return this._createCursorPromise(this._updatePromise, cursorPromiseMixin);
     }
 
     /**
@@ -1496,32 +1669,28 @@ var CursorObservable = (function (_Cursor) {
   }, {
     key: 'stopObservers',
     value: function stopObservers() {
-      this.update.cancel();
+      this._doUpdate.cancel();
       this.emit('stop');
     }
 
     /**
-     * Update a cursor result. Debounced function,
-     * return a Promise that resolved when cursor
-     * is updated.
+     * Execute update. Cancel previous execution if it's
+     * exists and start new one. Set `this._updatePromise`
+     * execution promise that resolved when update completelly
+     * executed.
      * @return {Promise}
      */
 
   }, {
     key: 'update',
     value: function update() {
-      var _this3 = this;
-
       var firstRun = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
+      var immidiatelly = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
 
-      this._updatePromise = Promise.resolve(this._updatePromise).then(function () {
-        return _this3.exec().then(function (result) {
-          _this3._latestResult = result;
-          _this3._updateLatestIds();
-          _this3._propagateUpdate(firstRun);
-          return result;
-        });
-      });
+      if (this._updatePromise && this._updatePromise.cancel) {
+        this._updatePromise.cancel();
+      }
+      this._updatePromise = immidiatelly ? this._doUpdate.func(firstRun) : this._doUpdate(firstRun);
       return this._updatePromise;
     }
 
@@ -1555,7 +1724,7 @@ var CursorObservable = (function (_Cursor) {
       // 1. Is a new doc or old doc matched by a query?
       // 2. Is a new doc has different number of fields then an old doc?
       // 3. Is a new doc not equals to an old doc?
-      var updatedInResult = removedFromResult || newDoc && oldDoc && (this._matcher.documentMatches(newDoc).result || this._matcher.documentMatches(oldDoc).result) && ((0, _keys3.default)(newDoc).length !== (0, _keys3.default)(oldDoc).length || !_EJSON2.default.equals(newDoc, oldDoc));
+      var updatedInResult = removedFromResult || newDoc && oldDoc && (this._matcher.documentMatches(newDoc).result || this._matcher.documentMatches(oldDoc).result) && !_EJSON2.default.equals(newDoc, oldDoc);
 
       // When it's an insert operation we just check
       // it's match a query
@@ -1568,27 +1737,11 @@ var CursorObservable = (function (_Cursor) {
     }
 
     /**
-     * Preapare a listener of updates. By default it just debounce
-     * it a little for no useless updates when update propagated
-     * from children cursors.
-     * It also applied to successFn of `then` of returned by
-     * `observer` stoper object.
-     * @param  {Function} listener
-     * @return {Promise}
-     */
-
-  }, {
-    key: '_prepareListener',
-    value: function _prepareListener(listener) {
-      // Debounce listener a little for update propagation
-      // when joins updated
-      return (0, _debounce2.default)(listener, 0, 0);
-    }
-
-    /**
+     * DEBOUNCED
      * Emits an update event with current result of a cursor
      * and call this method on parent cursor if it exists
      * and if it is not first run of update.
+     * @return {Promise}
      */
 
   }, {
@@ -1596,15 +1749,44 @@ var CursorObservable = (function (_Cursor) {
     value: function _propagateUpdate() {
       var firstRun = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
 
-      this.emit('update', this._latestResult, firstRun);
+      var updatePromise = this.emitAsync('update', this._latestResult, firstRun);
 
+      var parentUpdatePromise = undefined;
       if (!firstRun) {
-        (0, _forEach2.default)(this._parentCursors, function (v, k) {
+        parentUpdatePromise = Promise.all((0, _map3.default)(this._parentCursors, function (v, k) {
           if (v._propagateUpdate) {
-            v._propagateUpdate(false);
+            return v._propagateUpdate(false);
           }
-        });
+        }));
       }
+
+      return updatePromise.then(function () {
+        return parentUpdatePromise;
+      });
+    }
+
+    /**
+     * DEBOUNCED
+     * Execute query and propagate result to observers.
+     * Resolved with result of execution.
+     * @param  {Boolean} firstRun
+     * @return {Promise}
+     */
+
+  }, {
+    key: '_doUpdate',
+    value: function _doUpdate() {
+      var _this3 = this;
+
+      var firstRun = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
+
+      return this.exec().then(function (result) {
+        _this3._latestResult = result;
+        _this3._updateLatestIds();
+        return _this3._propagateUpdate(firstRun).then(function () {
+          return result;
+        });
+      });
     }
 
     /**
@@ -1615,48 +1797,52 @@ var CursorObservable = (function (_Cursor) {
   }, {
     key: '_updateLatestIds',
     value: function _updateLatestIds() {
-      if (_checkTypes2.default.array(this._latestResult)) {
-        this._latestIds = new Set((0, _map3.default)(this._latestResult, function (x) {
-          return x._id;
-        }));
-      } else if (this._latestResult && this._latestResult._id) {
-        this._latestIds = new Set([this._latestResult._id]);
+      var idsArr = _checkTypes2.default.array(this._latestResult) ? (0, _map3.default)(this._latestResult, function (x) {
+        return x._id;
+      }) : this._latestResult && [this._latestResult._id];
+      this._latestIds = new Set(idsArr);
+    }
+
+    /**
+     * Track child cursor and stop child observer
+     * if this cusros stopped or changed.
+     * @param  {CursorPromise} cursorPromise
+     */
+
+  }, {
+    key: '_trackChildCursorPromise',
+    value: function _trackChildCursorPromise(cursorPromise) {
+      var _this4 = this;
+
+      _get(Object.getPrototypeOf(CursorObservable.prototype), '_trackChildCursorPromise', this).call(this, cursorPromise);
+      var cursor = cursorPromise.cursor;
+      var cleaner = function cleaner() {
+        return delete _this4._childrenCursors[cursor._id];
+      };
+
+      cursor.once('stopped', cleaner);
+      if (cursorPromise.stop) {
+        this.once('cursorChanged', cursorPromise.stop);
+        this.once('stopped', cursorPromise.stop);
       }
     }
 
     /**
-     * Tracks a child cursor for analysing all cursors
-     * in the query (cursors tree)
-     * @param  {Cursor} cursor
-     */
-
-  }, {
-    key: '_trackChildCursor',
-    value: function _trackChildCursor(childCursor) {
-      var _this4 = this;
-
-      this._childrenCursors[childCursor._id] = childCursor;
-      var cleaner = function cleaner() {
-        return delete _this4._childrenCursors[childCursor._id];
-      };
-      childCursor.once('stopped', cleaner);
-    }
-
-    /**
-     * Tracks a parent cursor for propagating update event
+     * Track parent cursor for propagating update event
+     * to parent observers. Also remove parent if it is stopped.
      * @param  {Cursor} cursor
      */
 
   }, {
     key: '_trackParentCursor',
-    value: function _trackParentCursor(parentCursor) {
+    value: function _trackParentCursor(cursor) {
       var _this5 = this;
 
-      this._parentCursors[parentCursor._id] = parentCursor;
+      _get(Object.getPrototypeOf(CursorObservable.prototype), '_trackParentCursor', this).call(this, cursor);
       var cleaner = function cleaner() {
-        return delete _this5._parentCursors[parentCursor._id];
+        return delete _this5._parentCursors[cursor._id];
       };
-      parentCursor.once('stopped', cleaner);
+      cursor.once('stopped', cleaner);
     }
   }], [{
     key: 'defaultDebounce',
@@ -1684,7 +1870,7 @@ var CursorObservable = (function (_Cursor) {
 exports.CursorObservable = CursorObservable;
 exports.default = CursorObservable;
 
-},{"./Cursor":5,"./EJSON":13,"./debounce":18,"check-types":20,"fast.js/forEach":29,"fast.js/function/bind":32,"fast.js/map":36,"fast.js/object/keys":39}],7:[function(require,module,exports){
+},{"./Cursor":6,"./EJSON":14,"./debounce":19,"check-types":21,"fast.js/function/bind":33,"fast.js/map":37}],8:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1972,7 +2158,7 @@ var MongoTypeComp = exports.MongoTypeComp = {
   }
 };
 
-},{"./EJSON":13,"check-types":20,"fast.js/forEach":29,"fast.js/object/keys":39}],8:[function(require,module,exports){
+},{"./EJSON":14,"check-types":21,"fast.js/forEach":30,"fast.js/object/keys":40}],9:[function(require,module,exports){
 'use strict';
 
 function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
@@ -3056,7 +3242,7 @@ var andSomeMatchers = function andSomeMatchers(subMatchers) {
 var andDocumentMatchers = andSomeMatchers;
 var andBranchedMatchers = andSomeMatchers;
 
-},{"./Document":7,"./EJSON":13,"check-types":20,"fast.js/array/every":22,"fast.js/array/indexOf":25,"fast.js/array/some":28,"fast.js/forEach":29,"fast.js/map":36,"fast.js/object/keys":39,"geojson-utils":41}],9:[function(require,module,exports){
+},{"./Document":8,"./EJSON":14,"check-types":21,"fast.js/array/every":23,"fast.js/array/indexOf":26,"fast.js/array/some":29,"fast.js/forEach":30,"fast.js/map":37,"fast.js/object/keys":40,"geojson-utils":42}],10:[function(require,module,exports){
 'use strict';
 
 function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
@@ -3637,7 +3823,7 @@ var MODIFIERS = {
   }
 };
 
-},{"./Document":7,"./DocumentMatcher":8,"./DocumentSorter":12,"./EJSON":13,"check-types":20,"fast.js/array/every":22,"fast.js/forEach":29,"fast.js/object/assign":37}],10:[function(require,module,exports){
+},{"./Document":8,"./DocumentMatcher":9,"./DocumentSorter":13,"./EJSON":14,"check-types":21,"fast.js/array/every":23,"fast.js/forEach":30,"fast.js/object/assign":38}],11:[function(require,module,exports){
 'use strict';
 
 function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
@@ -4024,7 +4210,7 @@ var treeToPaths = function treeToPaths(tree, prefix) {
   return result;
 };
 
-},{"./Document":7,"./EJSON":13,"check-types":20,"fast.js/array/every":22,"fast.js/array/filter":23,"fast.js/array/indexOf":25,"fast.js/forEach":29,"fast.js/map":36,"fast.js/object/assign":37,"fast.js/object/keys":39}],11:[function(require,module,exports){
+},{"./Document":8,"./EJSON":14,"check-types":21,"fast.js/array/every":23,"fast.js/array/filter":24,"fast.js/array/indexOf":26,"fast.js/forEach":30,"fast.js/map":37,"fast.js/object/assign":38,"fast.js/object/keys":40}],12:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () {
@@ -4189,7 +4375,7 @@ var DocumentRetriver = exports.DocumentRetriver = (function () {
 
 exports.default = DocumentRetriver;
 
-},{"./Document":7,"check-types":20,"fast.js/array/filter":23,"fast.js/map":36}],12:[function(require,module,exports){
+},{"./Document":8,"check-types":21,"fast.js/array/filter":24,"fast.js/map":37}],13:[function(require,module,exports){
 'use strict';
 
 function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
@@ -4701,7 +4887,7 @@ var composeComparators = function composeComparators(comparatorArray) {
   };
 };
 
-},{"./Document":7,"./DocumentMatcher":8,"check-types":20,"fast.js/array/every":22,"fast.js/array/indexOf":25,"fast.js/forEach":29,"fast.js/map":36,"fast.js/object/keys":39}],13:[function(require,module,exports){
+},{"./Document":8,"./DocumentMatcher":9,"check-types":21,"fast.js/array/every":23,"fast.js/array/indexOf":26,"fast.js/forEach":30,"fast.js/map":37,"fast.js/object/keys":40}],14:[function(require,module,exports){
 'use strict';
 
 function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
@@ -5288,7 +5474,7 @@ var EJSON = exports.EJSON = (function () {
 
 exports.default = new EJSON();
 
-},{"./Base64":1,"check-types":20,"fast.js/array/some":28,"fast.js/forEach":29,"fast.js/object/keys":39}],14:[function(require,module,exports){
+},{"./Base64":2,"check-types":21,"fast.js/array/some":29,"fast.js/forEach":30,"fast.js/object/keys":40}],15:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () {
@@ -5578,7 +5764,7 @@ var IndexManager = exports.IndexManager = (function () {
 
 exports.default = IndexManager;
 
-},{"./CollectionIndex":4,"./DocumentRetriver":11,"./PromiseQueue":15,"fast.js/forEach":29,"fast.js/function/bind":32,"fast.js/map":36,"fast.js/object/keys":39,"invariant":42}],15:[function(require,module,exports){
+},{"./CollectionIndex":5,"./DocumentRetriver":12,"./PromiseQueue":16,"fast.js/forEach":30,"fast.js/function/bind":33,"fast.js/map":37,"fast.js/object/keys":40,"invariant":43}],16:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -5752,7 +5938,7 @@ Queue.prototype._dequeue = function () {
   return true;
 };
 
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 'use strict';
 
 function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
@@ -6028,7 +6214,7 @@ var Random = (function () {
 exports.default = Random;
 exports.default = Random;
 
-},{"crypto":undefined,"fast.js/function/try":35,"invariant":42}],17:[function(require,module,exports){
+},{"crypto":undefined,"fast.js/function/try":36,"invariant":43}],18:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () {
@@ -6174,7 +6360,7 @@ var StorageManager = exports.StorageManager = (function () {
 
 exports.default = StorageManager;
 
-},{"./EJSON":13,"./PromiseQueue":15,"eventemitter3":21,"fast.js/forEach":29}],18:[function(require,module,exports){
+},{"./EJSON":14,"./PromiseQueue":16,"eventemitter3":22,"fast.js/forEach":30}],19:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6255,7 +6441,7 @@ function debounce(func, wait, batchSize) {
   return debouncer;
 }
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 'use strict';
 
 var EventEmitter = require('eventemitter3');
@@ -6280,7 +6466,7 @@ module.exports = {
   debounce: debounce
 };
 
-},{"./dist/Base64":1,"./dist/Collection":2,"./dist/CursorObservable":6,"./dist/EJSON":13,"./dist/Random":16,"./dist/StorageManager":17,"./dist/debounce":18,"eventemitter3":21}],20:[function(require,module,exports){
+},{"./dist/Base64":2,"./dist/Collection":3,"./dist/CursorObservable":7,"./dist/EJSON":14,"./dist/Random":17,"./dist/StorageManager":18,"./dist/debounce":19,"eventemitter3":22}],21:[function(require,module,exports){
 /*globals define, module, Symbol */
 
 (function (globals) {
@@ -7215,7 +7401,7 @@ module.exports = {
   }
 }(this));
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 'use strict';
 
 //
@@ -7479,7 +7665,7 @@ if ('undefined' !== typeof module) {
   module.exports = EventEmitter;
 }
 
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 'use strict';
 
 var bindInternal3 = require('../function/bindInternal3');
@@ -7506,7 +7692,7 @@ module.exports = function fastEvery (subject, fn, thisContext) {
   return true;
 };
 
-},{"../function/bindInternal3":33}],23:[function(require,module,exports){
+},{"../function/bindInternal3":34}],24:[function(require,module,exports){
 'use strict';
 
 var bindInternal3 = require('../function/bindInternal3');
@@ -7534,7 +7720,7 @@ module.exports = function fastFilter (subject, fn, thisContext) {
   return result;
 };
 
-},{"../function/bindInternal3":33}],24:[function(require,module,exports){
+},{"../function/bindInternal3":34}],25:[function(require,module,exports){
 'use strict';
 
 var bindInternal3 = require('../function/bindInternal3');
@@ -7557,7 +7743,7 @@ module.exports = function fastForEach (subject, fn, thisContext) {
   }
 };
 
-},{"../function/bindInternal3":33}],25:[function(require,module,exports){
+},{"../function/bindInternal3":34}],26:[function(require,module,exports){
 'use strict';
 
 /**
@@ -7592,7 +7778,7 @@ module.exports = function fastIndexOf (subject, target, fromIndex) {
   return -1;
 };
 
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 'use strict';
 
 var bindInternal3 = require('../function/bindInternal3');
@@ -7618,7 +7804,7 @@ module.exports = function fastMap (subject, fn, thisContext) {
   return result;
 };
 
-},{"../function/bindInternal3":33}],27:[function(require,module,exports){
+},{"../function/bindInternal3":34}],28:[function(require,module,exports){
 'use strict';
 
 var bindInternal4 = require('../function/bindInternal4');
@@ -7655,7 +7841,7 @@ module.exports = function fastReduce (subject, fn, initialValue, thisContext) {
   return result;
 };
 
-},{"../function/bindInternal4":34}],28:[function(require,module,exports){
+},{"../function/bindInternal4":35}],29:[function(require,module,exports){
 'use strict';
 
 var bindInternal3 = require('../function/bindInternal3');
@@ -7682,7 +7868,7 @@ module.exports = function fastSome (subject, fn, thisContext) {
   return false;
 };
 
-},{"../function/bindInternal3":33}],29:[function(require,module,exports){
+},{"../function/bindInternal3":34}],30:[function(require,module,exports){
 'use strict';
 
 var forEachArray = require('./array/forEach'),
@@ -7705,7 +7891,7 @@ module.exports = function fastForEach (subject, fn, thisContext) {
     return forEachObject(subject, fn, thisContext);
   }
 };
-},{"./array/forEach":24,"./object/forEach":38}],30:[function(require,module,exports){
+},{"./array/forEach":25,"./object/forEach":39}],31:[function(require,module,exports){
 'use strict';
 
 /**
@@ -7736,7 +7922,7 @@ module.exports = function applyNoContext (subject, args) {
   }
 };
 
-},{}],31:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 'use strict';
 
 /**
@@ -7767,7 +7953,7 @@ module.exports = function applyWithContext (subject, thisContext, args) {
   }
 };
 
-},{}],32:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 'use strict';
 
 var applyWithContext = require('./applyWithContext');
@@ -7840,7 +8026,7 @@ module.exports = function fastBind (fn, thisContext) {
   }
 };
 
-},{"./applyNoContext":30,"./applyWithContext":31}],33:[function(require,module,exports){
+},{"./applyNoContext":31,"./applyWithContext":32}],34:[function(require,module,exports){
 'use strict';
 
 /**
@@ -7853,7 +8039,7 @@ module.exports = function bindInternal3 (func, thisContext) {
   };
 };
 
-},{}],34:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 'use strict';
 
 /**
@@ -7866,7 +8052,7 @@ module.exports = function bindInternal4 (func, thisContext) {
   };
 };
 
-},{}],35:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 'use strict';
 
 /**
@@ -7903,7 +8089,7 @@ module.exports = function fastTry (fn) {
   }
 };
 
-},{}],36:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 'use strict';
 
 var mapArray = require('./array/map'),
@@ -7927,7 +8113,7 @@ module.exports = function fastMap (subject, fn, thisContext) {
     return mapObject(subject, fn, thisContext);
   }
 };
-},{"./array/map":26,"./object/map":40}],37:[function(require,module,exports){
+},{"./array/map":27,"./object/map":41}],38:[function(require,module,exports){
 'use strict';
 
 /**
@@ -7963,7 +8149,7 @@ module.exports = function fastAssign (target) {
   return target;
 };
 
-},{}],38:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 'use strict';
 
 var bindInternal3 = require('../function/bindInternal3');
@@ -7988,7 +8174,7 @@ module.exports = function fastForEachObject (subject, fn, thisContext) {
   }
 };
 
-},{"../function/bindInternal3":33}],39:[function(require,module,exports){
+},{"../function/bindInternal3":34}],40:[function(require,module,exports){
 'use strict';
 
 /**
@@ -8006,7 +8192,7 @@ module.exports = typeof Object.keys === "function" ? Object.keys : /* istanbul i
   }
   return keys;
 };
-},{}],40:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 'use strict';
 
 var bindInternal3 = require('../function/bindInternal3');
@@ -8034,7 +8220,7 @@ module.exports = function fastMapObject (subject, fn, thisContext) {
   return result;
 };
 
-},{"../function/bindInternal3":33}],41:[function(require,module,exports){
+},{"../function/bindInternal3":34}],42:[function(require,module,exports){
 (function () {
   var gju = this.gju = {};
 
@@ -8444,7 +8630,7 @@ module.exports = function fastMapObject (subject, fn, thisContext) {
 
 })();
 
-},{}],42:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -8497,5 +8683,5 @@ var invariant = function(condition, format, a, b, c, d, e, f) {
 
 module.exports = invariant;
 
-},{}]},{},[19])(19)
+},{}]},{},[20])(20)
 });

@@ -25,6 +25,10 @@ var _reduce2 = require('fast.js/array/reduce');
 
 var _reduce3 = _interopRequireDefault(_reduce2);
 
+var _assign2 = require('fast.js/object/assign');
+
+var _assign3 = _interopRequireDefault(_assign2);
+
 var _map2 = require('fast.js/map');
 
 var _map3 = _interopRequireDefault(_map2);
@@ -33,9 +37,9 @@ var _checkTypes = require('check-types');
 
 var _checkTypes2 = _interopRequireDefault(_checkTypes);
 
-var _eventemitter = require('eventemitter3');
+var _AsyncEventEmitter2 = require('./AsyncEventEmitter');
 
-var _eventemitter2 = _interopRequireDefault(_eventemitter);
+var _AsyncEventEmitter3 = _interopRequireDefault(_AsyncEventEmitter2);
 
 var _invariant = require('invariant');
 
@@ -122,15 +126,18 @@ var PIPELINE_PROCESSORS = exports.PIPELINE_PROCESSORS = (_PIPELINE_PROCESSORS = 
 
   var res = pipeObj.value(docs, updatedFn, i, len);
   res = _checkTypes2.default.array(res) ? res : [res];
-
-  (0, _forEach2.default)(res, function (observeStopper) {
-    if (_checkTypes2.default.object(observeStopper) && observeStopper.then) {
-      if (observeStopper.parent) {
-        observeStopper.parent(cursor);
-        cursor.once('stopped', observeStopper.stop);
-        cursor.once('cursorChanged', observeStopper.stop);
-      }
+  res = (0, _map3.default)(res, function (val) {
+    var cursorPromise = undefined;
+    if (val instanceof Cursor) {
+      cursorPromise = val.exec();
+    } else if (_checkTypes2.default.object(val) && val.cursor && val.then) {
+      cursorPromise = val;
     }
+    if (cursorPromise) {
+      cursorPromise.cursor._trackParentCursor(cursor);
+      cursor._trackChildCursorPromise(cursorPromise);
+    }
+    return cursorPromise || val;
   });
 
   return Promise.all(res).then(function () {
@@ -148,8 +155,8 @@ var PIPELINE_PROCESSORS = exports.PIPELINE_PROCESSORS = (_PIPELINE_PROCESSORS = 
  * fully customizable response
  */
 
-var Cursor = (function (_EventEmitter) {
-  _inherits(Cursor, _EventEmitter);
+var Cursor = (function (_AsyncEventEmitter) {
+  _inherits(Cursor, _AsyncEventEmitter);
 
   function Cursor(db) {
     var query = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
@@ -165,6 +172,8 @@ var Cursor = (function (_EventEmitter) {
     _this._query = query;
     _this._pipeline = [];
     _this._executing = null;
+    _this._childrenCursors = {};
+    _this._parentCursors = {};
     _this._ensureMatcherSorter();
     return _this;
   }
@@ -327,6 +336,16 @@ var Cursor = (function (_EventEmitter) {
   }, {
     key: 'exec',
     value: function exec() {
+      return this._createCursorPromise(this._doExecute());
+    }
+  }, {
+    key: 'then',
+    value: function then(resolve, reject) {
+      return this.exec().then(resolve, reject);
+    }
+  }, {
+    key: '_doExecute',
+    value: function _doExecute() {
       var _this3 = this;
 
       return this._matchObjects().then(function (docs) {
@@ -344,11 +363,6 @@ var Cursor = (function (_EventEmitter) {
         }
         return _this3.processPipeline(clonned);
       });
-    }
-  }, {
-    key: 'then',
-    value: function then(resolve, reject) {
-      return this.exec().then(resolve, reject);
     }
   }, {
     key: '_matchObjects',
@@ -391,10 +405,35 @@ var Cursor = (function (_EventEmitter) {
         this._sorter = new _DocumentSorter2.default(this._sort || [], { matcher: this._matcher });
       }
     }
+  }, {
+    key: '_trackChildCursorPromise',
+    value: function _trackChildCursorPromise(cursorPromise) {
+      var cursor = cursorPromise.cursor;
+      this._childrenCursors[cursor._id] = cursor;
+    }
+  }, {
+    key: '_trackParentCursor',
+    value: function _trackParentCursor(cursor) {
+      this._parentCursors[cursor._id] = cursor;
+    }
+  }, {
+    key: '_createCursorPromise',
+    value: function _createCursorPromise(promise) {
+      var _this5 = this;
+
+      var mixin = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+      return (0, _assign3.default)({
+        cursor: this,
+        then: function then(successFn, failFn) {
+          return _this5._createCursorPromise(promise.then(successFn, failFn), mixin);
+        }
+      }, mixin);
+    }
   }]);
 
   return Cursor;
-})(_eventemitter2.default);
+})(_AsyncEventEmitter3.default);
 
 exports.Cursor = Cursor;
 exports.default = Cursor;
