@@ -270,16 +270,15 @@ function _inherits(subClass, superClass) {
 }
 
 // Defaults
-var _defaultRandomGenerator = new _Random2.default();
 var _defaultDelegate = _CollectionDelegate2.default;
 var _defaultCursorClass = _CursorObservable2.default;
 var _defaultStorageManager = _StorageManager2.default;
 var _defaultIndexManager = _IndexManager2.default;
 var _defaultIdGenerator = function _defaultIdGenerator(modelName) {
-  var nextSeed = _defaultRandomGenerator.hexString(20);
+  var nextSeed = _Random2.default.default().hexString(20);
   var sequenceSeed = [nextSeed, '/collection/' + modelName];
   return {
-    value: _Random2.default.createWithSeed.apply(null, sequenceSeed).id(17),
+    value: _Random2.default.createWithSeeds.apply(null, sequenceSeed).id(17),
     seed: nextSeed
   };
 };
@@ -579,7 +578,7 @@ var Collection = exports.Collection = (function (_EventEmitter) {
 
 exports.default = Collection;
 
-},{"./CollectionDelegate":3,"./CursorObservable":6,"./EJSON":13,"./IndexManager":14,"./PromiseQueue":15,"./Random":16,"./StorageManager":17,"check-types":20,"eventemitter3":21,"fast.js/forEach":29,"fast.js/map":35}],3:[function(require,module,exports){
+},{"./CollectionDelegate":3,"./CursorObservable":6,"./EJSON":13,"./IndexManager":14,"./PromiseQueue":15,"./Random":16,"./StorageManager":17,"check-types":20,"eventemitter3":21,"fast.js/forEach":29,"fast.js/map":36}],3:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () {
@@ -752,7 +751,7 @@ var CollectionDelegate = exports.CollectionDelegate = (function () {
 
 exports.default = CollectionDelegate;
 
-},{"./DocumentModifier":9,"fast.js/map":35}],4:[function(require,module,exports){
+},{"./DocumentModifier":9,"fast.js/map":36}],4:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () {
@@ -842,7 +841,7 @@ var CollectionIndex = exports.CollectionIndex = (function () {
 
 exports.default = CollectionIndex;
 
-},{"invariant":41}],5:[function(require,module,exports){
+},{"invariant":42}],5:[function(require,module,exports){
 'use strict';
 
 function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
@@ -1276,7 +1275,7 @@ var Cursor = (function (_EventEmitter) {
 exports.Cursor = Cursor;
 exports.default = Cursor;
 
-},{"./DocumentMatcher":8,"./DocumentProjector":10,"./DocumentRetriver":11,"./DocumentSorter":12,"./EJSON":13,"check-types":20,"eventemitter3":21,"fast.js/array/filter":23,"fast.js/array/reduce":27,"fast.js/forEach":29,"fast.js/function/bind":32,"fast.js/map":35,"invariant":41}],6:[function(require,module,exports){
+},{"./DocumentMatcher":8,"./DocumentProjector":10,"./DocumentRetriver":11,"./DocumentSorter":12,"./EJSON":13,"check-types":20,"eventemitter3":21,"fast.js/array/filter":23,"fast.js/array/reduce":27,"fast.js/forEach":29,"fast.js/function/bind":32,"fast.js/map":36,"invariant":42}],6:[function(require,module,exports){
 'use strict';
 
 function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
@@ -1446,6 +1445,8 @@ var CursorObservable = (function (_Cursor) {
           running = false;
           _this2._observers -= 1;
           if (_this2._observers === 0) {
+            _this2._latestResult = null;
+            _this2._latestIds = null;
             _this2.emit('stopped');
           }
         }
@@ -1683,7 +1684,7 @@ var CursorObservable = (function (_Cursor) {
 exports.CursorObservable = CursorObservable;
 exports.default = CursorObservable;
 
-},{"./Cursor":5,"./EJSON":13,"./debounce":18,"check-types":20,"fast.js/forEach":29,"fast.js/function/bind":32,"fast.js/map":35,"fast.js/object/keys":38}],7:[function(require,module,exports){
+},{"./Cursor":5,"./EJSON":13,"./debounce":18,"check-types":20,"fast.js/forEach":29,"fast.js/function/bind":32,"fast.js/map":36,"fast.js/object/keys":39}],7:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1971,7 +1972,7 @@ var MongoTypeComp = exports.MongoTypeComp = {
   }
 };
 
-},{"./EJSON":13,"check-types":20,"fast.js/forEach":29,"fast.js/object/keys":38}],8:[function(require,module,exports){
+},{"./EJSON":13,"check-types":20,"fast.js/forEach":29,"fast.js/object/keys":39}],8:[function(require,module,exports){
 'use strict';
 
 function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
@@ -3055,7 +3056,7 @@ var andSomeMatchers = function andSomeMatchers(subMatchers) {
 var andDocumentMatchers = andSomeMatchers;
 var andBranchedMatchers = andSomeMatchers;
 
-},{"./Document":7,"./EJSON":13,"check-types":20,"fast.js/array/every":22,"fast.js/array/indexOf":25,"fast.js/array/some":28,"fast.js/forEach":29,"fast.js/map":35,"fast.js/object/keys":38,"geojson-utils":40}],9:[function(require,module,exports){
+},{"./Document":7,"./EJSON":13,"check-types":20,"fast.js/array/every":22,"fast.js/array/indexOf":25,"fast.js/array/some":28,"fast.js/forEach":29,"fast.js/map":36,"fast.js/object/keys":39,"geojson-utils":41}],9:[function(require,module,exports){
 'use strict';
 
 function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
@@ -3636,7 +3637,7 @@ var MODIFIERS = {
   }
 };
 
-},{"./Document":7,"./DocumentMatcher":8,"./DocumentSorter":12,"./EJSON":13,"check-types":20,"fast.js/array/every":22,"fast.js/forEach":29,"fast.js/object/assign":36}],10:[function(require,module,exports){
+},{"./Document":7,"./DocumentMatcher":8,"./DocumentSorter":12,"./EJSON":13,"check-types":20,"fast.js/array/every":22,"fast.js/forEach":29,"fast.js/object/assign":37}],10:[function(require,module,exports){
 'use strict';
 
 function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
@@ -4023,7 +4024,7 @@ var treeToPaths = function treeToPaths(tree, prefix) {
   return result;
 };
 
-},{"./Document":7,"./EJSON":13,"check-types":20,"fast.js/array/every":22,"fast.js/array/filter":23,"fast.js/array/indexOf":25,"fast.js/forEach":29,"fast.js/map":35,"fast.js/object/assign":36,"fast.js/object/keys":38}],11:[function(require,module,exports){
+},{"./Document":7,"./EJSON":13,"check-types":20,"fast.js/array/every":22,"fast.js/array/filter":23,"fast.js/array/indexOf":25,"fast.js/forEach":29,"fast.js/map":36,"fast.js/object/assign":37,"fast.js/object/keys":39}],11:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () {
@@ -4188,7 +4189,7 @@ var DocumentRetriver = exports.DocumentRetriver = (function () {
 
 exports.default = DocumentRetriver;
 
-},{"./Document":7,"check-types":20,"fast.js/array/filter":23,"fast.js/map":35}],12:[function(require,module,exports){
+},{"./Document":7,"check-types":20,"fast.js/array/filter":23,"fast.js/map":36}],12:[function(require,module,exports){
 'use strict';
 
 function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
@@ -4700,7 +4701,7 @@ var composeComparators = function composeComparators(comparatorArray) {
   };
 };
 
-},{"./Document":7,"./DocumentMatcher":8,"check-types":20,"fast.js/array/every":22,"fast.js/array/indexOf":25,"fast.js/forEach":29,"fast.js/map":35,"fast.js/object/keys":38}],13:[function(require,module,exports){
+},{"./Document":7,"./DocumentMatcher":8,"check-types":20,"fast.js/array/every":22,"fast.js/array/indexOf":25,"fast.js/forEach":29,"fast.js/map":36,"fast.js/object/keys":39}],13:[function(require,module,exports){
 'use strict';
 
 function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
@@ -5287,7 +5288,7 @@ var EJSON = exports.EJSON = (function () {
 
 exports.default = new EJSON();
 
-},{"./Base64":1,"check-types":20,"fast.js/array/some":28,"fast.js/forEach":29,"fast.js/object/keys":38}],14:[function(require,module,exports){
+},{"./Base64":1,"check-types":20,"fast.js/array/some":28,"fast.js/forEach":29,"fast.js/object/keys":39}],14:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () {
@@ -5577,7 +5578,7 @@ var IndexManager = exports.IndexManager = (function () {
 
 exports.default = IndexManager;
 
-},{"./CollectionIndex":4,"./DocumentRetriver":11,"./PromiseQueue":15,"fast.js/forEach":29,"fast.js/function/bind":32,"fast.js/map":35,"fast.js/object/keys":38,"invariant":41}],15:[function(require,module,exports){
+},{"./CollectionIndex":4,"./DocumentRetriver":11,"./PromiseQueue":15,"fast.js/forEach":29,"fast.js/function/bind":32,"fast.js/map":36,"fast.js/object/keys":39,"invariant":42}],15:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -5754,6 +5755,8 @@ Queue.prototype._dequeue = function () {
 },{}],16:[function(require,module,exports){
 'use strict';
 
+function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
+
 var _createClass = (function () {
   function defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
@@ -5767,12 +5770,39 @@ var _createClass = (function () {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports._getBrowserSeeds = _getBrowserSeeds;
+
+var _try2 = require('fast.js/function/try');
+
+var _try3 = _interopRequireDefault(_try2);
+
+var _invariant = require('invariant');
+
+var _invariant2 = _interopRequireDefault(_invariant);
+
+function _interopRequireDefault(obj) {
+  return obj && obj.__esModule ? obj : { default: obj };
+}
+
+function _typeof(obj) {
+  return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
+}
 
 function _classCallCheck(instance, Constructor) {
   if (!(instance instanceof Constructor)) {
     throw new TypeError("Cannot call a class as a function");
   }
 }
+
+// Intarnals
+var _defaultRandomGenerator = undefined;
+var RANDOM_GENERATOR_TYPE = {
+  NODE_CRYPTO: 'NODE_CRYPTO',
+  BROWSER_CRYPTO: 'BROWSER_CRYPTO',
+  ALEA: 'ALEA'
+};
+var UNMISTAKABLE_CHARS = '23456789ABCDEFGHJKLMNPQRSTWXYZabcdefghijkmnopqrstuvwxyz';
+var BASE64_CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ' + '0123456789-_';
 
 // see http://baagoe.org/en/wiki/Better_random_numbers_for_javascript
 // for a full discussion and Alea implementation.
@@ -5847,92 +5877,115 @@ var Alea = function Alea() {
   })(Array.prototype.slice.call(arguments));
 };
 
-var UNMISTAKABLE_CHARS = '23456789ABCDEFGHJKLMNPQRSTWXYZabcdefghijkmnopqrstuvwxyz';
-var BASE64_CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ' + '0123456789-_';
+/**
+ * Create seeds array for a browser based on window sizes,
+ * Date and some random number.
+ * @return {Arrat}
+ */
+function _getBrowserSeeds() {
+  var height = typeof window !== 'undefined' && window.innerHeight || typeof document !== 'undefined' && document.documentElement && document.documentElement.clientHeight || typeof document !== 'undefined' && document.body && document.body.clientHeight || 1;
 
-var Random = exports.Random = (function () {
-  function Random() {
+  var width = typeof window !== 'undefined' && window.innerWidth || typeof document !== 'undefined' && document.documentElement && document.documentElement.clientWidth || typeof document !== 'undefined' && document.body && document.body.clientWidth || 1;
+
+  var agent = typeof navigator !== 'undefined' && navigator.userAgent || '';
+  return [new Date(), height, width, agent, Math.random()];
+}
+
+/**
+ * Random string generator copied from Meteor
+ * with minor modifications and refactoring.
+ */
+
+var Random = (function () {
+  function Random(type) {
+    var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
     _classCallCheck(this, Random);
 
-    // Get first argumnts with this method
-    // because ngInject tries to inject any
-    // service from a declared consturcor
-    var seedArray = arguments[0];
+    this.type = type;
 
-    // Get default seed in the browser
-    if (seedArray === undefined && !(typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues)) {
-      var height = typeof window !== 'undefined' && window.innerHeight || typeof document !== 'undefined' && document.documentElement && document.documentElement.clientHeight || typeof document !== 'undefined' && document.body && document.body.clientHeight || 1;
+    (0, _invariant2.default)(RANDOM_GENERATOR_TYPE[type], 'Random(...): no generator type %s', type);
 
-      var width = typeof window !== 'undefined' && window.innerWidth || typeof document !== 'undefined' && document.documentElement && document.documentElement.clientWidth || typeof document !== 'undefined' && document.body && document.body.clientWidth || 1;
-
-      var agent = typeof navigator !== 'undefined' && navigator.userAgent || '';
-      seedArray = [new Date(), height, width, agent, Math.random()];
-    }
-
-    // Use Alea then seed provided
-    if (seedArray !== undefined) {
-      this.alea = Alea.apply(null, seedArray);
+    if (type === RANDOM_GENERATOR_TYPE.ALEA) {
+      (0, _invariant2.default)(options.seeds, 'Random(...): seed is not provided for ALEA seeded generator');
+      this.alea = Alea.apply(null, options.seeds);
     }
   }
 
   _createClass(Random, [{
     key: 'fraction',
     value: function fraction() {
-      var self = this;
-      if (self.alea) {
-        return self.alea();
-      } else if (typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues) {
-        var array = new Uint32Array(1);
-        window.crypto.getRandomValues(array);
-        return array[0] * 2.3283064365386963e-10; // 2^-32
-      } else {
-          throw new Error('No random generator available');
-        }
+      if (this.type === RANDOM_GENERATOR_TYPE.ALEA) {
+        return this.alea();
+      } else if (this.type === RANDOM_GENERATOR_TYPE.NODE_CRYPTO) {
+        var numerator = parseInt(this.hexString(8), 16);
+        return numerator * 2.3283064365386963e-10; // 2^-32
+      } else if (this.type === RANDOM_GENERATOR_TYPE.BROWSER_CRYPTO) {
+          var array = new Uint32Array(1);
+          window.crypto.getRandomValues(array);
+          return array[0] * 2.3283064365386963e-10; // 2^-32
+        } else {
+            throw new Error('Unknown random generator type: ' + this.type);
+          }
     }
   }, {
     key: 'hexString',
     value: function hexString(digits) {
-      var self = this;
-      var hexDigits = [];
+      if (this.type === RANDOM_GENERATOR_TYPE.NODE_CRYPTO) {
+        var _ret = (function () {
+          var nodeCrypto = require('crypto');
+          var numBytes = Math.ceil(digits / 2);
 
-      for (var i = 0; i < digits; ++i) {
-        hexDigits.push(self.choice('0123456789abcdef'));
+          // Try to get cryptographically strong randomness. Fall back to
+          // non-cryptographically strong if not available.
+          var bytes = (0, _try3.default)(function () {
+            return nodeCrypto.randomBytes(numBytes);
+          });
+          if (bytes instanceof Error) {
+            bytes = nodeCrypto.pseudoRandomBytes(numBytes);
+          }
+
+          var result = bytes.toString('hex');
+          // If the number of digits is odd, we'll have generated an extra 4 bits
+          // of randomness, so we need to trim the last digit.
+          return {
+            v: result.substring(0, digits)
+          };
+        })();
+
+        if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
+      } else {
+        return this._randomString(digits, '0123456789abcdef');
       }
-
-      return hexDigits.join('');
     }
   }, {
     key: '_randomString',
     value: function _randomString(charsCount, alphabet) {
-      var self = this;
       var digits = [];
       for (var i = 0; i < charsCount; i++) {
-        digits[i] = self.choice(alphabet);
+        digits[i] = this.choice(alphabet);
       }
       return digits.join('');
     }
   }, {
     key: 'id',
     value: function id(charsCount) {
-      var self = this;
       // 17 characters is around 96 bits of entropy, which is the amount of
       // state in the Alea PRNG.
       if (charsCount === undefined) {
         charsCount = 17;
       }
-
-      return self._randomString(charsCount, UNMISTAKABLE_CHARS);
+      return this._randomString(charsCount, UNMISTAKABLE_CHARS);
     }
   }, {
     key: 'secret',
     value: function secret(charsCount) {
-      var self = this;
       // Default to 256 bits of entropy, or 43 characters at 6 bits per
       // character.
       if (charsCount === undefined) {
         charsCount = 43;
       }
-      return self._randomString(charsCount, BASE64_CHARS);
+      return this._randomString(charsCount, BASE64_CHARS);
     }
   }, {
     key: 'choice',
@@ -5945,12 +5998,27 @@ var Random = exports.Random = (function () {
       }
     }
   }], [{
-    key: 'createWithSeed',
-    value: function createWithSeed() {
-      if (arguments.length === 0) {
-        throw new Error('No seeds were provided');
+    key: 'default',
+    value: function _default() {
+      if (!_defaultRandomGenerator) {
+        if (typeof window !== 'undefined') {
+          if (window.crypto && window.crypto.getRandomValues) {
+            return new Random(RANDOM_GENERATOR_TYPE.BROWSER_CRYPTO);
+          } else {
+            return new Random(RANDOM_GENERATOR_TYPE.ALEA, { seeds: _getBrowserSeeds() });
+          }
+        } else {
+          return new Random(RANDOM_GENERATOR_TYPE.NODE_CRYPTO);
+        }
       }
-      return new Random(arguments);
+      return _defaultRandomGenerator;
+    }
+  }, {
+    key: 'createWithSeeds',
+    value: function createWithSeeds() {
+      (0, _invariant2.default)(arguments.length, 'Random.createWithSeeds(...): no seeds were provided');
+
+      return new Random(RANDOM_GENERATOR_TYPE.ALEA, { seeds: arguments });
     }
   }]);
 
@@ -5958,8 +6026,9 @@ var Random = exports.Random = (function () {
 })();
 
 exports.default = Random;
+exports.default = Random;
 
-},{}],17:[function(require,module,exports){
+},{"crypto":undefined,"fast.js/function/try":35,"invariant":42}],17:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () {
@@ -7636,7 +7705,7 @@ module.exports = function fastForEach (subject, fn, thisContext) {
     return forEachObject(subject, fn, thisContext);
   }
 };
-},{"./array/forEach":24,"./object/forEach":37}],30:[function(require,module,exports){
+},{"./array/forEach":24,"./object/forEach":38}],30:[function(require,module,exports){
 'use strict';
 
 /**
@@ -7800,6 +7869,43 @@ module.exports = function bindInternal4 (func, thisContext) {
 },{}],35:[function(require,module,exports){
 'use strict';
 
+/**
+ * # Try
+ *
+ * Allows functions to be optimised by isolating `try {} catch (e) {}` blocks
+ * outside the function declaration. Returns either the result of the function or an Error
+ * object if one was thrown. The caller should then check for `result instanceof Error`.
+ *
+ * ```js
+ * var result = fast.try(myFunction);
+ * if (result instanceof Error) {
+ *    console.log('something went wrong');
+ * }
+ * else {
+ *   console.log('result:', result);
+ * }
+ * ```
+ *
+ * @param  {Function} fn The function to invoke.
+ * @return {mixed}       The result of the function, or an `Error` object.
+ */
+module.exports = function fastTry (fn) {
+  try {
+    return fn();
+  }
+  catch (e) {
+    if (!(e instanceof Error)) {
+      return new Error(e);
+    }
+    else {
+      return e;
+    }
+  }
+};
+
+},{}],36:[function(require,module,exports){
+'use strict';
+
 var mapArray = require('./array/map'),
     mapObject = require('./object/map');
 
@@ -7821,7 +7927,7 @@ module.exports = function fastMap (subject, fn, thisContext) {
     return mapObject(subject, fn, thisContext);
   }
 };
-},{"./array/map":26,"./object/map":39}],36:[function(require,module,exports){
+},{"./array/map":26,"./object/map":40}],37:[function(require,module,exports){
 'use strict';
 
 /**
@@ -7857,7 +7963,7 @@ module.exports = function fastAssign (target) {
   return target;
 };
 
-},{}],37:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 'use strict';
 
 var bindInternal3 = require('../function/bindInternal3');
@@ -7882,7 +7988,7 @@ module.exports = function fastForEachObject (subject, fn, thisContext) {
   }
 };
 
-},{"../function/bindInternal3":33}],38:[function(require,module,exports){
+},{"../function/bindInternal3":33}],39:[function(require,module,exports){
 'use strict';
 
 /**
@@ -7900,7 +8006,7 @@ module.exports = typeof Object.keys === "function" ? Object.keys : /* istanbul i
   }
   return keys;
 };
-},{}],39:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 'use strict';
 
 var bindInternal3 = require('../function/bindInternal3');
@@ -7928,7 +8034,7 @@ module.exports = function fastMapObject (subject, fn, thisContext) {
   return result;
 };
 
-},{"../function/bindInternal3":33}],40:[function(require,module,exports){
+},{"../function/bindInternal3":33}],41:[function(require,module,exports){
 (function () {
   var gju = this.gju = {};
 
@@ -8338,7 +8444,7 @@ module.exports = function fastMapObject (subject, fn, thisContext) {
 
 })();
 
-},{}],41:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.

@@ -143,6 +143,8 @@ var CursorObservable = (function (_Cursor) {
           running = false;
           _this2._observers -= 1;
           if (_this2._observers === 0) {
+            _this2._latestResult = null;
+            _this2._latestIds = null;
             _this2.emit('stopped');
           }
         }

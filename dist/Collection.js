@@ -60,16 +60,15 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 // Defaults
-var _defaultRandomGenerator = new _Random2.default();
 var _defaultDelegate = _CollectionDelegate2.default;
 var _defaultCursorClass = _CursorObservable2.default;
 var _defaultStorageManager = _StorageManager2.default;
 var _defaultIndexManager = _IndexManager2.default;
 var _defaultIdGenerator = function _defaultIdGenerator(modelName) {
-  var nextSeed = _defaultRandomGenerator.hexString(20);
+  var nextSeed = _Random2.default.default().hexString(20);
   var sequenceSeed = [nextSeed, '/collection/' + modelName];
   return {
-    value: _Random2.default.createWithSeed.apply(null, sequenceSeed).id(17),
+    value: _Random2.default.createWithSeeds.apply(null, sequenceSeed).id(17),
     seed: nextSeed
   };
 };
