@@ -3,7 +3,9 @@ import Cursor from '../../lib/Cursor';
 import Random from '../../lib/Random';
 import chai, {assert, expect} from 'chai';
 import _ from 'lodash';
+import sinon from 'sinon';
 chai.use(require('chai-as-promised'));
+chai.use(require('sinon-chai'));
 chai.should();
 
 
@@ -385,6 +387,33 @@ describe('Cursor', () => {
     it('should throw an error if join is not a function', function () {
       const cursor = new Cursor(db);
       (() => cursor.join(123)).should.throw(Error);
+    });
+
+    it('should execute cursor if not executed yet', function () {
+      const cursor = new Cursor(db);
+      const cursorJoined = new Cursor(db);
+      cursorJoined.exec = sinon.stub();
+      cursorJoined.exec.returns({ cursor: cursorJoined, then: (fn) => fn() });
+      return cursor.find().join(() => cursorJoined).exec().then(() => {
+        cursorJoined.exec.should.have.callCount(7);
+      })
+    });
+
+    it('should resolve array of cursors returned in join', function () {
+      const cursor = new Cursor(db);
+      const cursorJoined_1 = new Cursor(db);
+      cursorJoined_1.exec = sinon.stub();
+      cursorJoined_1.exec.returns({ cursor: cursorJoined_1, then: (fn) => fn() });
+      const cursorJoined_2 = new Cursor(db);
+      cursorJoined_2.exec = sinon.stub();
+      cursorJoined_2.exec.returns({ cursor: cursorJoined_2, then: (fn) => fn() });
+
+      return cursor.find().join(() => [
+        cursorJoined_1, cursorJoined_2
+      ]).exec().then(() => {
+        cursorJoined_1.exec.should.have.callCount(7);
+        cursorJoined_2.exec.should.have.callCount(7);
+      })
     });
   });
 

@@ -2,6 +2,7 @@ import {Document} from '../../lib/Document';
 import Collection from '../../lib/Collection';
 import StorageManager from '../../lib/StorageManager';
 import CursorObservable from '../../lib/CursorObservable';
+import CollectionDelegate from '../../lib/CollectionDelegate';
 import chai, {expect} from 'chai';
 import sinon from 'sinon';
 chai.use(require('chai-as-promised'));
@@ -78,6 +79,19 @@ describe('Collection', () => {
       Collection.defaultCursorClass(NewCursor);
       Collection.defaultCursorClass().should.be.equal(NewCursor);
       Collection.defaultCursorClass(oldCursor);
+    });
+  });
+
+  describe('#defaultDelegate', function () {
+    it('should return default CollectionDelegate', function () {
+      Collection.defaultDelegate().should.be.equal(CollectionDelegate);
+    });
+    it('should set default Delegate class', function () {
+      const oldDelegate = Collection.defaultDelegate();
+      class NewDelegate {}
+      Collection.defaultDelegate(NewDelegate);
+      Collection.defaultDelegate().should.be.equal(NewDelegate);
+      Collection.defaultDelegate(oldDelegate);
     });
   });
 
