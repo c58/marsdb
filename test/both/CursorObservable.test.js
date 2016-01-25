@@ -477,4 +477,63 @@ describe('CursorObservable', () => {
       }, 20);
     });
   });
+
+  describe('#maybeUpdate', function () {
+    it('should update when no newDoc and oldDoc provided', function () {
+      const cursor = new CursorObservable(db);
+      cursor.update = sinon.spy();
+      cursor.maybeUpdate(null, null);
+      cursor.update.should.have.callCount(1);
+    });
+
+    it('should update when removed doc witihin previous result', function () {
+      const cursor = new CursorObservable(db);
+      cursor.update = sinon.spy();
+      cursor._latestResult = [{_id: '1'}];
+      cursor._updateLatestIds();
+      cursor.maybeUpdate(null, {_id: '1'});
+      cursor.update.should.have.callCount(1);
+      cursor.maybeUpdate(null, {_id: '2'});
+      cursor.update.should.have.callCount(1);
+    });
+
+    it('should update if match only old document', function() {
+      const cursor = new CursorObservable(db);
+      cursor.find({a: {$gt: 10}});
+      cursor.update = sinon.spy();
+      cursor.maybeUpdate({a: 9}, {a: 11});
+      cursor.update.should.have.callCount(1);
+      cursor.maybeUpdate({a: 11}, {a: 9});
+      cursor.update.should.have.callCount(2);
+      cursor.maybeUpdate({a: 12}, {a: 13});
+      cursor.update.should.have.callCount(3);
+      cursor.maybeUpdate({a: 8}, {a: 9});
+      cursor.update.should.have.callCount(3);
+    });
+  });
+
+  describe('#update', function () {
+    it('should stop previous update and return new one', function () {
+      const cursor = new CursorObservable(db);
+      const oldPromise = { cancel: sinon.spy() }
+      cursor._updatePromise = oldPromise;
+      cursor._doUpdate = sinon.spy();
+      cursor._doUpdate.func = sinon.spy();
+
+      cursor.update();
+      oldPromise.cancel.should.have.callCount(1);
+      cursor._doUpdate.should.have.callCount(1);
+    });
+
+    it('should immidiatelly call _doUpdate and return result Promise', function () {
+      const cursor = new CursorObservable(db);
+      cursor._doUpdate = sinon.spy();
+      cursor._doUpdate.func = sinon.stub();
+      cursor._doUpdate.func.returns(1);
+      const res = cursor.update(false, true);
+      cursor._doUpdate.func.should.have.callCount(1);
+      cursor._doUpdate.should.have.callCount(0);
+      res.should.be.equal(1);
+    });
+  });
 });
