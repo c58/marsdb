@@ -455,10 +455,9 @@ describe('Cursor', () => {
     let db2;
     beforeEach(function () {
       db2 = new Collection('another');
-      const rand = new Random();
       return Promise.all(_.times(30, function (i) {
         return db2.insert({
-          something: rand.id(),
+          something: Random.default().id(),
           anything: {
             foo: "bar",
             cool: "hot"
