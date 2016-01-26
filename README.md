@@ -10,9 +10,9 @@
 [![Join the chat at https://gitter.im/c58/marsdb](https://badges.gitter.im/c58/marsdb.svg)](https://gitter.im/c58/marsdb?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 MarsDB is a lightweight client-side database.
-It's based on a Meteor’s **minimongo** matching/modifying implementation. It's carefully written on **ES6**, have a **Promise based** interface and may be backed with any storage implementation ([see plugins](https://github.com/c58/marsdb#plugins)). It's also supports **observable** cursors.
+It's based on a Meteor's **minimongo** matching/modifying implementation. It's carefully written on **ES6**, have a **Promise based** interface and may be backed with any storage implementation ([see plugins](https://github.com/c58/marsdb#plugins)). It's also supports **observable** cursors.
 
-MarsDB supports any kind of find/update/remove operations that Meteor’s minimongo does. So, go to the Meteor docs for supported query/modifier operations.
+MarsDB supports any kind of find/update/remove operations that Meteor's minimongo does. So, go to the Meteor docs for supported query/modifier operations.
 
 You can use it in any JS environment (Browser, Electron, NW.js, Node.js).
 
@@ -21,8 +21,8 @@ You can use it in any JS environment (Browser, Electron, NW.js, Node.js).
 * **Promise based API**
 * **Carefully written on ES6**
 * **Very very flexible** – just take a look to the [plugins section](https://github.com/c58/marsdb#plugins)
-* **Supports many of MongoDB query/modify operations** – thanks to a Meteor’s minimongo
-* **Flexible pipeline** – map, reduce, custom sorting function, filtering. All with a sexy JS interface (no ugly mongo’s aggregation language)
+* **Supports many of MongoDB query/modify operations** – thanks to a Meteor's minimongo
+* **Flexible pipeline** – map, reduce, custom sorting function, filtering. All with a sexy JS interface (no ugly mongo's aggregation language)
 * **Persistence API** – all collections can be stored (and restored) with any kind of storage (in-memory, LocalStorage, LevelUP, etc)
 * **Observable queries** - live queries just like in Meteor, but with simplier interface
 * **Reactive joins** – out of the box
@@ -45,12 +45,12 @@ You can use it in any JS environment (Browser, Electron, NW.js, Node.js).
 ## Examples
 
 ### Using within non-ES6 environment
-The `./dist` folder contains already compiled to a ES5 code, but some polyfills needed. For using in a browser you must to include `marsdb.polyfills.js` before `marsdb.min.js`. In node.js you need to `require(‘marsdb/polyfills’)`.
+The `./dist` folder contains already compiled to a ES5 code, but some polyfills needed. For using in a browser you must to include `marsdb.polyfills.js` before `marsdb.min.js`. In node.js you need to `require('marsdb/polyfills')`.
 It sets in a window/global: Promise, Set and Symbol.
 
 ### Create a collection
 ```javascript
-import Collection from ‘marsdb’;
+import Collection from 'marsdb';
 import LocalStorageManager from 'marsdb-localstorage';
 
 // Setup different id generator and storage managers
@@ -63,14 +63,14 @@ Collection.defaultIdGenerator(() => {
   };
 });
 
-const users = new Collection(‘users’);
+const users = new Collection('users');
 ```
 ### Find documents
 ```javascript
-const posts = new Collection(‘posts’);
-posts.find({author: ‘Bob’})
+const posts = new Collection('posts');
+posts.find({author: 'Bob'})
   .project({author: 1})
-  .sort([‘createdAt’])
+  .sort(['createdAt'])
   .then(docs => {
     // do something with docs
   });
@@ -78,7 +78,7 @@ posts.find({author: ‘Bob’})
 ### Find with pipeline (map, reduce, filter)
 An order of pipeline methods invokation is important. Next pipeline operation gives as argument a result of a previous operation.
 ```javascript
-const posts = new Collection(‘posts’);
+const posts = new Collection('posts');
 
 // Get number of all comments in the DB
 posts.find()
@@ -104,8 +104,8 @@ posts.find({author: 'not_existing_name'})
 Observable cursor returned by a `find` and `findOne` methods of a collection. Updates of the cursor is batched and debounced (default batch size is `20` and debounce time is `1000 / 15` ms). You can change the paramters by `batchSize` and `debounce` methods of an observable cursor (methods is chained).
 
 ```javascript
-const posts = new Collection(‘posts’);
-const stopper = posts.find({tags: {$in: [‘marsdb’, ‘is’, ‘awesome’]}})
+const posts = new Collection('posts');
+const stopper = posts.find({tags: {$in: ['marsdb', 'is', 'awesome']}})
   .observe(docs => {
     // invoked on every result change
     // (on initial result too)
@@ -118,8 +118,8 @@ const stopper = posts.find({tags: {$in: [‘marsdb’, ‘is’, ‘awesome’]}
 
 ### Find with joins
 ```javascript
-const users = new Collection(‘users’);
-const posts = new Collection(‘posts’);
+const users = new Collection('users');
+const posts = new Collection('posts');
 posts.find()
   .join(doc => {
     // Return a Promise for waiting of the result.
@@ -155,24 +155,24 @@ posts.find()
 ```
 ### Inserting
 ```javascript
-const posts = new Collection(‘posts’);
-posts.insert({text: ‘MarsDB is awesome’}).then(docId => {
+const posts = new Collection('posts');
+posts.insert({text: 'MarsDB is awesome'}).then(docId => {
   // Invoked after persisting document
 })
 posts.insertAll(
-  {text: ‘MarsDB’},
-  {text: ‘is’},
-  {text: ‘awesome’}
+  {text: 'MarsDB'},
+  {text: 'is'},
+  {text: 'awesome'}
 ).then(docsIds => {
   // invoked when all documents inserted
 });
 ```
 ### Updating
 ```javascript
-const posts = new Collection(‘posts’);
+const posts = new Collection('posts');
 posts.update(
   {authorId: {$in: [1, 2, 3]}},
-  {$set: {text: ‘noop’}}
+  {$set: {text: 'noop'}}
 ).then(result => {
   console.log(result.modified) // count of modified docs
   console.log(result.updated) // array of updated docs
@@ -181,7 +181,7 @@ posts.update(
 ```
 ### Removing
 ```javascript
-const posts = new Collection(‘posts’);
+const posts = new Collection('posts');
 posts.remove({authorId: {$in: [1,2,3]}})
   .then(removedDocs => {
     // do something with removed documents array
@@ -195,8 +195,8 @@ posts.remove({authorId: {$in: [1,2,3]}})
 * Documentation
 
 ## Contributing
-I’m waiting for your pull requests and issues.
-Don’t forget to execute `gulp lint` before requesting. Accepted only requests without errors.
+I'm waiting for your pull requests and issues.
+Don't forget to execute `gulp lint` before requesting. Accepted only requests without errors.
 
 ## License
 See [License](LICENSE)
