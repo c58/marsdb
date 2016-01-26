@@ -1028,6 +1028,10 @@ var _assign2 = require('fast.js/object/assign');
 
 var _assign3 = _interopRequireDefault(_assign2);
 
+var _keys2 = require('fast.js/object/keys');
+
+var _keys3 = _interopRequireDefault(_keys2);
+
 var _map2 = require('fast.js/map');
 
 var _map3 = _interopRequireDefault(_map2);
@@ -1155,7 +1159,6 @@ var PIPELINE_PROCESSORS = exports.PIPELINE_PROCESSORS = (_PIPELINE_PROCESSORS = 
       cursorPromise = val;
     }
     if (cursorPromise) {
-      cursorPromise.cursor._trackParentCursor(cursor);
       cursor._trackChildCursorPromise(cursorPromise);
     }
     return cursorPromise || val;
@@ -1192,7 +1195,7 @@ var Cursor = (function (_AsyncEventEmitter) {
     _this._id = _currentCursorId++;
     _this._query = query;
     _this._pipeline = [];
-    _this._executing = null;
+    _this._latestResult = null;
     _this._childrenCursors = {};
     _this._parentCursors = {};
     _this._ensureMatcherSorter();
@@ -1246,7 +1249,7 @@ var Cursor = (function (_AsyncEventEmitter) {
     value: function sortFunc(sortFn) {
       (0, _invariant2.default)(typeof sortFn === 'function', 'sortFunc(...): argument must be a function');
 
-      this.addPipeline(PIPELINE_TYPE.Sort, sortFn);
+      this._addPipeline(PIPELINE_TYPE.Sort, sortFn);
       return this;
     }
   }, {
@@ -1254,7 +1257,7 @@ var Cursor = (function (_AsyncEventEmitter) {
     value: function filter(filterFn) {
       (0, _invariant2.default)(typeof filterFn === 'function', 'filter(...): argument must be a function');
 
-      this.addPipeline(PIPELINE_TYPE.Filter, filterFn);
+      this._addPipeline(PIPELINE_TYPE.Filter, filterFn);
       return this;
     }
   }, {
@@ -1262,7 +1265,7 @@ var Cursor = (function (_AsyncEventEmitter) {
     value: function map(mapperFn) {
       (0, _invariant2.default)(typeof mapperFn === 'function', 'map(...): mapper must be a function');
 
-      this.addPipeline(PIPELINE_TYPE.Map, mapperFn);
+      this._addPipeline(PIPELINE_TYPE.Map, mapperFn);
       return this;
     }
   }, {
@@ -1270,7 +1273,7 @@ var Cursor = (function (_AsyncEventEmitter) {
     value: function reduce(reduceFn, initial) {
       (0, _invariant2.default)(typeof reduceFn === 'function', 'reduce(...): reducer argument must be a function');
 
-      this.addPipeline(PIPELINE_TYPE.Reduce, reduceFn, initial);
+      this._addPipeline(PIPELINE_TYPE.Reduce, reduceFn, initial);
       return this;
     }
   }, {
@@ -1278,7 +1281,7 @@ var Cursor = (function (_AsyncEventEmitter) {
     value: function aggregate(aggrFn) {
       (0, _invariant2.default)(typeof aggrFn === 'function', 'aggregate(...): aggregator must be a function');
 
-      this.addPipeline(PIPELINE_TYPE.Aggregate, aggrFn);
+      this._addPipeline(PIPELINE_TYPE.Aggregate, aggrFn);
       return this;
     }
   }, {
@@ -1286,7 +1289,7 @@ var Cursor = (function (_AsyncEventEmitter) {
     value: function join(joinFn) {
       (0, _invariant2.default)(typeof joinFn === 'function', 'join(...): argument must be a function');
 
-      this.addPipeline(PIPELINE_TYPE.Join, joinFn);
+      this._addPipeline(PIPELINE_TYPE.Join, joinFn);
       return this;
     }
   }, {
@@ -1294,7 +1297,7 @@ var Cursor = (function (_AsyncEventEmitter) {
     value: function joinEach(joinFn) {
       (0, _invariant2.default)(typeof joinFn === 'function', 'joinEach(...): argument must be a function');
 
-      this.addPipeline(PIPELINE_TYPE.JoinEach, joinFn);
+      this._addPipeline(PIPELINE_TYPE.JoinEach, joinFn);
       return this;
     }
   }, {
@@ -1302,18 +1305,34 @@ var Cursor = (function (_AsyncEventEmitter) {
     value: function joinAll(joinFn) {
       (0, _invariant2.default)(typeof joinFn === 'function', 'joinAll(...): argument must be a function');
 
-      this.addPipeline(PIPELINE_TYPE.JoinAll, joinFn);
+      this._addPipeline(PIPELINE_TYPE.JoinAll, joinFn);
       return this;
     }
   }, {
     key: 'ifNotEmpty',
     value: function ifNotEmpty() {
-      this.addPipeline(PIPELINE_TYPE.IfNotEmpty);
+      this._addPipeline(PIPELINE_TYPE.IfNotEmpty);
       return this;
     }
   }, {
-    key: 'addPipeline',
-    value: function addPipeline(type, val) {
+    key: 'exec',
+    value: function exec() {
+      var _this2 = this;
+
+      this.emit('beforeExecute');
+      return this._createCursorPromise(this._doExecute().then(function (result) {
+        _this2._latestResult = result;
+        return result;
+      }));
+    }
+  }, {
+    key: 'then',
+    value: function then(resolve, reject) {
+      return this.exec().then(resolve, reject);
+    }
+  }, {
+    key: '_addPipeline',
+    value: function _addPipeline(type, val) {
       (0, _invariant2.default)(type && PIPELINE_TYPE[type], 'Unknown pipeline processor type %s', type);
 
       for (var _len = arguments.length, args = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
@@ -1328,9 +1347,9 @@ var Cursor = (function (_AsyncEventEmitter) {
       return this;
     }
   }, {
-    key: 'processPipeline',
-    value: function processPipeline(docs) {
-      var _this2 = this;
+    key: '_processPipeline',
+    value: function _processPipeline(docs) {
+      var _this3 = this;
 
       var i = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
 
@@ -1342,64 +1361,47 @@ var Cursor = (function (_AsyncEventEmitter) {
           if (result === PIPLEINE_STOP_MARKER) {
             return result;
           } else {
-            return _this2.processPipeline(result, i + 1);
+            return _this3._processPipeline(result, i + 1);
           }
         });
       }
     }
   }, {
-    key: 'processSkipLimits',
-    value: function processSkipLimits(docs) {
-      var skip = this._skip || 0;
-      var limit = this._limit || docs.length;
-      return docs.slice(skip, limit + skip);
-    }
-  }, {
-    key: 'exec',
-    value: function exec() {
-      return this._createCursorPromise(this._doExecute());
-    }
-  }, {
-    key: 'then',
-    value: function then(resolve, reject) {
-      return this.exec().then(resolve, reject);
-    }
-  }, {
     key: '_doExecute',
     value: function _doExecute() {
-      var _this3 = this;
+      var _this4 = this;
 
       return this._matchObjects().then(function (docs) {
         var clonned = undefined;
-        if (_this3.options.noClone) {
+        if (_this4.options.noClone) {
           clonned = docs;
         } else {
-          if (!_this3._projector) {
+          if (!_this4._projector) {
             clonned = (0, _map3.default)(docs, function (doc) {
               return _EJSON2.default.clone(doc);
             });
           } else {
-            clonned = _this3._projector.project(docs);
+            clonned = _this4._projector.project(docs);
           }
         }
-        return _this3.processPipeline(clonned);
+        return _this4._processPipeline(clonned);
       });
     }
   }, {
     key: '_matchObjects',
     value: function _matchObjects() {
-      var _this4 = this;
+      var _this5 = this;
 
       return new _DocumentRetriver2.default(this.db).retriveForQeury(this._query).then(function (docs) {
         var results = [];
-        var withFastLimit = _this4._limit && !_this4._skip && !_this4._sorter;
+        var withFastLimit = _this5._limit && !_this5._skip && !_this5._sorter;
 
         (0, _forEach2.default)(docs, function (d) {
-          var match = _this4._matcher.documentMatches(d);
+          var match = _this5._matcher.documentMatches(d);
           if (match.result) {
             results.push(d);
           }
-          if (withFastLimit && results.length === _this4._limit) {
+          if (withFastLimit && results.length === _this5._limit) {
             return false;
           }
         });
@@ -1408,12 +1410,14 @@ var Cursor = (function (_AsyncEventEmitter) {
           return results;
         }
 
-        if (_this4._sorter) {
-          var comparator = _this4._sorter.getComparator();
+        if (_this5._sorter) {
+          var comparator = _this5._sorter.getComparator();
           results.sort(comparator);
         }
 
-        return _this4.processSkipLimits(results);
+        var skip = _this5._skip || 0;
+        var limit = _this5._limit || results.length;
+        return results.slice(skip, limit + skip);
       });
     }
   }, {
@@ -1428,26 +1432,32 @@ var Cursor = (function (_AsyncEventEmitter) {
     }
   }, {
     key: '_trackChildCursorPromise',
-    value: function _trackChildCursorPromise(cursorPromise) {
-      var cursor = cursorPromise.cursor;
-      this._childrenCursors[cursor._id] = cursor;
-    }
-  }, {
-    key: '_trackParentCursor',
-    value: function _trackParentCursor(cursor) {
-      this._parentCursors[cursor._id] = cursor;
+    value: function _trackChildCursorPromise(childCursorPromise) {
+      var _this6 = this;
+
+      var childCursor = childCursorPromise.cursor;
+      this._childrenCursors[childCursor._id] = childCursor;
+      childCursor._parentCursors[this._id] = this;
+
+      this.once('beforeExecute', function () {
+        delete _this6._childrenCursors[childCursor._id];
+        delete childCursor._parentCursors[_this6._id];
+        if ((0, _keys3.default)(childCursor._parentCursors).length === 0) {
+          childCursor.emit('beforeExecute');
+        }
+      });
     }
   }, {
     key: '_createCursorPromise',
     value: function _createCursorPromise(promise) {
-      var _this5 = this;
+      var _this7 = this;
 
       var mixin = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
       return (0, _assign3.default)({
         cursor: this,
         then: function then(successFn, failFn) {
-          return _this5._createCursorPromise(promise.then(successFn, failFn), mixin);
+          return _this7._createCursorPromise(promise.then(successFn, failFn), mixin);
         }
       }, mixin);
     }
@@ -1459,7 +1469,7 @@ var Cursor = (function (_AsyncEventEmitter) {
 exports.Cursor = Cursor;
 exports.default = Cursor;
 
-},{"./AsyncEventEmitter":1,"./DocumentMatcher":9,"./DocumentProjector":11,"./DocumentRetriver":12,"./DocumentSorter":13,"./EJSON":14,"check-types":21,"fast.js/array/filter":24,"fast.js/array/reduce":28,"fast.js/forEach":30,"fast.js/function/bind":33,"fast.js/map":37,"fast.js/object/assign":38,"invariant":44}],7:[function(require,module,exports){
+},{"./AsyncEventEmitter":1,"./DocumentMatcher":9,"./DocumentProjector":11,"./DocumentRetriver":12,"./DocumentSorter":13,"./EJSON":14,"check-types":21,"fast.js/array/filter":24,"fast.js/array/reduce":28,"fast.js/forEach":30,"fast.js/function/bind":33,"fast.js/map":37,"fast.js/object/assign":38,"fast.js/object/keys":40,"invariant":44}],7:[function(require,module,exports){
 'use strict';
 
 function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
@@ -1548,7 +1558,6 @@ function _inherits(subClass, superClass) {
 // Defaults
 var _defaultDebounce = 1000 / 60;
 var _defaultBatchSize = 10;
-var _noop = function _noop() {};
 
 /**
  * Observable cursor is used for making request auto-updatable
@@ -1566,7 +1575,6 @@ var CursorObservable = (function (_Cursor) {
     _this.maybeUpdate = (0, _bind3.default)(_this.maybeUpdate, _this);
     _this._propagateUpdate = (0, _debounce2.default)((0, _bind3.default)(_this._propagateUpdate, _this), 0, 0);
     _this._doUpdate = (0, _debounce2.default)((0, _bind3.default)(_this._doUpdate, _this), _defaultDebounce, _defaultBatchSize);
-    _this._latestResult = null;
     _this._observers = 0;
     return _this;
   }
@@ -1614,10 +1622,9 @@ var CursorObservable = (function (_Cursor) {
 
   }, {
     key: 'observe',
-    value: function observe() {
+    value: function observe(listener) {
       var _this2 = this;
 
-      var listener = arguments.length <= 0 || arguments[0] === undefined ? _noop : arguments[0];
       var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
       // Make new wrapper for make possible to observe
@@ -1625,6 +1632,7 @@ var CursorObservable = (function (_Cursor) {
       var updateWrapper = function updateWrapper(a, b) {
         return _this2.maybeUpdate(a, b);
       };
+      listener = listener || function () {};
 
       this.db.on('insert', updateWrapper);
       this.db.on('update', updateWrapper);
@@ -1643,9 +1651,9 @@ var CursorObservable = (function (_Cursor) {
           running = false;
           self._observers -= 1;
           if (self._observers === 0) {
-            self._latestResult = null;
             self._latestIds = null;
-            self.emit('stopped');
+            self._latestResult = null;
+            self.emit('observeStopped');
           }
         }
       }
@@ -1785,7 +1793,6 @@ var CursorObservable = (function (_Cursor) {
       var firstRun = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
 
       return this.exec().then(function (result) {
-        _this3._latestResult = result;
         _this3._updateLatestIds();
         return _this3._propagateUpdate(firstRun).then(function () {
           return result;
@@ -1816,37 +1823,12 @@ var CursorObservable = (function (_Cursor) {
   }, {
     key: '_trackChildCursorPromise',
     value: function _trackChildCursorPromise(cursorPromise) {
-      var _this4 = this;
-
       _get(Object.getPrototypeOf(CursorObservable.prototype), '_trackChildCursorPromise', this).call(this, cursorPromise);
-      var cursor = cursorPromise.cursor;
-      var cleaner = function cleaner() {
-        return delete _this4._childrenCursors[cursor._id];
-      };
-
-      cursor.once('stopped', cleaner);
       if (cursorPromise.stop) {
         this.once('cursorChanged', cursorPromise.stop);
-        this.once('stopped', cursorPromise.stop);
+        this.once('observeStopped', cursorPromise.stop);
+        this.once('beforeExecute', cursorPromise.stop);
       }
-    }
-
-    /**
-     * Track parent cursor for propagating update event
-     * to parent observers. Also remove parent if it is stopped.
-     * @param  {Cursor} cursor
-     */
-
-  }, {
-    key: '_trackParentCursor',
-    value: function _trackParentCursor(cursor) {
-      var _this5 = this;
-
-      _get(Object.getPrototypeOf(CursorObservable.prototype), '_trackParentCursor', this).call(this, cursor);
-      var cleaner = function cleaner() {
-        return delete _this5._parentCursors[cursor._id];
-      };
-      cursor.once('stopped', cleaner);
     }
   }], [{
     key: 'defaultDebounce',

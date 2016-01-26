@@ -48,7 +48,6 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 // Defaults
 var _defaultDebounce = 1000 / 60;
 var _defaultBatchSize = 10;
-var _noop = function _noop() {};
 
 /**
  * Observable cursor is used for making request auto-updatable
@@ -66,7 +65,6 @@ var CursorObservable = (function (_Cursor) {
     _this.maybeUpdate = (0, _bind3.default)(_this.maybeUpdate, _this);
     _this._propagateUpdate = (0, _debounce2.default)((0, _bind3.default)(_this._propagateUpdate, _this), 0, 0);
     _this._doUpdate = (0, _debounce2.default)((0, _bind3.default)(_this._doUpdate, _this), _defaultDebounce, _defaultBatchSize);
-    _this._latestResult = null;
     _this._observers = 0;
     return _this;
   }
@@ -114,10 +112,9 @@ var CursorObservable = (function (_Cursor) {
 
   }, {
     key: 'observe',
-    value: function observe() {
+    value: function observe(listener) {
       var _this2 = this;
 
-      var listener = arguments.length <= 0 || arguments[0] === undefined ? _noop : arguments[0];
       var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
       // Make new wrapper for make possible to observe
@@ -125,6 +122,7 @@ var CursorObservable = (function (_Cursor) {
       var updateWrapper = function updateWrapper(a, b) {
         return _this2.maybeUpdate(a, b);
       };
+      listener = listener || function () {};
 
       this.db.on('insert', updateWrapper);
       this.db.on('update', updateWrapper);
@@ -143,9 +141,9 @@ var CursorObservable = (function (_Cursor) {
           running = false;
           self._observers -= 1;
           if (self._observers === 0) {
-            self._latestResult = null;
             self._latestIds = null;
-            self.emit('stopped');
+            self._latestResult = null;
+            self.emit('observeStopped');
           }
         }
       }
@@ -285,7 +283,6 @@ var CursorObservable = (function (_Cursor) {
       var firstRun = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
 
       return this.exec().then(function (result) {
-        _this3._latestResult = result;
         _this3._updateLatestIds();
         return _this3._propagateUpdate(firstRun).then(function () {
           return result;
@@ -316,37 +313,12 @@ var CursorObservable = (function (_Cursor) {
   }, {
     key: '_trackChildCursorPromise',
     value: function _trackChildCursorPromise(cursorPromise) {
-      var _this4 = this;
-
       _get(Object.getPrototypeOf(CursorObservable.prototype), '_trackChildCursorPromise', this).call(this, cursorPromise);
-      var cursor = cursorPromise.cursor;
-      var cleaner = function cleaner() {
-        return delete _this4._childrenCursors[cursor._id];
-      };
-
-      cursor.once('stopped', cleaner);
       if (cursorPromise.stop) {
         this.once('cursorChanged', cursorPromise.stop);
-        this.once('stopped', cursorPromise.stop);
+        this.once('observeStopped', cursorPromise.stop);
+        this.once('beforeExecute', cursorPromise.stop);
       }
-    }
-
-    /**
-     * Track parent cursor for propagating update event
-     * to parent observers. Also remove parent if it is stopped.
-     * @param  {Cursor} cursor
-     */
-
-  }, {
-    key: '_trackParentCursor',
-    value: function _trackParentCursor(cursor) {
-      var _this5 = this;
-
-      _get(Object.getPrototypeOf(CursorObservable.prototype), '_trackParentCursor', this).call(this, cursor);
-      var cleaner = function cleaner() {
-        return delete _this5._parentCursors[cursor._id];
-      };
-      cursor.once('stopped', cleaner);
     }
   }], [{
     key: 'defaultDebounce',
