@@ -83,10 +83,10 @@ describe('CursorObservable', () => {
   });
 
   describe('#observe', function () {
-    it('should generate `stopped` event when all observers stopped', function () {
+    it('should generate `observeStopped` event when all observers stopped', function () {
       const cursor = db.find({b: 1})
       const cb = sinon.spy();
-      cursor.on('stopped', cb);
+      cursor.on('observeStopped', cb);
       const obs1 = cursor.observe(() => {});
       const obs2 = cursor.observe(() => {});
       obs1.stop();
@@ -534,6 +534,66 @@ describe('CursorObservable', () => {
       cursor._doUpdate.func.should.have.callCount(1);
       cursor._doUpdate.should.have.callCount(0);
       res.should.be.equal(1);
+    });
+  });
+
+  describe('#_trackChildCursorPromise', function () {
+    it('should stop observer throught not observable cursor', function () {
+      const cursor_3 = new CursorObservable(db).find({a: 'c'});
+      const cursor_2 = new CursorObservable(db).find({a: 'b'}).join(() => cursor_3.observe());
+      const cursor_1 = new CursorObservable(db).find({a: 'a'}).join(() => cursor_2);
+
+      return Promise.all([
+        cursor_1.observe()
+      ])
+      .then(() => cursor_1.update())
+      .then(() => {
+        cursor_3.listeners('update').should.have.length(1);
+        cursor_2.listeners('update').should.have.length(0);
+        cursor_1.listeners('update').should.have.length(1);
+      });
+    });
+
+    it('should stop only useless observers', function () {
+      const cursor_3 = new CursorObservable(db).find({a: 'c'});
+      const cursor_2 = new CursorObservable(db).find({a: 'b'}).join(() => cursor_3.observe());
+      const cursor_1 = new CursorObservable(db).find({a: 'a'}).join(() => cursor_2);
+
+      return Promise.all([
+        cursor_1.observe(),
+        cursor_3.observe(),
+      ])
+      .then(() => {
+        cursor_3.listeners('update').should.have.length(2);
+        return cursor_1.update();
+      })
+      .then(() => {
+        cursor_3.listeners('update').should.have.length(2);
+        cursor_2.listeners('update').should.have.length(0);
+        cursor_1.listeners('update').should.have.length(1);
+      });
+    });
+
+    it('should not stop observer in parallel cursor tree', function () {
+      const cursor_3 = new CursorObservable(db).find({a: 'c'});
+      const cursor_2 = new CursorObservable(db).find({a: 'b'}).join(() => cursor_3.observe());
+      const cursor_1 = new CursorObservable(db).find({a: 'a'}).join(() => cursor_2);
+      const cursor_1_1 = new CursorObservable(db).find({a: 'a'}).join(() => cursor_3.observe());
+
+      return Promise.all([
+        cursor_1.observe(),
+        cursor_1_1.observe(),
+      ])
+      .then(() => {
+        cursor_3.listeners('update').should.have.length(2);
+        return cursor_1.update();
+      })
+      .then(() => {
+        cursor_3.listeners('update').should.have.length(2);
+        cursor_2.listeners('update').should.have.length(0);
+        cursor_1.listeners('update').should.have.length(1);
+        cursor_1_1.listeners('update').should.have.length(1);
+      });
     });
   });
 });

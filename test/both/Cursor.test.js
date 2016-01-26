@@ -72,6 +72,24 @@ describe('Cursor', () => {
         });
       });
     });
+
+    it('should set latest result', function () {
+      const cursor = new Cursor(db, {}, {noClone: true});
+      cursor.find({b: {$gt: 4}}).skip(1).sort({b: 1});
+      expect(cursor._latestResult).to.be.null;
+      return cursor.exec().then((docs) => {
+        cursor._latestResult.should.have.length(2);
+      })
+    });
+
+    it('should emit `beforeExecute` event', function () {
+      const cb = sinon.spy();
+      const cursor = new Cursor(db, {}, {noClone: true});
+      cursor.on('beforeExecute', cb);
+      cursor.find({b: {$gt: 4}}).skip(1).sort({b: 1});
+      cursor.exec();
+      cb.should.have.callCount(1);
+    });
   });
 
   describe('#skip', function () {
@@ -624,6 +642,36 @@ describe('Cursor', () => {
             ]);
           });
         });
+      });
+    });
+  });
+
+  describe('#_trackChildCursorPromise', function () {
+    it('should destroy only not used cursors', function () {
+      const cursor_3 = new Cursor(db).find({a: 'c'});
+      const cursor_3_1 = new Cursor(db).find({a: 'c'});
+      const cursor_2 = new Cursor(db).find({a: 'b'}).join(() => [cursor_3, cursor_3_1]);
+      const cursor_1 = new Cursor(db).find({a: 'a'}).join(() => cursor_2);
+      const cursor_1_1 = new Cursor(db).find({a: 'd'}).join(() => cursor_3);
+      const destroy_spy_1 = sinon.spy();
+      const destroy_spy_2 = sinon.spy();
+      const destroy_spy_3 = sinon.spy();
+      const destroy_spy_3_1 = sinon.spy();
+      cursor_1.on('beforeExecute', destroy_spy_1);
+      cursor_2.on('beforeExecute', destroy_spy_2);
+      cursor_3.on('beforeExecute', destroy_spy_3);
+      cursor_3_1.on('beforeExecute', destroy_spy_3_1);
+
+      return Promise.all([
+        cursor_1, cursor_1_1
+      ]).then(() => {
+        cursor_1.exec();
+        destroy_spy_1.should.have.callCount(2);
+        destroy_spy_2.should.have.callCount(2);
+        destroy_spy_3_1.should.have.callCount(2);
+        destroy_spy_3.should.have.callCount(2);
+        cursor_1_1.exec();
+        destroy_spy_3.should.have.callCount(3);
       });
     });
   });
