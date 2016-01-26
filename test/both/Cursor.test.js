@@ -653,25 +653,74 @@ describe('Cursor', () => {
       const cursor_2 = new Cursor(db).find({a: 'b'}).join(() => [cursor_3, cursor_3_1]);
       const cursor_1 = new Cursor(db).find({a: 'a'}).join(() => cursor_2);
       const cursor_1_1 = new Cursor(db).find({a: 'd'}).join(() => cursor_3);
-      const destroy_spy_1 = sinon.spy();
-      const destroy_spy_2 = sinon.spy();
-      const destroy_spy_3 = sinon.spy();
-      const destroy_spy_3_1 = sinon.spy();
-      cursor_1.on('beforeExecute', destroy_spy_1);
-      cursor_2.on('beforeExecute', destroy_spy_2);
-      cursor_3.on('beforeExecute', destroy_spy_3);
-      cursor_3_1.on('beforeExecute', destroy_spy_3_1);
 
       return Promise.all([
         cursor_1, cursor_1_1
       ]).then(() => {
-        cursor_1.exec();
-        destroy_spy_1.should.have.callCount(2);
-        destroy_spy_2.should.have.callCount(2);
-        destroy_spy_3_1.should.have.callCount(2);
-        destroy_spy_3.should.have.callCount(2);
-        cursor_1_1.exec();
-        destroy_spy_3.should.have.callCount(3);
+        cursor_1._childrenCursors.should.be.deep.equal({[cursor_2._id]: cursor_2});
+        cursor_1._parentCursors.should.be.deep.equal({});
+        cursor_2._childrenCursors.should.be.deep.equal({
+          [cursor_3._id]: cursor_3,
+          [cursor_3_1._id]: cursor_3_1,
+        });
+        cursor_2._parentCursors.should.be.deep.equal({[cursor_1._id]: cursor_1});
+        cursor_3._childrenCursors.should.be.deep.equal({});
+        cursor_3._parentCursors.should.be.deep.equal({
+          [cursor_1_1._id]: cursor_1_1,
+          [cursor_2._id]: cursor_2,
+        });
+        cursor_3_1._childrenCursors.should.be.deep.equal({});
+        cursor_3_1._parentCursors.should.be.deep.equal({
+          [cursor_2._id]: cursor_2,
+        });
+        cursor_1_1._parentCursors.should.be.deep.equal({});
+        cursor_1_1._childrenCursors.should.be.deep.equal({[cursor_3._id]: cursor_3});
+
+        let a = cursor_1.exec();
+        cursor_1._childrenCursors.should.be.deep.equal({});
+        cursor_1._parentCursors.should.be.deep.equal({});
+        cursor_2._childrenCursors.should.be.deep.equal({});
+        cursor_2._parentCursors.should.be.deep.equal({});
+        cursor_3._childrenCursors.should.be.deep.equal({});
+        cursor_3._parentCursors.should.be.deep.equal({
+          [cursor_1_1._id]: cursor_1_1,
+        });
+        cursor_3_1._childrenCursors.should.be.deep.equal({});
+        cursor_3_1._parentCursors.should.be.deep.equal({});
+        cursor_1_1._parentCursors.should.be.deep.equal({});
+        cursor_1_1._childrenCursors.should.be.deep.equal({[cursor_3._id]: cursor_3});
+
+        let b = cursor_1_1.exec();
+        cursor_1._childrenCursors.should.be.deep.equal({});
+        cursor_1._parentCursors.should.be.deep.equal({});
+        cursor_2._childrenCursors.should.be.deep.equal({});
+        cursor_2._parentCursors.should.be.deep.equal({});
+        cursor_3._childrenCursors.should.be.deep.equal({});
+        cursor_3._parentCursors.should.be.deep.equal({});
+        cursor_3_1._childrenCursors.should.be.deep.equal({});
+        cursor_3_1._parentCursors.should.be.deep.equal({});
+        cursor_1_1._parentCursors.should.be.deep.equal({});
+        cursor_1_1._childrenCursors.should.be.deep.equal({});
+        return Promise.all([a, b]);
+      }).then(() => {
+        cursor_1._childrenCursors.should.be.deep.equal({[cursor_2._id]: cursor_2});
+        cursor_1._parentCursors.should.be.deep.equal({});
+        cursor_2._childrenCursors.should.be.deep.equal({
+          [cursor_3._id]: cursor_3,
+          [cursor_3_1._id]: cursor_3_1,
+        });
+        cursor_2._parentCursors.should.be.deep.equal({[cursor_1._id]: cursor_1});
+        cursor_3._childrenCursors.should.be.deep.equal({});
+        cursor_3._parentCursors.should.be.deep.equal({
+          [cursor_1_1._id]: cursor_1_1,
+          [cursor_2._id]: cursor_2,
+        });
+        cursor_3_1._childrenCursors.should.be.deep.equal({});
+        cursor_3_1._parentCursors.should.be.deep.equal({
+          [cursor_2._id]: cursor_2,
+        });
+        cursor_1_1._parentCursors.should.be.deep.equal({});
+        cursor_1_1._childrenCursors.should.be.deep.equal({[cursor_3._id]: cursor_3});
       });
     });
   });
