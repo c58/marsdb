@@ -17,6 +17,10 @@ var _checkTypes = require('check-types');
 
 var _checkTypes2 = _interopRequireDefault(_checkTypes);
 
+var _values2 = require('fast.js/object/values');
+
+var _values3 = _interopRequireDefault(_values2);
+
 var _map2 = require('fast.js/map');
 
 var _map3 = _interopRequireDefault(_map2);
@@ -253,11 +257,11 @@ var CursorObservable = (function (_Cursor) {
 
       var parentUpdatePromise = undefined;
       if (!firstRun) {
-        parentUpdatePromise = Promise.all((0, _map3.default)(this._parentCursors, function (v, k) {
+        parentUpdatePromise = Promise.all((0, _values3.default)((0, _map3.default)(this._parentCursors, function (v, k) {
           if (v._propagateUpdate) {
             return v._propagateUpdate(false);
           }
-        }));
+        })));
       }
 
       return updatePromise.then(function () {

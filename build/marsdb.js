@@ -986,7 +986,7 @@ var CollectionIndex = exports.CollectionIndex = (function () {
 
 exports.default = CollectionIndex;
 
-},{"invariant":43}],6:[function(require,module,exports){
+},{"invariant":44}],6:[function(require,module,exports){
 'use strict';
 
 function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
@@ -1459,7 +1459,7 @@ var Cursor = (function (_AsyncEventEmitter) {
 exports.Cursor = Cursor;
 exports.default = Cursor;
 
-},{"./AsyncEventEmitter":1,"./DocumentMatcher":9,"./DocumentProjector":11,"./DocumentRetriver":12,"./DocumentSorter":13,"./EJSON":14,"check-types":21,"fast.js/array/filter":24,"fast.js/array/reduce":28,"fast.js/forEach":30,"fast.js/function/bind":33,"fast.js/map":37,"fast.js/object/assign":38,"invariant":43}],7:[function(require,module,exports){
+},{"./AsyncEventEmitter":1,"./DocumentMatcher":9,"./DocumentProjector":11,"./DocumentRetriver":12,"./DocumentSorter":13,"./EJSON":14,"check-types":21,"fast.js/array/filter":24,"fast.js/array/reduce":28,"fast.js/forEach":30,"fast.js/function/bind":33,"fast.js/map":37,"fast.js/object/assign":38,"invariant":44}],7:[function(require,module,exports){
 'use strict';
 
 function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
@@ -1502,6 +1502,10 @@ var _bind3 = _interopRequireDefault(_bind2);
 var _checkTypes = require('check-types');
 
 var _checkTypes2 = _interopRequireDefault(_checkTypes);
+
+var _values2 = require('fast.js/object/values');
+
+var _values3 = _interopRequireDefault(_values2);
 
 var _map2 = require('fast.js/map');
 
@@ -1753,11 +1757,11 @@ var CursorObservable = (function (_Cursor) {
 
       var parentUpdatePromise = undefined;
       if (!firstRun) {
-        parentUpdatePromise = Promise.all((0, _map3.default)(this._parentCursors, function (v, k) {
+        parentUpdatePromise = Promise.all((0, _values3.default)((0, _map3.default)(this._parentCursors, function (v, k) {
           if (v._propagateUpdate) {
             return v._propagateUpdate(false);
           }
-        }));
+        })));
       }
 
       return updatePromise.then(function () {
@@ -1870,7 +1874,7 @@ var CursorObservable = (function (_Cursor) {
 exports.CursorObservable = CursorObservable;
 exports.default = CursorObservable;
 
-},{"./Cursor":6,"./EJSON":14,"./debounce":19,"check-types":21,"fast.js/function/bind":33,"fast.js/map":37}],8:[function(require,module,exports){
+},{"./Cursor":6,"./EJSON":14,"./debounce":19,"check-types":21,"fast.js/function/bind":33,"fast.js/map":37,"fast.js/object/values":42}],8:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3242,7 +3246,7 @@ var andSomeMatchers = function andSomeMatchers(subMatchers) {
 var andDocumentMatchers = andSomeMatchers;
 var andBranchedMatchers = andSomeMatchers;
 
-},{"./Document":8,"./EJSON":14,"check-types":21,"fast.js/array/every":23,"fast.js/array/indexOf":26,"fast.js/array/some":29,"fast.js/forEach":30,"fast.js/map":37,"fast.js/object/keys":40,"geojson-utils":42}],10:[function(require,module,exports){
+},{"./Document":8,"./EJSON":14,"check-types":21,"fast.js/array/every":23,"fast.js/array/indexOf":26,"fast.js/array/some":29,"fast.js/forEach":30,"fast.js/map":37,"fast.js/object/keys":40,"geojson-utils":43}],10:[function(require,module,exports){
 'use strict';
 
 function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
@@ -5764,7 +5768,7 @@ var IndexManager = exports.IndexManager = (function () {
 
 exports.default = IndexManager;
 
-},{"./CollectionIndex":5,"./DocumentRetriver":12,"./PromiseQueue":16,"fast.js/forEach":30,"fast.js/function/bind":33,"fast.js/map":37,"fast.js/object/keys":40,"invariant":43}],16:[function(require,module,exports){
+},{"./CollectionIndex":5,"./DocumentRetriver":12,"./PromiseQueue":16,"fast.js/forEach":30,"fast.js/function/bind":33,"fast.js/map":37,"fast.js/object/keys":40,"invariant":44}],16:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -6214,7 +6218,7 @@ var Random = (function () {
 exports.default = Random;
 exports.default = Random;
 
-},{"crypto":undefined,"fast.js/function/try":36,"invariant":43}],18:[function(require,module,exports){
+},{"crypto":undefined,"fast.js/function/try":36,"invariant":44}],18:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () {
@@ -8221,6 +8225,27 @@ module.exports = function fastMapObject (subject, fn, thisContext) {
 };
 
 },{"../function/bindInternal3":34}],42:[function(require,module,exports){
+'use strict';
+
+/**
+ * # Values
+ * Return all the (enumerable) property values for an object.
+ * Like Object.keys() but for values.
+ *
+ * @param  {Object} obj The object to retrieve values from.
+ * @return {Array}      An array containing property values.
+ */
+module.exports = function fastValues (obj) {
+  var keys = Object.keys(obj),
+      length = keys.length,
+      values = new Array(length);
+
+  for (var i = 0; i < length; i++) {
+    values[i] = obj[keys[i]];
+  }
+  return values;
+};
+},{}],43:[function(require,module,exports){
 (function () {
   var gju = this.gju = {};
 
@@ -8630,7 +8655,7 @@ module.exports = function fastMapObject (subject, fn, thisContext) {
 
 })();
 
-},{}],43:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
