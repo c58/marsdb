@@ -16,9 +16,6 @@ MarsDB supports any kind of find/update/remove operations that Meteor's minimong
 
 You can use it in any JS environment (Browser, Electron, NW.js, Node.js).
 
-Do you like MarsDB? Give it your star!
-<iframe src="https://ghbtns.com/github-btn.html?user=c58&repo=marsdb&type=star&count=true&size=large" frameborder="0" scrolling="0" width="160px" height="30px"></iframe>
-
 ## Features
 
 * **Promise based API**
