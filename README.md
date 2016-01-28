@@ -40,7 +40,12 @@ You can use it in any JS environment (Browser, Electron, NW.js, Node.js).
 * [LevelUP storage](https://github.com/c58/marsdb-levelup) – lightweight server-less Node.js storage
 * [MongoDB wrapper](https://github.com/c58/marsdb-mongo) – use MarsDB for comfortable work with MongoDB
 * [Validation via Mongoose](https://github.com/c58/marsdb-validation) – validate objects with Mongoose
-* **Meteor compatible** [Client](https://github.com/c58/marsdb-sync-client) / [Server](https://github.com/c58/marsdb-sync-server) synchronizer
+
+## Meteor compatible client/server
+Sometimes you can't use Meteor infrastructure. Maybe you need to build a custom client. Maybe you need to build a custom server with express and other modules. In meteor it can be done with a ton of hack. But the only reason why it's so ugly to do a simple things is because Meteor forces you to use their infrastructure. I'm trying to solve this issue with DDP client/server modules, based on MarsDB.
+
+* [DDP client](https://github.com/c58/marsdb-sync-client)
+* [DDP server](https://github.com/c58/marsdb-sync-server)
 
 ## Examples
 
