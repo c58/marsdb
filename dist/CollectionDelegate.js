@@ -15,6 +15,10 @@ var _DocumentModifier = require('./DocumentModifier');
 
 var _DocumentModifier2 = _interopRequireDefault(_DocumentModifier);
 
+var _CursorObservable = require('./CursorObservable');
+
+var _CursorObservable2 = _interopRequireDefault(_CursorObservable);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
@@ -110,7 +114,7 @@ var CollectionDelegate = exports.CollectionDelegate = (function () {
     value: function find(query) {
       var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
-      return new this.db.cursorClass(this.db, query, options);
+      return new _CursorObservable2.default(this.db, query, options);
     }
   }, {
     key: 'findOne',

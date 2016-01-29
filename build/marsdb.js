@@ -376,10 +376,6 @@ var _StorageManager = require('./StorageManager');
 
 var _StorageManager2 = _interopRequireDefault(_StorageManager);
 
-var _CursorObservable = require('./CursorObservable');
-
-var _CursorObservable2 = _interopRequireDefault(_CursorObservable);
-
 var _CollectionDelegate = require('./CollectionDelegate');
 
 var _CollectionDelegate2 = _interopRequireDefault(_CollectionDelegate);
@@ -415,8 +411,8 @@ function _inherits(subClass, superClass) {
 }
 
 // Defaults
+var _defaultUpgradeEmitter = new _eventemitter2.default();
 var _defaultDelegate = _CollectionDelegate2.default;
-var _defaultCursorClass = _CursorObservable2.default;
 var _defaultStorageManager = _StorageManager2.default;
 var _defaultIndexManager = _IndexManager2.default;
 var _defaultIdGenerator = function _defaultIdGenerator(modelName) {
@@ -439,16 +435,16 @@ var Collection = exports.Collection = (function (_EventEmitter) {
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Collection).call(this));
 
     _this._modelName = name;
-    _this._writeQueue = new _PromiseQueue2.default(options.writeConcurrency || 2);
+    _this._writeQueue = new _PromiseQueue2.default(options.writeConcurrency || 5);
 
     var storageManagerClass = options.storageManager || _defaultStorageManager;
     var delegateClass = options.delegate || _defaultDelegate;
     var indexManagerClass = options.indexManager || _defaultIndexManager;
-    _this.cursorClass = options.cursorClass || _defaultCursorClass;
     _this.idGenerator = options.idGenerator || _defaultIdGenerator;
     _this.indexManager = new indexManagerClass(_this, options);
     _this.storageManager = new storageManagerClass(_this, options);
     _this.delegate = new delegateClass(_this, options);
+    _this._registerDefaultUpgradeHandlers(options);
     return _this;
   }
 
@@ -656,6 +652,41 @@ var Collection = exports.Collection = (function (_EventEmitter) {
 
       return this.delegate.ids(query, options);
     }
+
+    /**
+     * If defaults is not overrided by options, then collection
+     * registered in evenbus for default upgrade.
+     * @param  {Object} options
+     */
+
+  }, {
+    key: '_registerDefaultUpgradeHandlers',
+    value: function _registerDefaultUpgradeHandlers() {
+      var _this6 = this;
+
+      var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+      if (!options.storageManager) {
+        _defaultUpgradeEmitter.on('storageManager', function () {
+          return _this6.storageManager = new _defaultStorageManager(_this6, options);
+        });
+      }
+      if (!options.idGenerator) {
+        _defaultUpgradeEmitter.on('idGenerator', function () {
+          return _this6.idGenerator = _defaultIdGenerator;
+        });
+      }
+      if (!options.delegate) {
+        _defaultUpgradeEmitter.on('delegate', function () {
+          return _this6.delegate = new _defaultDelegate(_this6, options);
+        });
+      }
+      if (!options.indexManager) {
+        _defaultUpgradeEmitter.on('indexManager', function () {
+          return _this6.indexManager = new _defaultIndexManager(_this6, options);
+        });
+      }
+    }
   }, {
     key: 'modelName',
     get: function get() {
@@ -671,47 +702,78 @@ var Collection = exports.Collection = (function (_EventEmitter) {
     get: function get() {
       return this.storageManager;
     }
+
+    /**
+     * Wihout arguments it returns current default storage manager.
+     * If arguments provided, then first argument will be set as default
+     * storage manager and all collections, who uses default storage manager,
+     * will be upgraded to a new strage manager.
+     * @return {undefined|Class}
+     */
+
   }], [{
     key: 'defaultStorageManager',
     value: function defaultStorageManager() {
       if (arguments.length > 0) {
         _defaultStorageManager = arguments[0];
+        _defaultUpgradeEmitter.emit('storageManager');
       } else {
         return _defaultStorageManager;
       }
     }
+
+    /**
+     * Wihout arguments it returns current default id generator.
+     * If arguments provided, then first argument will be set as default
+     * id generator and all collections, who uses default id generator,
+     * will be upgraded to a new id generator.
+     * @return {undefined|Class}
+     */
+
   }, {
     key: 'defaultIdGenerator',
     value: function defaultIdGenerator() {
       if (arguments.length > 0) {
         _defaultIdGenerator = arguments[0];
+        _defaultUpgradeEmitter.emit('idGenerator');
       } else {
         return _defaultIdGenerator;
       }
     }
-  }, {
-    key: 'defaultCursorClass',
-    value: function defaultCursorClass() {
-      if (arguments.length > 0) {
-        _defaultCursorClass = arguments[0];
-      } else {
-        return _defaultCursorClass;
-      }
-    }
+
+    /**
+     * Wihout arguments it returns current default delegate class.
+     * If arguments provided, then first argument will be set as default
+     * delegate and all collections, who uses default delegate,
+     * will be upgraded to a new delegate.
+     * @return {undefined|Class}
+     */
+
   }, {
     key: 'defaultDelegate',
     value: function defaultDelegate() {
       if (arguments.length > 0) {
         _defaultDelegate = arguments[0];
+        _defaultUpgradeEmitter.emit('delegate');
       } else {
         return _defaultDelegate;
       }
     }
+
+    /**
+     * Wihout arguments it returns current default index manager class.
+     * If arguments provided, then first argument will be set as default
+     * index manager and all collections, who uses default index manager,
+     * will be upgraded to a new index manager.
+     * @return {undefined|Class}
+     */
+
   }, {
     key: 'defaultIndexManager',
     value: function defaultIndexManager() {
       if (arguments.length > 0) {
         _defaultIndexManager = arguments[0];
+        _defaultUpgradeEmitter.emit('indexManager');
       } else {
         return _defaultIndexManager;
       }
@@ -723,7 +785,7 @@ var Collection = exports.Collection = (function (_EventEmitter) {
 
 exports.default = Collection;
 
-},{"./CollectionDelegate":4,"./CursorObservable":7,"./EJSON":14,"./IndexManager":15,"./PromiseQueue":16,"./Random":17,"./StorageManager":18,"check-types":21,"eventemitter3":22,"fast.js/forEach":30,"fast.js/map":37}],4:[function(require,module,exports){
+},{"./CollectionDelegate":4,"./EJSON":14,"./IndexManager":15,"./PromiseQueue":16,"./Random":17,"./StorageManager":18,"check-types":21,"eventemitter3":22,"fast.js/forEach":30,"fast.js/map":37}],4:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () {
@@ -748,6 +810,10 @@ var _map3 = _interopRequireDefault(_map2);
 var _DocumentModifier = require('./DocumentModifier');
 
 var _DocumentModifier2 = _interopRequireDefault(_DocumentModifier);
+
+var _CursorObservable = require('./CursorObservable');
+
+var _CursorObservable2 = _interopRequireDefault(_CursorObservable);
 
 function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : { default: obj };
@@ -858,7 +924,7 @@ var CollectionDelegate = exports.CollectionDelegate = (function () {
     value: function find(query) {
       var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
-      return new this.db.cursorClass(this.db, query, options);
+      return new _CursorObservable2.default(this.db, query, options);
     }
   }, {
     key: 'findOne',
@@ -896,7 +962,7 @@ var CollectionDelegate = exports.CollectionDelegate = (function () {
 
 exports.default = CollectionDelegate;
 
-},{"./DocumentModifier":10,"fast.js/map":37}],5:[function(require,module,exports){
+},{"./CursorObservable":7,"./DocumentModifier":10,"fast.js/map":37}],5:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () {
