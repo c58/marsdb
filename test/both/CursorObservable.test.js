@@ -371,113 +371,6 @@ describe('CursorObservable', () => {
     });
   });
 
-
-  describe('#debounce', function () {
-
-    it('should change debounce wait time', function (done) {
-      var called = false;
-      const cursor = new CursorObservable(db);
-      cursor.debounce(100);
-      const stopper = cursor.find({b: {$gt: 4, $lte: 7}}).observe((result) => {
-        called = true;
-      });
-      setTimeout(() => {
-        if (!called) {
-          done(new Error('Should be called'));
-        }
-        db.insert({b: 4.5});
-        called = false;
-        setTimeout(() => {
-          if (called) {
-            done(new Error('Can\'t be called before debounce'))
-          }
-        }, 90);
-        setTimeout(() => {
-          if (!called) {
-            done(new Error('Must be called after debounce'))
-          } else {
-            done();
-          }
-        }, 120);
-      }, 10);
-    });
-
-    it('should debounce update calls', function (done) {
-      var called = false;
-      const cursor = new CursorObservable(db);
-      cursor.debounce(100);
-      const stopper = cursor.find({b: {$gt: 4, $lte: 7}}).observe((result) => {
-        called = true;
-      });
-      setTimeout(() => {
-        if (!called) {
-          done(new Error('Should be called'));
-        }
-        db.insert({b: 4.5});
-        called = false;
-        setTimeout(() => {
-          if (called) {
-            done(new Error('Can\'t be called before debounce'));
-          }
-          db.insert({b: 4.5});
-        }, 90);
-        setTimeout(() => {
-          if (called) {
-            done(new Error('Can\'t be called before debounce'));
-          }
-        }, 110);
-        setTimeout(() => {
-          if (called) {
-            done(new Error('Can\'t be called before debounce'));
-          }
-        }, 190);
-        setTimeout(() => {
-          if (!called) {
-            done(new Error('Must be called after debounce'));
-          } else {
-            done();
-          }
-        }, 310);
-      }, 10);
-    });
-  });
-
-  describe('#batchSize', function () {
-    it('should change batchSize and apply batch update before debounce wait', function (done) {
-      var called = false;
-      const cursor = new CursorObservable(db);
-      cursor.debounce(10000);
-      cursor.batchSize(5);
-      const stopper = cursor.find({b: {$gt: 4, $lte: 7}}).observe((result) => {
-        called = true;
-      });
-
-      setTimeout(() => {
-        if (!called) {
-          done(new Error('Should be called'));
-        }
-        called = false;
-        Promise.all([1, 2, 3, 4, 5].map(x => db.insert({b: 4.5}))).then(() => {
-          setTimeout(() => {
-            if (called) {
-              done(new Error('Can\'t be called before debounce'));
-            } else {
-              db.insert({b: 4.5}).then(() => {
-                setTimeout(() => {
-                  if (!called) {
-                    done(new Error('Must be called after debounce'));
-                  } else {
-                    done();
-                  }
-                }, 10);
-              })
-            }
-          }, 10);
-        });
-      }, 20);
-    });
-  });
-
   describe('#maybeUpdate', function () {
     it('should update when no newDoc and oldDoc provided', function () {
       const cursor = new CursorObservable(db);
@@ -515,13 +408,12 @@ describe('CursorObservable', () => {
   describe('#update', function () {
     it('should stop previous update and return new one', function () {
       const cursor = new CursorObservable(db);
-      const oldPromise = { cancel: sinon.spy() }
-      cursor._updatePromise = oldPromise;
       cursor._doUpdate = sinon.spy();
       cursor._doUpdate.func = sinon.spy();
+      cursor._doUpdate.cancel = sinon.spy();
 
       cursor.update();
-      oldPromise.cancel.should.have.callCount(1);
+      cursor._doUpdate.cancel.should.have.callCount(1);
       cursor._doUpdate.should.have.callCount(1);
     });
 
@@ -530,9 +422,11 @@ describe('CursorObservable', () => {
       cursor._doUpdate = sinon.spy();
       cursor._doUpdate.func = sinon.stub();
       cursor._doUpdate.func.returns(1);
+      cursor._doUpdate.cancel = sinon.spy();
       const res = cursor.update(false, true);
       cursor._doUpdate.func.should.have.callCount(1);
       cursor._doUpdate.should.have.callCount(0);
+      cursor._doUpdate.cancel.should.have.callCount(1);
       res.should.be.equal(1);
     });
   });
