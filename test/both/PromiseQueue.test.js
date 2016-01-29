@@ -27,10 +27,15 @@ describe('PromiseQueue', () => {
         queue.add(cb3),
       ];
       queue.length.should.be.equals(3);
-      cb1.should.have.callCount(1);
-      cb2.should.have.callCount(1);
+      cb1.should.have.callCount(0);
+      cb2.should.have.callCount(0);
       cb3.should.have.callCount(0);
-      return Promise.all(ops);
+      return Promise.all(ops).then(() => {
+        cb1.should.have.callCount(1);
+        cb2.should.have.callCount(1);
+        cb3.should.have.callCount(1);
+        queue.length.should.be.equals(0);
+      });
     });
 
     it('should reject on error and process next item', function () {
