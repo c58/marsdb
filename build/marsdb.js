@@ -1749,6 +1749,7 @@ var CursorObservable = (function (_Cursor) {
     value: function stopObservers() {
       this._doUpdate.cancel();
       this.emit('stop');
+      return this;
     }
 
     /**
@@ -1765,9 +1766,7 @@ var CursorObservable = (function (_Cursor) {
       var firstRun = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
       var immidiatelly = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
 
-      if (this._updatePromise && this._updatePromise.cancel) {
-        this._updatePromise.cancel();
-      }
+      this._doUpdate.cancel();
       this._updatePromise = immidiatelly ? this._doUpdate.func(firstRun) : this._doUpdate(firstRun);
       return this._updatePromise;
     }
