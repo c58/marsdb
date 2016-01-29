@@ -330,16 +330,18 @@ describe('Collection', () => {
       const db = new Collection('test');
       const cb = sinon.spy();
       db.on('sync:update', cb);
-      db.update({}, {$set: {a: 1}}, {});
-      cb.should.have.callCount(1);
+      return db.update({}, {$set: {a: 1}}, {}).then(() => {
+        cb.should.have.callCount(1);
+      });
     });
 
     it('should be quiet if options.quiet passed', function () {
       const db = new Collection('test');
       const cb = sinon.spy();
       db.on('sync:update', cb);
-      db.update({}, {$set: {a: 1}}, {quiet: true});
-      cb.should.have.callCount(0);
+      return db.update({}, {$set: {a: 1}}, {quiet: true}).then(() => {
+        cb.should.have.callCount(0);
+      });
     });
 
     it('should update index of a doucmnet', function () {
