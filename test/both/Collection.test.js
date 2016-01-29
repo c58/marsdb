@@ -12,21 +12,35 @@ chai.should();
 
 describe('Collection', () => {
 
+  const _defaultIdGenerator = Collection.defaultIdGenerator();
+  const _defaultDelegate = Collection.defaultDelegate();
+  const _defaultStorageManager = Collection.defaultStorageManager();
+  const _defaultIndexManager = Collection.defaultIndexManager();
+  beforeEach(function () {
+    Collection.defaultDelegate(_defaultDelegate);
+    Collection.defaultStorageManager(_defaultStorageManager);
+    Collection.defaultIndexManager(_defaultIndexManager);
+    Collection.defaultIdGenerator(_defaultIdGenerator);
+  });
+
   describe('#constructor', function () {
-    it('should accept second argument with options', function () {
+    it('should override defaults', function () {
       class NewStorageManager {}
       function new_id_generator() {}
-      class NewCursor {}
+      class NewIndexManager {}
+      class NewDelegate {}
 
       const db = new Collection('test', {
         storageManager: NewStorageManager,
         idGenerator: new_id_generator,
-        cursorClass: NewCursor,
+        indexManager: NewIndexManager,
+        delegate: NewDelegate,
       });
 
       db.storageManager.should.be.an.instanceof(NewStorageManager);
       db.idGenerator.should.be.equal(new_id_generator);
-      db.cursorClass.should.be.equal(NewCursor);
+      db.indexManager.should.be.an.instanceof(NewIndexManager);
+      db.delegate.should.be.an.instanceof(NewDelegate);
     });
   });
 
@@ -47,51 +61,62 @@ describe('Collection', () => {
   });
 
   describe('#defaultStorageManager', function () {
-    it('should return default in-memory StorageManager', function () {
-      Collection.defaultStorageManager().should.be.equal(StorageManager);
-    });
     it('should set default storage manager', function () {
-      const oldStorage = Collection.defaultStorageManager();
       class NewStorageManager {}
       Collection.defaultStorageManager(NewStorageManager);
       Collection.defaultStorageManager().should.be.equal(NewStorageManager);
-      Collection.defaultStorageManager(oldStorage);
+    });
+    it('should upgrade all collections uses defaults', function () {
+      const defColl = new Collection();
+      defColl.storage.should.be.instanceof(Collection.defaultStorageManager());
+      class NewStorageManager {}
+      Collection.defaultStorageManager(NewStorageManager);
+      defColl.storage.should.be.instanceof(NewStorageManager);
     });
   });
 
   describe('#defaultIdGenerator', function () {
     it('should set default id generator', function () {
-      const oldGenerator = Collection.defaultIdGenerator();
       function new_id_generator() {}
       Collection.defaultIdGenerator(new_id_generator);
       Collection.defaultIdGenerator().should.be.equal(new_id_generator);
-      Collection.defaultIdGenerator(oldGenerator);
     });
-  });
-
-  describe('#defaultCursorClass', function () {
-    it('should return default CursorObservable', function () {
-      Collection.defaultCursorClass().should.be.equal(CursorObservable);
-    });
-    it('should set default Cursor class', function () {
-      const oldCursor = Collection.defaultCursorClass();
-      class NewCursor {}
-      Collection.defaultCursorClass(NewCursor);
-      Collection.defaultCursorClass().should.be.equal(NewCursor);
-      Collection.defaultCursorClass(oldCursor);
+    it('should upgrade all collections uses defaults', function () {
+      const defColl = new Collection();
+      defColl.idGenerator.should.be.equal(Collection.defaultIdGenerator());
+      function new_id_generator() {}
+      Collection.defaultIdGenerator(new_id_generator);
+      defColl.idGenerator.should.be.equal(new_id_generator);
     });
   });
 
   describe('#defaultDelegate', function () {
-    it('should return default CollectionDelegate', function () {
-      Collection.defaultDelegate().should.be.equal(CollectionDelegate);
-    });
     it('should set default Delegate class', function () {
-      const oldDelegate = Collection.defaultDelegate();
       class NewDelegate {}
       Collection.defaultDelegate(NewDelegate);
       Collection.defaultDelegate().should.be.equal(NewDelegate);
-      Collection.defaultDelegate(oldDelegate);
+    });
+    it('should upgrade all collections uses defaults', function () {
+      const defColl = new Collection();
+      defColl.delegate.should.be.instanceof(Collection.defaultDelegate());
+      class NewDelegate {}
+      Collection.defaultDelegate(NewDelegate);
+      defColl.delegate.should.be.instanceof(NewDelegate);
+    });
+  });
+
+  describe('#defaultIndexManager', function () {
+    it('should set default index manager class', function () {
+      class NewIndexManager {}
+      Collection.defaultIndexManager(NewIndexManager);
+      Collection.defaultIndexManager().should.be.equal(NewIndexManager);
+    });
+    it('should upgrade all collections uses defaults', function () {
+      const defColl = new Collection();
+      defColl.indexManager.should.be.instanceof(Collection.defaultIndexManager());
+      class NewIndexManager {}
+      Collection.defaultIndexManager(NewIndexManager);
+      defColl.indexManager.should.be.instanceof(NewIndexManager);
     });
   });
 
