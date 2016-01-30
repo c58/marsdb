@@ -67,7 +67,7 @@ describe('Collection', () => {
       Collection.defaultStorageManager().should.be.equal(NewStorageManager);
     });
     it('should upgrade all collections uses defaults', function () {
-      const defColl = new Collection();
+      const defColl = new Collection('test', {upgradeDefaults: true});
       defColl.storage.should.be.instanceof(Collection.defaultStorageManager());
       class NewStorageManager {}
       Collection.defaultStorageManager(NewStorageManager);
@@ -82,7 +82,7 @@ describe('Collection', () => {
       Collection.defaultIdGenerator().should.be.equal(new_id_generator);
     });
     it('should upgrade all collections uses defaults', function () {
-      const defColl = new Collection();
+      const defColl = new Collection('test', {upgradeDefaults: true});
       defColl.idGenerator.should.be.equal(Collection.defaultIdGenerator());
       function new_id_generator() {}
       Collection.defaultIdGenerator(new_id_generator);
@@ -97,7 +97,7 @@ describe('Collection', () => {
       Collection.defaultDelegate().should.be.equal(NewDelegate);
     });
     it('should upgrade all collections uses defaults', function () {
-      const defColl = new Collection();
+      const defColl = new Collection('test', {upgradeDefaults: true});
       defColl.delegate.should.be.instanceof(Collection.defaultDelegate());
       class NewDelegate {}
       Collection.defaultDelegate(NewDelegate);
@@ -112,7 +112,7 @@ describe('Collection', () => {
       Collection.defaultIndexManager().should.be.equal(NewIndexManager);
     });
     it('should upgrade all collections uses defaults', function () {
-      const defColl = new Collection();
+      const defColl = new Collection('test', {upgradeDefaults: true});
       defColl.indexManager.should.be.instanceof(Collection.defaultIndexManager());
       class NewIndexManager {}
       Collection.defaultIndexManager(NewIndexManager);
