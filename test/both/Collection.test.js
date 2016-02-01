@@ -365,6 +365,29 @@ describe('Collection', () => {
       // TODO
     });
 
+    it('should insert document if it is not exists with updasert', function () {
+      const db = new Collection('test');
+      const testUpsert = (query, mod, expected) => {
+        return db.remove({}, {multi: true}).then(() => {
+          return db.update(query, mod, {upsert: true}).then((res) => {
+            res.modified.should.be.equals(0);
+            res.original.should.be.deep.equals([]);
+            res.updated.should.be.deep.equals([]);
+            expect(res.inserted._id).to.have.length(17);
+            delete res.inserted._id;
+            res.inserted.should.be.deep.equals(expected);
+          });
+        });
+      }
+
+      return Promise.all([
+        testUpsert({a: 2}, {$set: {b: 3}}, {a: 2, b: 3}),
+        testUpsert({a: 2}, {b: 3}, {b: 3}),
+        testUpsert({a: 2}, {$unset: {a: 1}}, {}),
+        testUpsert({a: 2}, {$setOnInsert: {a: 1}}, {a: 1}),
+      ]);
+    });
+
     it('should update by primitive id type', function () {
       const db = new Collection('test');
       return db.insertAll([{a: 1, _id: '1'}, {a: 2, _id: 2}])
