@@ -380,6 +380,10 @@ var _CollectionDelegate = require('./CollectionDelegate');
 
 var _CollectionDelegate2 = _interopRequireDefault(_CollectionDelegate);
 
+var _CursorObservable = require('./CursorObservable');
+
+var _CursorObservable2 = _interopRequireDefault(_CursorObservable);
+
 var _Random = require('./Random');
 
 var _Random2 = _interopRequireDefault(_Random);
@@ -412,6 +416,7 @@ function _inherits(subClass, superClass) {
 
 // Defaults
 var _defaultUpgradeEmitter = new _eventemitter2.default();
+var _defaultCursor = _CursorObservable2.default;
 var _defaultDelegate = _CollectionDelegate2.default;
 var _defaultStorageManager = _StorageManager2.default;
 var _defaultIndexManager = _IndexManager2.default;
@@ -441,6 +446,7 @@ var Collection = exports.Collection = function (_EventEmitter) {
     var delegateClass = options.delegate || _defaultDelegate;
     var indexManagerClass = options.indexManager || _defaultIndexManager;
     _this.idGenerator = options.idGenerator || _defaultIdGenerator;
+    _this.cursorClass = options.cursorClass || _defaultCursor;
     _this.indexManager = new indexManagerClass(_this, options);
     _this.storageManager = new storageManagerClass(_this, options);
     _this.delegate = new delegateClass(_this, options);
@@ -679,6 +685,11 @@ var Collection = exports.Collection = function (_EventEmitter) {
           return _this6.indexManager = new _defaultIndexManager(_this6, options);
         });
       }
+      if (!options.cursorClass) {
+        _defaultUpgradeEmitter.on('cursor', function () {
+          return _this6.cursorClass = _defaultCursor;
+        });
+      }
     }
   }, {
     key: 'modelName',
@@ -705,6 +716,25 @@ var Collection = exports.Collection = function (_EventEmitter) {
      */
 
   }], [{
+    key: 'defaultCursor',
+    value: function defaultCursor() {
+      if (arguments.length > 0) {
+        _defaultCursor = arguments[0];
+        _defaultUpgradeEmitter.emit('cursor');
+      } else {
+        return _defaultCursor;
+      }
+    }
+
+    /**
+     * Wihout arguments it returns current default storage manager.
+     * If arguments provided, then first argument will be set as default
+     * storage manager and all collections, who uses default storage manager,
+     * will be upgraded to a new strage manager.
+     * @return {undefined|Class}
+     */
+
+  }, {
     key: 'defaultStorageManager',
     value: function defaultStorageManager() {
       if (arguments.length > 0) {
@@ -778,7 +808,7 @@ var Collection = exports.Collection = function (_EventEmitter) {
 
 exports.default = Collection;
 
-},{"./CollectionDelegate":4,"./EJSON":14,"./IndexManager":15,"./PromiseQueue":16,"./Random":17,"./StorageManager":18,"check-types":21,"eventemitter3":23,"fast.js/forEach":31,"fast.js/map":38}],4:[function(require,module,exports){
+},{"./CollectionDelegate":4,"./CursorObservable":7,"./EJSON":14,"./IndexManager":15,"./PromiseQueue":16,"./Random":17,"./StorageManager":18,"check-types":21,"eventemitter3":23,"fast.js/forEach":31,"fast.js/map":38}],4:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () {
@@ -803,10 +833,6 @@ var _map3 = _interopRequireDefault(_map2);
 var _DocumentModifier = require('./DocumentModifier');
 
 var _DocumentModifier2 = _interopRequireDefault(_DocumentModifier);
-
-var _CursorObservable = require('./CursorObservable');
-
-var _CursorObservable2 = _interopRequireDefault(_CursorObservable);
 
 function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : { default: obj };
@@ -917,7 +943,8 @@ var CollectionDelegate = exports.CollectionDelegate = function () {
     value: function find(query) {
       var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
-      return new _CursorObservable2.default(this.db, query, options);
+      var cursorClass = this.db.cursorClass;
+      return new cursorClass(this.db, query, options);
     }
   }, {
     key: 'findOne',
@@ -955,7 +982,7 @@ var CollectionDelegate = exports.CollectionDelegate = function () {
 
 exports.default = CollectionDelegate;
 
-},{"./CursorObservable":7,"./DocumentModifier":10,"fast.js/map":38}],5:[function(require,module,exports){
+},{"./DocumentModifier":10,"fast.js/map":38}],5:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () {
