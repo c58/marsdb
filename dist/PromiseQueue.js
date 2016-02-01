@@ -1,38 +1,22 @@
 'use strict';
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = Queue;
-/**
- * @return {Object}
- */
-/* istanbul ignore next */
-var LocalPromise = typeof Promise !== 'undefined' ? Promise : function () {
-  return {
-    then: function then() {
-      throw new Error('Queue.configure() before use Queue');
-    }
-  };
-};
 
-/* istanbul ignore next */
-var noop = function noop() {};
+var _try2 = require('fast.js/function/try');
 
-/**
- * @param {*} value
- * @returns {LocalPromise}
- */
-/* istanbul ignore next */
-var resolveWith = function resolveWith(value) {
-  if (value && typeof value.then === 'function') {
-    return value;
-  }
+var _try3 = _interopRequireDefault(_try2);
 
-  return new LocalPromise(function (resolve) {
-    resolve(value);
-  });
-};
+var _doubleEndedQueue = require('double-ended-queue');
+
+var _doubleEndedQueue2 = _interopRequireDefault(_doubleEndedQueue);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 /**
  * It limits concurrently executed promises
@@ -40,133 +24,126 @@ var resolveWith = function resolveWith(value) {
  * @param {Number} [maxPendingPromises=Infinity] max number of concurrently executed promises
  * @param {Number} [maxQueuedPromises=Infinity]  max number of queued promises
  * @constructor
- *
- * @example
- *
- * var queue = new Queue(1);
- *
- * queue.add(function () {
- *     // resolve of this promise will resume next request
- *     return downloadTarballFromGithub(url, file);
- * })
- * .then(function (file) {
- *     doStuffWith(file);
- * });
- *
- * queue.add(function () {
- *     return downloadTarballFromGithub(url, file);
- * })
- * // This request will be paused
- * .then(function (file) {
- *     doStuffWith(file);
- * });
  */
-/* istanbul ignore next */
-function Queue(maxPendingPromises, maxQueuedPromises) {
-  this.pendingPromises = 0;
-  this.maxPendingPromises = typeof maxPendingPromises !== 'undefined' ? maxPendingPromises : Infinity;
-  this.maxQueuedPromises = typeof maxQueuedPromises !== 'undefined' ? maxQueuedPromises : Infinity;
-  this.queue = [];
-}
 
-/**
- * Defines promise promiseFactory
- * @param {Function} GlobalPromise
- */
-/* istanbul ignore next */
-Queue.configure = function (GlobalPromise) {
-  LocalPromise = GlobalPromise;
-};
+var PromiseQueue = function () {
+  function PromiseQueue() {
+    var maxPendingPromises = arguments.length <= 0 || arguments[0] === undefined ? Infinity : arguments[0];
+    var maxQueuedPromises = arguments.length <= 1 || arguments[1] === undefined ? Infinity : arguments[1];
 
-/**
- * @param {Function} promiseGenerator
- * @return {LocalPromise}
- */
-/* istanbul ignore next */
-Queue.prototype.add = function (promiseGenerator) {
-  var self = this;
-  return new LocalPromise(function (resolve, reject, notify) {
-    // Do not queue to much promises
-    if (self.queue.length >= self.maxQueuedPromises) {
-      reject(new Error('Queue limit reached'));
-      return;
+    _classCallCheck(this, PromiseQueue);
+
+    this.pendingPromises = 0;
+    this.maxPendingPromises = maxPendingPromises;
+    this.maxQueuedPromises = maxQueuedPromises;
+    this.queue = new _doubleEndedQueue2.default();
+    this.length = 0;
+  }
+
+  /**
+   * Pause queue processing
+   */
+
+  _createClass(PromiseQueue, [{
+    key: 'pause',
+    value: function pause() {
+      this._paused = true;
     }
 
-    // Add to queue
-    self.queue.push({
-      promiseGenerator: promiseGenerator,
-      resolve: resolve,
-      reject: reject,
-      notify: notify || noop
-    });
+    /**
+     * Resume queue processing
+     */
 
-    self._dequeue();
-  });
-};
+  }, {
+    key: 'unpause',
+    value: function unpause() {
+      this._paused = false;
+      this._dequeue();
+    }
 
-/**
- * Number of simultaneously running promises (which are resolving)
- *
- * @return {number}
- */
-/* istanbul ignore next */
-Queue.prototype.getPendingLength = function () {
-  return this.pendingPromises;
-};
+    /**
+     * Adds new promise generator in the queue
+     * @param {Function} promiseGenerator
+     */
 
-/**
- * Number of queued promises (which are waiting)
- *
- * @return {number}
- */
-/* istanbul ignore next */
-Queue.prototype.getQueueLength = function () {
-  return this.queue.length;
-};
+  }, {
+    key: 'add',
+    value: function add(promiseGenerator) {
+      var _this = this;
 
-/**
- * @returns {boolean} true if first item removed from queue
- * @private
- */
-/* istanbul ignore next */
-Queue.prototype._dequeue = function () {
-  var self = this;
-  if (this.pendingPromises >= this.maxPendingPromises) {
-    return false;
-  }
+      var unshift = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
 
-  // Remove from queue
-  var item = this.queue.shift();
-  if (!item) {
-    return false;
-  }
+      return new Promise(function (resolve, reject) {
+        if (_this.length >= _this.maxQueuedPromises) {
+          reject(new Error('Queue limit reached'));
+        } else {
+          var queueItem = {
+            promiseGenerator: promiseGenerator,
+            resolve: resolve,
+            reject: reject
+          };
 
-  try {
-    this.pendingPromises++;
+          if (!unshift) {
+            _this.queue.push(queueItem);
+          } else {
+            _this.queue.unshift(queueItem);
+          }
 
-    resolveWith(item.promiseGenerator())
-    // Forward all stuff
-    .then(function (value) {
-      // It is not pending now
-      self.pendingPromises--;
-      // It should pass values
-      item.resolve(value);
-      self._dequeue();
-    }, function (err) {
-      // It is not pending now
-      self.pendingPromises--;
-      // It should not mask errors
-      item.reject(err);
-      self._dequeue();
-    }, function (message) {
-      // It should pass notifications
-      item.notify(message);
-    });
-  } catch (err) {
-    self.pendingPromises--;
-    item.reject(err);
-    self._dequeue();
-  }
+          _this.length += 1;
+          _this._dequeue();
+        }
+      });
+    }
 
-  return true;
-};
+    /**
+     * Internal queue processor. Starts processing of
+     * the next queued function
+     * @return {Boolean}
+     */
+
+  }, {
+    key: '_dequeue',
+    value: function _dequeue() {
+      var _this2 = this;
+
+      if (this._paused || this.pendingPromises >= this.maxPendingPromises) {
+        return false;
+      }
+
+      var item = this.queue.shift();
+      if (!item) {
+        return false;
+      }
+
+      var result = (0, _try3.default)(function () {
+        _this2.pendingPromises++;
+        return Promise.resolve().then(function () {
+          return item.promiseGenerator();
+        }).then(function (value) {
+          _this2.length--;
+          _this2.pendingPromises--;
+          item.resolve(value);
+          _this2._dequeue();
+        }, function (err) {
+          _this2.length--;
+          _this2.pendingPromises--;
+          item.reject(err);
+          _this2._dequeue();
+        });
+      });
+
+      if (result instanceof Error) {
+        this.length--;
+        this.pendingPromises--;
+        item.reject(result);
+        this._dequeue();
+      }
+
+      return true;
+    }
+  }]);
+
+  return PromiseQueue;
+}();
+
+exports.default = PromiseQueue;

@@ -1,6 +1,6 @@
 'use strict';
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -69,7 +69,7 @@ var _defaultIdGenerator = function _defaultIdGenerator(modelName) {
   };
 };
 
-var Collection = exports.Collection = (function (_EventEmitter) {
+var Collection = exports.Collection = function (_EventEmitter) {
   _inherits(Collection, _EventEmitter);
 
   function Collection(name) {
@@ -89,7 +89,10 @@ var Collection = exports.Collection = (function (_EventEmitter) {
     _this.indexManager = new indexManagerClass(_this, options);
     _this.storageManager = new storageManagerClass(_this, options);
     _this.delegate = new delegateClass(_this, options);
-    _this._registerDefaultUpgradeHandlers(options);
+
+    if (options.upgradeDefaults) {
+      _this._registerDefaultUpgradeHandlers(options);
+    }
     return _this;
   }
 
@@ -126,17 +129,13 @@ var Collection = exports.Collection = (function (_EventEmitter) {
       doc._id = doc._id || randomId.value;
 
       return this._writeQueue.add(function () {
-        return new Promise(function (resolve, reject) {
-          _this2.emit('beforeInsert', doc, randomId);
-          if (!options.quiet) {
-            _this2.emit('sync:insert', doc, randomId);
-          }
-          resolve();
-        }).then(function () {
-          return _this2.delegate.insert(doc, options).then(function (docId) {
-            _this2.emit('insert', doc, null, randomId);
-            return docId;
-          });
+        _this2.emit('beforeInsert', doc, randomId);
+        if (!options.quiet) {
+          _this2.emit('sync:insert', doc, randomId);
+        }
+        return _this2.delegate.insert(doc, options, randomId).then(function (docId) {
+          _this2.emit('insert', doc, null, randomId);
+          return docId;
         });
       });
     }
@@ -178,19 +177,15 @@ var Collection = exports.Collection = (function (_EventEmitter) {
       var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
       return this._writeQueue.add(function () {
-        return new Promise(function (resolve, reject) {
-          _this4.emit('beforeRemove', query, options);
-          if (!options.quiet) {
-            _this4.emit('sync:remove', query, options);
-          }
-          resolve();
-        }).then(function () {
-          return _this4.delegate.remove(query, options).then(function (removedDocs) {
-            (0, _forEach2.default)(removedDocs, function (d) {
-              return _this4.emit('remove', null, d);
-            });
-            return removedDocs;
+        _this4.emit('beforeRemove', query, options);
+        if (!options.quiet) {
+          _this4.emit('sync:remove', query, options);
+        }
+        return _this4.delegate.remove(query, options).then(function (removedDocs) {
+          (0, _forEach2.default)(removedDocs, function (d) {
+            return _this4.emit('remove', null, d);
           });
+          return removedDocs;
         });
       });
     }
@@ -213,19 +208,15 @@ var Collection = exports.Collection = (function (_EventEmitter) {
       var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
       return this._writeQueue.add(function () {
-        return new Promise(function (resolve, reject) {
-          _this5.emit('beforeUpdate', query, modifier, options);
-          if (!options.quiet) {
-            _this5.emit('sync:update', query, modifier, options);
-          }
-          resolve();
-        }).then(function () {
-          return _this5.delegate.update(query, modifier, options).then(function (res) {
-            (0, _forEach2.default)(res.updated, function (d, i) {
-              _this5.emit('update', d, res.original[i]);
-            });
-            return res;
+        _this5.emit('beforeUpdate', query, modifier, options);
+        if (!options.quiet) {
+          _this5.emit('sync:update', query, modifier, options);
+        }
+        return _this5.delegate.update(query, modifier, options).then(function (res) {
+          (0, _forEach2.default)(res.updated, function (d, i) {
+            _this5.emit('update', d, res.original[i]);
           });
+          return res;
         });
       });
     }
@@ -300,7 +291,9 @@ var Collection = exports.Collection = (function (_EventEmitter) {
 
     /**
      * If defaults is not overrided by options, then collection
-     * registered in evenbus for default upgrade.
+     * registered in evenbus for default upgrade. This behaviour
+     * is optional and may be enabled by special constructor
+     * option.
      * @param  {Object} options
      */
 
@@ -426,6 +419,6 @@ var Collection = exports.Collection = (function (_EventEmitter) {
   }]);
 
   return Collection;
-})(_eventemitter2.default);
+}(_eventemitter2.default);
 
 exports.default = Collection;

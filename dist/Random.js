@@ -1,6 +1,8 @@
 'use strict';
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -16,8 +18,6 @@ var _invariant = require('invariant');
 var _invariant2 = _interopRequireDefault(_invariant);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -56,7 +56,7 @@ var Alea = function Alea() {
     return mash;
   }
 
-  return (function (args) {
+  return function (args) {
     var s0 = 0;
     var s1 = 0;
     var s2 = 0;
@@ -101,7 +101,7 @@ var Alea = function Alea() {
     random.version = 'Alea 0.9';
     random.args = args;
     return random;
-  })(Array.prototype.slice.call(arguments));
+  }(Array.prototype.slice.call(arguments));
 };
 
 /**
@@ -123,7 +123,7 @@ function _getBrowserSeeds() {
  * with minor modifications and refactoring.
  */
 
-var Random = (function () {
+var Random = function () {
   function Random(type) {
     var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
@@ -159,7 +159,7 @@ var Random = (function () {
     key: 'hexString',
     value: function hexString(digits) {
       if (this.type === RANDOM_GENERATOR_TYPE.NODE_CRYPTO) {
-        var _ret = (function () {
+        var _ret = function () {
           var nodeCrypto = require('crypto');
           var numBytes = Math.ceil(digits / 2);
 
@@ -178,7 +178,7 @@ var Random = (function () {
           return {
             v: result.substring(0, digits)
           };
-        })();
+        }();
 
         if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
       } else {
@@ -250,7 +250,7 @@ var Random = (function () {
   }]);
 
   return Random;
-})();
+}();
 
 exports.default = Random;
 exports.default = Random;
