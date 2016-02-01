@@ -16,7 +16,9 @@ describe('Collection', () => {
   const _defaultDelegate = Collection.defaultDelegate();
   const _defaultStorageManager = Collection.defaultStorageManager();
   const _defaultIndexManager = Collection.defaultIndexManager();
+  const _defaultCursor = Collection.defaultCursor();
   beforeEach(function () {
+    Collection.defaultCursor(_defaultCursor);
     Collection.defaultDelegate(_defaultDelegate);
     Collection.defaultStorageManager(_defaultStorageManager);
     Collection.defaultIndexManager(_defaultIndexManager);
@@ -57,6 +59,21 @@ describe('Collection', () => {
       const doc = db.create('{"a": 2, "b": 3}');
       doc.a.should.be.equal(2);
       doc.b.should.be.equal(3);
+    });
+  });
+
+  describe('#defaultCursor', function () {
+    it('should set default cursor', function () {
+      class NewCursor {}
+      Collection.defaultCursor(NewCursor);
+      Collection.defaultCursor().should.be.equal(NewCursor);
+    });
+    it('should upgrade all collections uses defaults', function () {
+      const defColl = new Collection('test', {upgradeDefaults: true});
+      defColl.cursorClass.should.be.equal(Collection.defaultCursor());
+      class NewCursor {}
+      Collection.defaultCursor(NewCursor);
+      defColl.cursorClass.should.be.equal(NewCursor);
     });
   });
 
