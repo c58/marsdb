@@ -194,8 +194,6 @@ posts.remove({authorId: {$in: [1,2,3]}})
 ```
 
 ## Roadmap
-* Keep track of multiple remove/update documents in selector (allow only if opations.multi passed)
-* Upsert updating
 * Indexes support for some kind of simple requests {a: '^b'}, {a: {$lt: 9}}
 * Documentation
 
