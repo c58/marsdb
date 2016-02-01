@@ -811,6 +811,24 @@ exports.default = Collection;
 },{"./CollectionDelegate":4,"./CursorObservable":7,"./EJSON":14,"./IndexManager":15,"./PromiseQueue":16,"./Random":17,"./StorageManager":18,"check-types":21,"eventemitter3":23,"fast.js/forEach":31,"fast.js/map":38}],4:[function(require,module,exports){
 'use strict';
 
+var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+var _typeof = typeof Symbol === "function" && _typeof2(Symbol.iterator) === "symbol" ? function (obj) {
+  return typeof obj === "undefined" ? "undefined" : _typeof2(obj);
+} : function (obj) {
+  return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
+};
+
+var _extends = Object.assign || function (target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i];for (var key in source) {
+      if (Object.prototype.hasOwnProperty.call(source, key)) {
+        target[key] = source[key];
+      }
+    }
+  }return target;
+};
+
 var _createClass = function () {
   function defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
@@ -872,6 +890,7 @@ var CollectionDelegate = exports.CollectionDelegate = function () {
       var _this = this;
 
       var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+      var randomId = arguments[2];
 
       return this.db.indexManager.indexDocument(doc).then(function () {
         return _this.db.storageManager.persist(doc._id, doc).then(function () {
@@ -913,29 +932,47 @@ var CollectionDelegate = exports.CollectionDelegate = function () {
       var sort = _ref2$sort === undefined ? { _id: 1 } : _ref2$sort;
       var _ref2$multi = _ref2.multi;
       var multi = _ref2$multi === undefined ? false : _ref2$multi;
+      var _ref2$upsert = _ref2.upsert;
+      var upsert = _ref2$upsert === undefined ? false : _ref2$upsert;
 
       return this.find(query, { noClone: true }).sort(sort).then(function (docs) {
         if (docs.length > 1 && !multi) {
           docs = [docs[0]];
         }
-        return new _DocumentModifier2.default(query).modify(docs, modifier);
+        return new _DocumentModifier2.default(query).modify(docs, modifier, { upsert: upsert });
       }).then(function (_ref3) {
         var original = _ref3.original;
         var updated = _ref3.updated;
 
-        var updateStorgePromises = (0, _map3.default)(updated, function (d) {
-          return _this3.db.storageManager.persist(d._id, d);
-        });
-        var updateIndexPromises = (0, _map3.default)(updated, function (d, i) {
-          return _this3.db.indexManager.reindexDocument(original[i], d);
-        });
-        return Promise.all([].concat(_toConsumableArray(updateStorgePromises), _toConsumableArray(updateIndexPromises))).then(function () {
-          return {
-            modified: updated.length,
-            original: original,
-            updated: updated
-          };
-        });
+        if (upsert && original.length && original[0] === null) {
+          var _ret = function () {
+            var newDoc = updated[0];
+            return {
+              v: _this3.db.insert(newDoc, { quiet: true }).then(function (docId) {
+                return {
+                  modified: 0, original: [], updated: [],
+                  inserted: _extends({ _id: docId }, newDoc)
+                };
+              })
+            };
+          }();
+
+          if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
+        } else {
+          var updateStorgePromises = (0, _map3.default)(updated, function (d) {
+            return _this3.db.storageManager.persist(d._id, d);
+          });
+          var updateIndexPromises = (0, _map3.default)(updated, function (d, i) {
+            return _this3.db.indexManager.reindexDocument(original[i], d);
+          });
+          return Promise.all([].concat(_toConsumableArray(updateStorgePromises), _toConsumableArray(updateIndexPromises))).then(function () {
+            return {
+              modified: updated.length,
+              original: original,
+              updated: updated
+            };
+          });
+        }
       });
     }
   }, {
@@ -1955,6 +1992,7 @@ exports.selectorIsIdPerhapsAsObject = selectorIsIdPerhapsAsObject;
 exports.isArray = isArray;
 exports.isPlainObject = isPlainObject;
 exports.isIndexable = isIndexable;
+exports.removeDollarOperators = removeDollarOperators;
 exports.isOperatorObject = isOperatorObject;
 exports.isNumericKey = isNumericKey;
 
@@ -2008,6 +2046,17 @@ function isPlainObject(x) {
 
 function isIndexable(x) {
   return isArray(x) || isPlainObject(x);
+}
+
+// Oddball function used by upsert.
+function removeDollarOperators(selector) {
+  var selectorDoc = {};
+  for (var k in selector) {
+    if (k.substr(0, 1) !== '$') {
+      selectorDoc[k] = selector[k];
+    }
+  }
+  return selectorDoc;
 }
 
 // Returns true if this is an object with at least one key and all keys begin
@@ -3389,6 +3438,7 @@ var DocumentModifier = exports.DocumentModifier = function () {
 
     _classCallCheck(this, DocumentModifier);
 
+    this._query = query;
     this._matcher = new _DocumentMatcher2.default(query);
   }
 
@@ -3411,6 +3461,13 @@ var DocumentModifier = exports.DocumentModifier = function () {
           oldResults.push(d);
         }
       });
+
+      if (!docs.length && options.upsert) {
+        var newDoc = (0, _Document.removeDollarOperators)(this._query);
+        newDoc = this._modifyDocument(newDoc, mod, { isInsert: true });
+        newResults.push(newDoc);
+        oldResults.push(null);
+      }
 
       return {
         updated: newResults,

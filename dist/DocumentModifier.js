@@ -49,6 +49,7 @@ var DocumentModifier = exports.DocumentModifier = function () {
 
     _classCallCheck(this, DocumentModifier);
 
+    this._query = query;
     this._matcher = new _DocumentMatcher2.default(query);
   }
 
@@ -71,6 +72,13 @@ var DocumentModifier = exports.DocumentModifier = function () {
           oldResults.push(d);
         }
       });
+
+      if (!docs.length && options.upsert) {
+        var newDoc = (0, _Document.removeDollarOperators)(this._query);
+        newDoc = this._modifyDocument(newDoc, mod, { isInsert: true });
+        newResults.push(newDoc);
+        oldResults.push(null);
+      }
 
       return {
         updated: newResults,

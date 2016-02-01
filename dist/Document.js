@@ -9,6 +9,7 @@ exports.selectorIsIdPerhapsAsObject = selectorIsIdPerhapsAsObject;
 exports.isArray = isArray;
 exports.isPlainObject = isPlainObject;
 exports.isIndexable = isIndexable;
+exports.removeDollarOperators = removeDollarOperators;
 exports.isOperatorObject = isOperatorObject;
 exports.isNumericKey = isNumericKey;
 
@@ -60,6 +61,17 @@ function isPlainObject(x) {
 
 function isIndexable(x) {
   return isArray(x) || isPlainObject(x);
+}
+
+// Oddball function used by upsert.
+function removeDollarOperators(selector) {
+  var selectorDoc = {};
+  for (var k in selector) {
+    if (k.substr(0, 1) !== '$') {
+      selectorDoc[k] = selector[k];
+    }
+  }
+  return selectorDoc;
 }
 
 // Returns true if this is an object with at least one key and all keys begin

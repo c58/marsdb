@@ -1,5 +1,9 @@
 'use strict';
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 Object.defineProperty(exports, "__esModule", {
@@ -39,6 +43,7 @@ var CollectionDelegate = exports.CollectionDelegate = function () {
       var _this = this;
 
       var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+      var randomId = arguments[2];
 
       return this.db.indexManager.indexDocument(doc).then(function () {
         return _this.db.storageManager.persist(doc._id, doc).then(function () {
@@ -80,29 +85,47 @@ var CollectionDelegate = exports.CollectionDelegate = function () {
       var sort = _ref2$sort === undefined ? { _id: 1 } : _ref2$sort;
       var _ref2$multi = _ref2.multi;
       var multi = _ref2$multi === undefined ? false : _ref2$multi;
+      var _ref2$upsert = _ref2.upsert;
+      var upsert = _ref2$upsert === undefined ? false : _ref2$upsert;
 
       return this.find(query, { noClone: true }).sort(sort).then(function (docs) {
         if (docs.length > 1 && !multi) {
           docs = [docs[0]];
         }
-        return new _DocumentModifier2.default(query).modify(docs, modifier);
+        return new _DocumentModifier2.default(query).modify(docs, modifier, { upsert: upsert });
       }).then(function (_ref3) {
         var original = _ref3.original;
         var updated = _ref3.updated;
 
-        var updateStorgePromises = (0, _map3.default)(updated, function (d) {
-          return _this3.db.storageManager.persist(d._id, d);
-        });
-        var updateIndexPromises = (0, _map3.default)(updated, function (d, i) {
-          return _this3.db.indexManager.reindexDocument(original[i], d);
-        });
-        return Promise.all([].concat(_toConsumableArray(updateStorgePromises), _toConsumableArray(updateIndexPromises))).then(function () {
-          return {
-            modified: updated.length,
-            original: original,
-            updated: updated
-          };
-        });
+        if (upsert && original.length && original[0] === null) {
+          var _ret = function () {
+            var newDoc = updated[0];
+            return {
+              v: _this3.db.insert(newDoc, { quiet: true }).then(function (docId) {
+                return {
+                  modified: 0, original: [], updated: [],
+                  inserted: _extends({ _id: docId }, newDoc)
+                };
+              })
+            };
+          }();
+
+          if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
+        } else {
+          var updateStorgePromises = (0, _map3.default)(updated, function (d) {
+            return _this3.db.storageManager.persist(d._id, d);
+          });
+          var updateIndexPromises = (0, _map3.default)(updated, function (d, i) {
+            return _this3.db.indexManager.reindexDocument(original[i], d);
+          });
+          return Promise.all([].concat(_toConsumableArray(updateStorgePromises), _toConsumableArray(updateIndexPromises))).then(function () {
+            return {
+              modified: updated.length,
+              original: original,
+              updated: updated
+            };
+          });
+        }
       });
     }
   }, {

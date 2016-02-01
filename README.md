@@ -183,6 +183,15 @@ posts.update(
   console.log(result.updated) // array of updated docs
   console.log(result.original) // array of original docs
 });
+
+// Upsert (insert when nothing found)
+posts.update(
+  {authorId: "123"},
+  {$set: {text: 'noop'}},
+  {upsert: true}
+).then(result => {
+  // { authorId: "123", text: 'noop', _id: '...' }
+});
 ```
 ### Removing
 ```javascript
