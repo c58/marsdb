@@ -70,7 +70,7 @@ describe('CursorObservable', () => {
       const cursor = new CursorObservable(db);
       const cb1 = sinon.spy();
       cursor.on('update', cb1);
-      cursor.debounce(10);
+      cursor.debounce(50);
       cursor.update();
       cursor.update();
       cb1.should.have.callCount(0);
@@ -406,28 +406,51 @@ describe('CursorObservable', () => {
   });
 
   describe('#update', function () {
-    it('should stop previous update and return new one', function () {
-      const cursor = new CursorObservable(db);
-      cursor._doUpdate = sinon.spy();
-      cursor._doUpdate.func = sinon.spy();
-      cursor._doUpdate.cancel = sinon.spy();
+    it('should guarantee that only one _doUpdate invoked at one time', function () {
+      const beforeUpdateCall = sinon.spy();
+      const doUpdateCall = sinon.spy();
+      class OtherCursor extends CursorObservable {
+        _doUpdate(...args) {
+          beforeUpdateCall();
+          return new Promise((resolve) => {
+            setTimeout(resolve, 50);
+          }).then(() => {
+            return super._doUpdate(...args);
+          }).then((res) => {
+            doUpdateCall();
+            return res;
+          });
+        }
+      }
 
-      cursor.update();
-      cursor._doUpdate.cancel.should.have.callCount(1);
-      cursor._doUpdate.should.have.callCount(1);
-    });
-
-    it('should immidiatelly call _doUpdate and return result Promise', function () {
-      const cursor = new CursorObservable(db);
-      cursor._doUpdate = sinon.spy();
-      cursor._doUpdate.func = sinon.stub();
-      cursor._doUpdate.func.returns(1);
-      cursor._doUpdate.cancel = sinon.spy();
-      const res = cursor.update(false, true);
-      cursor._doUpdate.func.should.have.callCount(1);
-      cursor._doUpdate.should.have.callCount(0);
-      cursor._doUpdate.cancel.should.have.callCount(1);
-      res.should.be.equal(1);
+      const cursor = new OtherCursor(db);
+      cursor.batchSize(2);
+      cursor.debounce(50);
+      const initUpd = cursor.update(true, true);
+      const upd2 = cursor.update();
+      const upd3 = cursor.update();
+      //beforeUpdateCall.should.have.callCount(0);
+      return Promise.resolve().then(() => {
+        beforeUpdateCall.should.have.callCount(1);
+        cursor.update();
+        cursor.update();
+        cursor.update();
+        const upd4 = cursor.update();
+        beforeUpdateCall.should.have.callCount(1);
+        return initUpd.then(() => {
+          beforeUpdateCall.should.have.callCount(1);
+          return upd3;
+        })
+        .then(() => {
+          beforeUpdateCall.should.have.callCount(2);
+          doUpdateCall.should.have.callCount(2);
+          return upd4;
+        })
+        .then(() => {
+          beforeUpdateCall.should.have.callCount(4);
+          doUpdateCall.should.have.callCount(4);
+        });
+      })
     });
   });
 

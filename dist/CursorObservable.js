@@ -33,6 +33,10 @@ var _EJSON = require('./EJSON');
 
 var _EJSON2 = _interopRequireDefault(_EJSON);
 
+var _PromiseQueue = require('./PromiseQueue');
+
+var _PromiseQueue2 = _interopRequireDefault(_PromiseQueue);
+
 var _debounce = require('./debounce');
 
 var _debounce2 = _interopRequireDefault(_debounce);
@@ -63,6 +67,7 @@ var CursorObservable = function (_Cursor) {
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(CursorObservable).call(this, db, query, options));
 
     _this.maybeUpdate = (0, _bind3.default)(_this.maybeUpdate, _this);
+    _this._updateQueue = new _PromiseQueue2.default(1);
     _this._propagateUpdate = (0, _debounce2.default)((0, _bind3.default)(_this._propagateUpdate, _this), 0, 0);
     _this._doUpdate = (0, _debounce2.default)((0, _bind3.default)(_this._doUpdate, _this), _defaultDebounce, _defaultBatchSize);
     _this._observers = 0;
@@ -177,21 +182,38 @@ var CursorObservable = function (_Cursor) {
     }
 
     /**
-     * Execute update. Cancel previous execution if it's
-     * exists and start new one. Set `this._updatePromise`
-     * execution promise that resolved when update completelly
-     * executed.
+     * Executes an update. It is guarantee that
+     * one `_doUpdate` will be executed at one time.
+     *
+     * TODO it's a bit hacky implementation, but it works well.
+     * 			I can't imagine more clearly impl for now.
      * @return {Promise}
      */
 
   }, {
     key: 'update',
     value: function update() {
+      var _this3 = this;
+
       var firstRun = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
       var immidiatelly = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
 
-      this._doUpdate.cancel();
-      this._updatePromise = immidiatelly ? this._doUpdate.func(firstRun) : this._doUpdate(firstRun);
+      this._updatePromise = this._updateQueue.add(function () {
+        _this3._updatePromise = immidiatelly ? _this3._doUpdate.func(firstRun) : _this3._doUpdate(firstRun);
+
+        if (immidiatelly) {
+          return _this3._updatePromise;
+        } else {
+          if (_this3._updatePromise.debouncePassed) {
+            return _this3._updatePromise;
+          } else {
+            return Promise.resolve('__debounced__');
+          }
+        }
+      }).then(function (res) {
+        return res === '__debounced__' ? _this3._updatePromise : res;
+      });
+
       return this._updatePromise;
     }
 
@@ -277,13 +299,13 @@ var CursorObservable = function (_Cursor) {
   }, {
     key: '_doUpdate',
     value: function _doUpdate() {
-      var _this3 = this;
+      var _this4 = this;
 
       var firstRun = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
 
       return this.exec().then(function (result) {
-        _this3._updateLatestIds();
-        return _this3._propagateUpdate(firstRun).then(function () {
+        _this4._updateLatestIds();
+        return _this4._propagateUpdate(firstRun).then(function () {
           return result;
         });
       });

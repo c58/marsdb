@@ -48,6 +48,7 @@ function debounce(func, wait, batchSize) {
 
       if (callNow && _maybeResolve) {
         var returnPromise = promise;
+        returnPromise.debouncePassed = true;
         clearTimeout(timeout);
         _maybeResolve();
         callsCount += 1;
@@ -62,11 +63,9 @@ function debounce(func, wait, batchSize) {
   var updateBatchSize = function updateBatchSize(newBatchSize) {
     batchSize = newBatchSize;
   };
-
   var updateWait = function updateWait(newWait) {
     wait = newWait;
   };
-
   var cancel = function cancel() {
     clearTimeout(timeout);
   };
