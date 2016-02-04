@@ -6555,7 +6555,7 @@ function debounce(func, wait, batchSize) {
 },{}],20:[function(require,module,exports){
 'use strict';
 
-var EventEmitter = require('./dist/AsyncEventEmitter');
+var EventEmitter = require('./dist/AsyncEventEmitter').default;
 var Collection = require('./dist/Collection').default;
 var CursorObservable = require('./dist/CursorObservable').default;
 var debounce = require('./dist/debounce').default;
