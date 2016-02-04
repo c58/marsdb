@@ -11,4 +11,6 @@ node_js:
   - "4.2"
   - "0.12"
 
-script: npm run coveralls && npm run test_browser
+script: npm test && npm run test_browser
+
+after_script: npm run coveralls
