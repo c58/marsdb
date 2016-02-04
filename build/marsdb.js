@@ -6555,7 +6555,7 @@ function debounce(func, wait, batchSize) {
 },{}],20:[function(require,module,exports){
 'use strict';
 
-var EventEmitter = require('eventemitter3');
+var EventEmitter = require('./dist/AsyncEventEmitter');
 var Collection = require('./dist/Collection').default;
 var CursorObservable = require('./dist/CursorObservable').default;
 var debounce = require('./dist/debounce').default;
@@ -6563,6 +6563,7 @@ var StorageManager = require('./dist/StorageManager').default;
 var Random = require('./dist/Random').default;
 var EJSON = require('./dist/EJSON').default;
 var Base64 = require('./dist/Base64').default;
+var PromiseQueue = require('./dist/PromiseQueue').default;
 
 module.exports = {
   __esModule: true,
@@ -6574,10 +6575,11 @@ module.exports = {
   CursorObservable: CursorObservable,
   StorageManager: StorageManager,
   EventEmitter: EventEmitter,
+  PromiseQueue: PromiseQueue,
   debounce: debounce
 };
 
-},{"./dist/Base64":2,"./dist/Collection":3,"./dist/CursorObservable":7,"./dist/EJSON":14,"./dist/Random":17,"./dist/StorageManager":18,"./dist/debounce":19,"eventemitter3":23}],21:[function(require,module,exports){
+},{"./dist/AsyncEventEmitter":1,"./dist/Base64":2,"./dist/Collection":3,"./dist/CursorObservable":7,"./dist/EJSON":14,"./dist/PromiseQueue":16,"./dist/Random":17,"./dist/StorageManager":18,"./dist/debounce":19}],21:[function(require,module,exports){
 /*globals define, module, Symbol */
 
 (function (globals) {
