@@ -1,4 +1,4 @@
-var EventEmitter = require('./dist/AsyncEventEmitter');
+var EventEmitter = require('./dist/AsyncEventEmitter').default;
 var Collection = require('./dist/Collection').default;
 var CursorObservable = require('./dist/CursorObservable').default;
 var debounce = require('./dist/debounce').default;
