@@ -56,20 +56,32 @@ It sets in a window/global: Promise, Set and Symbol.
 ### Create a collection
 ```javascript
 import Collection from 'marsdb';
-import LocalStorageManager from 'marsdb-localstorage';
+import LocalForageManager from 'marsdb-localforage';
 
-// Setup different id generator and storage managers
 // Default storage is in-memory
-Collection.defaultStorageManager(LocalStorageManager);
-Collection.defaultIdGenerator(() => {
-  return {
-    value: Math.random(),
-    seed: 0,
-  };
-});
+// Setup different storage managers
+// (all documents will be save in a browser cache)
+Collection.defaultStorageManager(LocalForageManager);
 
+// Create collection wit new default storage
 const users = new Collection('users');
 ```
+
+### Create an in-memory collection
+```javascript
+import Collection from 'marsdb';
+import LocalStorageManager from 'marsdb-localstorage';
+
+// Set some defaults and create collection
+Collection.defaultStorageManager(LocalStorageManager);
+const users = new Collection('users');
+
+// But it may be useful to create in-memory
+// collection without defined defaults
+// (for example to save some session state)
+const session = new Collection('session', {inMemory: true});
+```
+
 ### Find documents
 ```javascript
 const posts = new Collection('posts');
@@ -80,6 +92,7 @@ posts.find({author: 'Bob'})
     // do something with docs
   });
 ```
+
 ### Find with pipeline (map, reduce, filter)
 An order of pipeline methods invokation is important. Next pipeline operation gives as argument a result of a previous operation.
 ```javascript
@@ -105,6 +118,7 @@ posts.find({author: 'not_existing_name'})
   .ifNotEmpty()
   .aggregate(user => user.name)
 ```
+
 ### Find with observing changes
 Observable cursor returned by a `find` and `findOne` methods of a collection. Updates of the cursor is batched and debounced (default batch size is `20` and debounce time is `1000 / 15` ms). You can change the paramters by `batchSize` and `debounce` methods of an observable cursor (methods is chained).
 
@@ -158,6 +172,7 @@ posts.find()
     // (and when observed joins changed too)
   })
 ```
+
 ### Inserting
 ```javascript
 const posts = new Collection('posts');
@@ -172,6 +187,7 @@ posts.insertAll(
   // invoked when all documents inserted
 });
 ```
+
 ### Updating
 ```javascript
 const posts = new Collection('posts');
@@ -193,6 +209,7 @@ posts.update(
   // { authorId: "123", text: 'noop', _id: '...' }
 });
 ```
+
 ### Removing
 ```javascript
 const posts = new Collection('posts');
