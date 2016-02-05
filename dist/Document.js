@@ -9,7 +9,6 @@ exports.selectorIsIdPerhapsAsObject = selectorIsIdPerhapsAsObject;
 exports.isArray = isArray;
 exports.isPlainObject = isPlainObject;
 exports.isIndexable = isIndexable;
-exports.removeDollarOperators = removeDollarOperators;
 exports.isOperatorObject = isOperatorObject;
 exports.isNumericKey = isNumericKey;
 
@@ -45,33 +44,16 @@ function selectorIsIdPerhapsAsObject(selector) {
   return selectorIsId(selector) || selector && _checkTypes2.default.object(selector) && selector._id && selectorIsId(selector._id) && (0, _keys3.default)(selector).length === 1;
 }
 
-// Like _isArray, but doesn't regard polyfilled Uint8Arrays on old browsers as
-// arrays.
-// XXX maybe this should be EJSON.isArray
 function isArray(x) {
   return _checkTypes2.default.array(x) && !_EJSON2.default.isBinary(x);
 }
 
-// XXX maybe this should be EJSON.isObject, though EJSON doesn't know about
-// RegExp
-// XXX note that _type(undefined) === 3!!!!
 function isPlainObject(x) {
   return x && MongoTypeComp._type(x) === 3;
 }
 
 function isIndexable(x) {
   return isArray(x) || isPlainObject(x);
-}
-
-// Oddball function used by upsert.
-function removeDollarOperators(selector) {
-  var selectorDoc = {};
-  for (var k in selector) {
-    if (k.substr(0, 1) !== '$') {
-      selectorDoc[k] = selector[k];
-    }
-  }
-  return selectorDoc;
 }
 
 // Returns true if this is an object with at least one key and all keys begin

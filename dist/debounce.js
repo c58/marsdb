@@ -19,7 +19,7 @@ function debounce(func, wait, batchSize) {
   var callsCount = 0;
   var promise = null;
   var doNotResolve = true;
-  var _maybeResolve = null;
+  var maybeResolve = null;
 
   var debouncer = function debouncer() {
     var context = this;
@@ -27,9 +27,9 @@ function debounce(func, wait, batchSize) {
 
     if (!promise) {
       promise = new Promise(function (resolve, reject) {
-        _maybeResolve = function maybeResolve() {
+        maybeResolve = function () {
           if (doNotResolve) {
-            timeout = setTimeout(_maybeResolve, wait);
+            timeout = setTimeout(maybeResolve, wait);
             doNotResolve = false;
           } else {
             resolve(func.apply(context, args));
@@ -37,20 +37,20 @@ function debounce(func, wait, batchSize) {
             callsCount = 0;
             timeout = null;
             doNotResolve = true;
-            _maybeResolve = null;
+            maybeResolve = null;
           }
         };
-        _maybeResolve();
+        maybeResolve();
       });
     } else {
       var callNow = batchSize && callsCount >= batchSize;
       doNotResolve = !callNow;
 
-      if (callNow && _maybeResolve) {
+      if (callNow && maybeResolve) {
         var returnPromise = promise;
         returnPromise.debouncePassed = true;
         clearTimeout(timeout);
-        _maybeResolve();
+        maybeResolve();
         callsCount += 1;
         return returnPromise;
       }

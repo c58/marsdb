@@ -1,9 +1,9 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Mars = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
 
-var _createClass = function () {
+var _createClass = (function () {
   function defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
@@ -11,7 +11,7 @@ var _createClass = function () {
   }return function (Constructor, protoProps, staticProps) {
     if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
   };
-}();
+})();
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -50,7 +50,7 @@ function _inherits(subClass, superClass) {
  */
 /* istanbul ignore next */
 
-var AsyncEventEmitter = function (_EventEmitter) {
+var AsyncEventEmitter = (function (_EventEmitter) {
   _inherits(AsyncEventEmitter, _EventEmitter);
 
   function AsyncEventEmitter() {
@@ -139,14 +139,14 @@ var AsyncEventEmitter = function (_EventEmitter) {
   }]);
 
   return AsyncEventEmitter;
-}(_eventemitter2.default);
+})(_eventemitter2.default);
 
 exports.default = AsyncEventEmitter;
 
 },{"eventemitter3":23}],2:[function(require,module,exports){
 'use strict';
 
-var _createClass = function () {
+var _createClass = (function () {
   function defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
@@ -154,7 +154,7 @@ var _createClass = function () {
   }return function (Constructor, protoProps, staticProps) {
     if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
   };
-}();
+})();
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -193,7 +193,7 @@ var getVal = function getVal(ch) {
 
 // Base 64 encoding
 
-var Base64 = exports.Base64 = function () {
+var Base64 = exports.Base64 = (function () {
   function Base64() {
     _classCallCheck(this, Base64);
   }
@@ -324,16 +324,16 @@ var Base64 = exports.Base64 = function () {
   }]);
 
   return Base64;
-}();
+})();
 
 exports.default = new Base64();
 
 },{}],3:[function(require,module,exports){
 'use strict';
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
 
-var _createClass = function () {
+var _createClass = (function () {
   function defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
@@ -341,7 +341,7 @@ var _createClass = function () {
   }return function (Constructor, protoProps, staticProps) {
     if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
   };
-}();
+})();
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -429,7 +429,7 @@ var _defaultIdGenerator = function _defaultIdGenerator(modelName) {
   };
 };
 
-var Collection = exports.Collection = function (_EventEmitter) {
+var Collection = exports.Collection = (function (_EventEmitter) {
   _inherits(Collection, _EventEmitter);
 
   function Collection(name) {
@@ -804,32 +804,14 @@ var Collection = exports.Collection = function (_EventEmitter) {
   }]);
 
   return Collection;
-}(_eventemitter2.default);
+})(_eventemitter2.default);
 
 exports.default = Collection;
 
 },{"./CollectionDelegate":4,"./CursorObservable":7,"./EJSON":14,"./IndexManager":15,"./PromiseQueue":16,"./Random":17,"./StorageManager":18,"check-types":21,"eventemitter3":23,"fast.js/forEach":31,"fast.js/map":38}],4:[function(require,module,exports){
 'use strict';
 
-var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
-
-var _typeof = typeof Symbol === "function" && _typeof2(Symbol.iterator) === "symbol" ? function (obj) {
-  return typeof obj === "undefined" ? "undefined" : _typeof2(obj);
-} : function (obj) {
-  return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
-};
-
-var _extends = Object.assign || function (target) {
-  for (var i = 1; i < arguments.length; i++) {
-    var source = arguments[i];for (var key in source) {
-      if (Object.prototype.hasOwnProperty.call(source, key)) {
-        target[key] = source[key];
-      }
-    }
-  }return target;
-};
-
-var _createClass = function () {
+var _createClass = (function () {
   function defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
@@ -837,7 +819,7 @@ var _createClass = function () {
   }return function (Constructor, protoProps, staticProps) {
     if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
   };
-}();
+})();
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -877,7 +859,7 @@ function _classCallCheck(instance, Constructor) {
  * normal MarsDB approach – within a browser.
  */
 
-var CollectionDelegate = exports.CollectionDelegate = function () {
+var CollectionDelegate = exports.CollectionDelegate = (function () {
   function CollectionDelegate(db) {
     _classCallCheck(this, CollectionDelegate);
 
@@ -944,35 +926,19 @@ var CollectionDelegate = exports.CollectionDelegate = function () {
         var original = _ref3.original;
         var updated = _ref3.updated;
 
-        if (upsert && original.length && original[0] === null) {
-          var _ret = function () {
-            var newDoc = updated[0];
-            return {
-              v: _this3.db.insert(newDoc, { quiet: true }).then(function (docId) {
-                return {
-                  modified: 0, original: [], updated: [],
-                  inserted: _extends({ _id: docId }, newDoc)
-                };
-              })
-            };
-          }();
-
-          if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
-        } else {
-          var updateStorgePromises = (0, _map3.default)(updated, function (d) {
-            return _this3.db.storageManager.persist(d._id, d);
-          });
-          var updateIndexPromises = (0, _map3.default)(updated, function (d, i) {
-            return _this3.db.indexManager.reindexDocument(original[i], d);
-          });
-          return Promise.all([].concat(_toConsumableArray(updateStorgePromises), _toConsumableArray(updateIndexPromises))).then(function () {
-            return {
-              modified: updated.length,
-              original: original,
-              updated: updated
-            };
-          });
-        }
+        var updateStorgePromises = (0, _map3.default)(updated, function (d) {
+          return _this3.db.storageManager.persist(d._id, d);
+        });
+        var updateIndexPromises = (0, _map3.default)(updated, function (d, i) {
+          return _this3.db.indexManager.reindexDocument(original[i], d);
+        });
+        return Promise.all([].concat(_toConsumableArray(updateStorgePromises), _toConsumableArray(updateIndexPromises))).then(function () {
+          return {
+            modified: updated.length,
+            original: original,
+            updated: updated
+          };
+        });
       });
     }
   }, {
@@ -1015,14 +981,14 @@ var CollectionDelegate = exports.CollectionDelegate = function () {
   }]);
 
   return CollectionDelegate;
-}();
+})();
 
 exports.default = CollectionDelegate;
 
 },{"./DocumentModifier":10,"fast.js/map":38}],5:[function(require,module,exports){
 'use strict';
 
-var _createClass = function () {
+var _createClass = (function () {
   function defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
@@ -1030,7 +996,7 @@ var _createClass = function () {
   }return function (Constructor, protoProps, staticProps) {
     if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
   };
-}();
+})();
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -1051,7 +1017,7 @@ function _classCallCheck(instance, Constructor) {
   }
 }
 
-var CollectionIndex = exports.CollectionIndex = function () {
+var CollectionIndex = exports.CollectionIndex = (function () {
   function CollectionIndex() {
     var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -1105,22 +1071,16 @@ var CollectionIndex = exports.CollectionIndex = function () {
   }]);
 
   return CollectionIndex;
-}();
+})();
 
 exports.default = CollectionIndex;
 
 },{"invariant":45}],6:[function(require,module,exports){
 'use strict';
 
-var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
 
-var _typeof = typeof Symbol === "function" && _typeof2(Symbol.iterator) === "symbol" ? function (obj) {
-  return typeof obj === "undefined" ? "undefined" : _typeof2(obj);
-} : function (obj) {
-  return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
-};
-
-var _createClass = function () {
+var _createClass = (function () {
   function defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
@@ -1128,7 +1088,7 @@ var _createClass = function () {
   }return function (Constructor, protoProps, staticProps) {
     if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
   };
-}();
+})();
 
 var _PIPELINE_PROCESSORS;
 
@@ -1199,6 +1159,10 @@ var _EJSON2 = _interopRequireDefault(_EJSON);
 
 function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : { default: obj };
+}
+
+function _typeof(obj) {
+  return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
 }
 
 function _classCallCheck(instance, Constructor) {
@@ -1304,7 +1268,7 @@ var PIPELINE_PROCESSORS = exports.PIPELINE_PROCESSORS = (_PIPELINE_PROCESSORS = 
  * fully customizable response
  */
 
-var Cursor = function (_AsyncEventEmitter) {
+var Cursor = (function (_AsyncEventEmitter) {
   _inherits(Cursor, _AsyncEventEmitter);
 
   function Cursor(db) {
@@ -1589,7 +1553,7 @@ var Cursor = function (_AsyncEventEmitter) {
   }]);
 
   return Cursor;
-}(_AsyncEventEmitter3.default);
+})(_AsyncEventEmitter3.default);
 
 exports.Cursor = Cursor;
 exports.default = Cursor;
@@ -1597,9 +1561,9 @@ exports.default = Cursor;
 },{"./AsyncEventEmitter":1,"./DocumentMatcher":9,"./DocumentProjector":11,"./DocumentRetriver":12,"./DocumentSorter":13,"./EJSON":14,"check-types":21,"fast.js/array/filter":25,"fast.js/array/reduce":29,"fast.js/forEach":31,"fast.js/function/bind":34,"fast.js/map":38,"fast.js/object/assign":39,"fast.js/object/keys":41,"invariant":45}],7:[function(require,module,exports){
 'use strict';
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
 
-var _createClass = function () {
+var _createClass = (function () {
   function defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
@@ -1607,7 +1571,7 @@ var _createClass = function () {
   }return function (Constructor, protoProps, staticProps) {
     if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
   };
-}();
+})();
 
 var _get = function get(object, property, receiver) {
   if (object === null) object = Function.prototype;var desc = Object.getOwnPropertyDescriptor(object, property);if (desc === undefined) {
@@ -1693,7 +1657,7 @@ var _defaultBatchSize = 10;
  * after some changes is happen in a database.
  */
 
-var CursorObservable = function (_Cursor) {
+var CursorObservable = (function (_Cursor) {
   _inherits(CursorObservable, _Cursor);
 
   function CursorObservable(db, query, options) {
@@ -1997,7 +1961,7 @@ var CursorObservable = function (_Cursor) {
   }]);
 
   return CursorObservable;
-}(_Cursor3.default);
+})(_Cursor3.default);
 
 exports.CursorObservable = CursorObservable;
 exports.default = CursorObservable;
@@ -2014,7 +1978,6 @@ exports.selectorIsIdPerhapsAsObject = selectorIsIdPerhapsAsObject;
 exports.isArray = isArray;
 exports.isPlainObject = isPlainObject;
 exports.isIndexable = isIndexable;
-exports.removeDollarOperators = removeDollarOperators;
 exports.isOperatorObject = isOperatorObject;
 exports.isNumericKey = isNumericKey;
 
@@ -2052,33 +2015,16 @@ function selectorIsIdPerhapsAsObject(selector) {
   return selectorIsId(selector) || selector && _checkTypes2.default.object(selector) && selector._id && selectorIsId(selector._id) && (0, _keys3.default)(selector).length === 1;
 }
 
-// Like _isArray, but doesn't regard polyfilled Uint8Arrays on old browsers as
-// arrays.
-// XXX maybe this should be EJSON.isArray
 function isArray(x) {
   return _checkTypes2.default.array(x) && !_EJSON2.default.isBinary(x);
 }
 
-// XXX maybe this should be EJSON.isObject, though EJSON doesn't know about
-// RegExp
-// XXX note that _type(undefined) === 3!!!!
 function isPlainObject(x) {
   return x && MongoTypeComp._type(x) === 3;
 }
 
 function isIndexable(x) {
   return isArray(x) || isPlainObject(x);
-}
-
-// Oddball function used by upsert.
-function removeDollarOperators(selector) {
-  var selectorDoc = {};
-  for (var k in selector) {
-    if (k.substr(0, 1) !== '$') {
-      selectorDoc[k] = selector[k];
-    }
-  }
-  return selectorDoc;
 }
 
 // Returns true if this is an object with at least one key and all keys begin
@@ -2305,15 +2251,9 @@ var MongoTypeComp = exports.MongoTypeComp = {
 },{"./EJSON":14,"check-types":21,"fast.js/forEach":31,"fast.js/object/keys":41}],9:[function(require,module,exports){
 'use strict';
 
-var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
 
-var _typeof = typeof Symbol === "function" && _typeof2(Symbol.iterator) === "symbol" ? function (obj) {
-  return typeof obj === "undefined" ? "undefined" : _typeof2(obj);
-} : function (obj) {
-  return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
-};
-
-var _createClass = function () {
+var _createClass = (function () {
   function defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
@@ -2321,7 +2261,7 @@ var _createClass = function () {
   }return function (Constructor, protoProps, staticProps) {
     if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
   };
-}();
+})();
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -2374,6 +2314,10 @@ function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : { default: obj };
 }
 
+function _typeof(obj) {
+  return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
+}
+
 function _classCallCheck(instance, Constructor) {
   if (!(instance instanceof Constructor)) {
     throw new TypeError("Cannot call a class as a function");
@@ -2401,7 +2345,7 @@ function _classCallCheck(instance, Constructor) {
 //   var matcher = new Minimongo.Matcher({a: {$gt: 5}});
 //   if (matcher.documentMatches({a: 7})) ...
 
-var DocumentMatcher = exports.DocumentMatcher = function () {
+var DocumentMatcher = exports.DocumentMatcher = (function () {
   function DocumentMatcher(selector) {
     _classCallCheck(this, DocumentMatcher);
 
@@ -2509,7 +2453,7 @@ var DocumentMatcher = exports.DocumentMatcher = function () {
   }]);
 
   return DocumentMatcher;
-}();
+})();
 
 exports.default = DocumentMatcher;
 
@@ -2843,7 +2787,7 @@ var VALUE_OPERATORS = {
       // GeoJSON '2dsphere' mode.
       maxDistance = operand.$maxDistance;
       point = operand.$geometry;
-      distance = function distance(value) {
+      distance = function (value) {
         // XXX: for now, we don't calculate the actual distance between, say,
         // polygon and circle. If people care about this use-case it will get
         // a priority.
@@ -2862,7 +2806,7 @@ var VALUE_OPERATORS = {
         throw Error('$near argument must be coordinate pair or GeoJSON');
       }
       point = pointToArray(operand);
-      distance = function distance(value) {
+      distance = function (value) {
         if (!(0, _Document.isArray)(value) && !(0, _Document.isPlainObject)(value)) {
           return null;
         }
@@ -3391,15 +3335,9 @@ var andBranchedMatchers = andSomeMatchers;
 },{"./Document":8,"./EJSON":14,"check-types":21,"fast.js/array/every":24,"fast.js/array/indexOf":27,"fast.js/array/some":30,"fast.js/forEach":31,"fast.js/map":38,"fast.js/object/keys":41,"geojson-utils":44}],10:[function(require,module,exports){
 'use strict';
 
-var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
 
-var _typeof = typeof Symbol === "function" && _typeof2(Symbol.iterator) === "symbol" ? function (obj) {
-  return typeof obj === "undefined" ? "undefined" : _typeof2(obj);
-} : function (obj) {
-  return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
-};
-
-var _createClass = function () {
+var _createClass = (function () {
   function defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
@@ -3407,7 +3345,7 @@ var _createClass = function () {
   }return function (Constructor, protoProps, staticProps) {
     if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
   };
-}();
+})();
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -3434,6 +3372,10 @@ var _EJSON = require('./EJSON');
 
 var _EJSON2 = _interopRequireDefault(_EJSON);
 
+var _Random = require('./Random');
+
+var _Random2 = _interopRequireDefault(_Random);
+
 var _DocumentMatcher = require('./DocumentMatcher');
 
 var _DocumentMatcher2 = _interopRequireDefault(_DocumentMatcher);
@@ -3448,13 +3390,17 @@ function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : { default: obj };
 }
 
+function _typeof(obj) {
+  return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
+}
+
 function _classCallCheck(instance, Constructor) {
   if (!(instance instanceof Constructor)) {
     throw new TypeError("Cannot call a class as a function");
   }
 }
 
-var DocumentModifier = exports.DocumentModifier = function () {
+var DocumentModifier = exports.DocumentModifier = (function () {
   function DocumentModifier() {
     var query = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -3466,14 +3412,16 @@ var DocumentModifier = exports.DocumentModifier = function () {
 
   _createClass(DocumentModifier, [{
     key: 'modify',
-    value: function modify(docs, mod) {
+    value: function modify(docs) {
       var _this = this;
 
+      var mod = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
       var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
       var oldResults = [];
       var newResults = [];
 
+      // Regular update
       (0, _forEach2.default)(docs, function (d) {
         var match = _this._matcher.documentMatches(d);
         if (match.result) {
@@ -3484,8 +3432,10 @@ var DocumentModifier = exports.DocumentModifier = function () {
         }
       });
 
-      if (!docs.length && options.upsert) {
-        var newDoc = (0, _Document.removeDollarOperators)(this._query);
+      // Upsert update
+      if (!newResults.length && options.upsert) {
+        var newDoc = documentBySelector(this._query);
+        newDoc._id = newDoc._id || _Random2.default.default().id(17);
         newDoc = this._modifyDocument(newDoc, mod, { isInsert: true });
         newResults.push(newDoc);
         oldResults.push(null);
@@ -3525,7 +3475,7 @@ var DocumentModifier = exports.DocumentModifier = function () {
       var newDoc;
 
       if (!isModifier) {
-        if (mod._id && !_EJSON2.default.equals(doc._id, mod._id)) {
+        if (!options.isInsert && mod._id && !_EJSON2.default.equals(doc._id, mod._id)) {
           throw new Error('Cannot change the _id of a document');
         }
 
@@ -3554,9 +3504,8 @@ var DocumentModifier = exports.DocumentModifier = function () {
             if (keypath === '') {
               throw new Error('An empty update path is not valid.');
             }
-
-            if (keypath === '_id') {
-              throw new Error('Mod on _id not allowed');
+            if (keypath === '_id' && !options.isInsert) {
+              throw new Error('Mod on _id not allowed for update.');
             }
 
             var keyparts = keypath.split('.');
@@ -3583,9 +3532,26 @@ var DocumentModifier = exports.DocumentModifier = function () {
   }]);
 
   return DocumentModifier;
-}();
+})();
 
 exports.default = DocumentModifier;
+
+// by given selector returns an object that should
+// be used for upsert operation
+
+var documentBySelector = function documentBySelector(selector) {
+  var selectorDoc = {};
+  (0, _forEach2.default)(selector, function (v, k) {
+    if (k.substr(0, 1) !== '$' && !(0, _Document.isOperatorObject)(v, true)) {
+      var keyparts = k.split('.');
+      var modTarget = findModTarget(selectorDoc, keyparts);
+      if (modTarget) {
+        modTarget[keyparts[keyparts.length - 1]] = v;
+      }
+    }
+  });
+  return selectorDoc;
+};
 
 // for a.b.c.2.d.e, keyparts should be ['a', 'b', 'c', '2', 'd', 'e'],
 // and then you would operate on the 'e' property of the returned
@@ -3604,7 +3570,6 @@ exports.default = DocumentModifier;
 //
 // if options.arrayIndices is set, use its first element for the (first) '$' in
 // the path.
-
 var findModTarget = function findModTarget(doc, keyparts, options) {
   options = options || {};
   var usedArrayIndex = false;
@@ -3979,18 +3944,12 @@ var MODIFIERS = {
   }
 };
 
-},{"./Document":8,"./DocumentMatcher":9,"./DocumentSorter":13,"./EJSON":14,"check-types":21,"fast.js/array/every":24,"fast.js/forEach":31,"fast.js/object/assign":39}],11:[function(require,module,exports){
+},{"./Document":8,"./DocumentMatcher":9,"./DocumentSorter":13,"./EJSON":14,"./Random":17,"check-types":21,"fast.js/array/every":24,"fast.js/forEach":31,"fast.js/object/assign":39}],11:[function(require,module,exports){
 'use strict';
 
-var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
 
-var _typeof = typeof Symbol === "function" && _typeof2(Symbol.iterator) === "symbol" ? function (obj) {
-  return typeof obj === "undefined" ? "undefined" : _typeof2(obj);
-} : function (obj) {
-  return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
-};
-
-var _createClass = function () {
+var _createClass = (function () {
   function defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
@@ -3998,7 +3957,7 @@ var _createClass = function () {
   }return function (Constructor, protoProps, staticProps) {
     if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
   };
-}();
+})();
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -4053,6 +4012,10 @@ function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : { default: obj };
 }
 
+function _typeof(obj) {
+  return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
+}
+
 function _classCallCheck(instance, Constructor) {
   if (!(instance instanceof Constructor)) {
     throw new TypeError("Cannot call a class as a function");
@@ -4068,7 +4031,7 @@ function _has(obj, key) {
  * A wrapper around pojection functions.
  */
 
-var DocumentProjector = function () {
+var DocumentProjector = (function () {
   function DocumentProjector(fields) {
     _classCallCheck(this, DocumentProjector);
 
@@ -4092,7 +4055,7 @@ var DocumentProjector = function () {
   }]);
 
   return DocumentProjector;
-}();
+})();
 
 // Knows how to compile a fields projection to a predicate function.
 // @returns - Function: a closure that filters out an object according to the
@@ -4371,7 +4334,7 @@ var treeToPaths = function treeToPaths(tree, prefix) {
 },{"./Document":8,"./EJSON":14,"check-types":21,"fast.js/array/every":24,"fast.js/array/filter":25,"fast.js/array/indexOf":27,"fast.js/forEach":31,"fast.js/map":38,"fast.js/object/assign":39,"fast.js/object/keys":41}],12:[function(require,module,exports){
 'use strict';
 
-var _createClass = function () {
+var _createClass = (function () {
   function defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
@@ -4379,7 +4342,7 @@ var _createClass = function () {
   }return function (Constructor, protoProps, staticProps) {
     if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
   };
-}();
+})();
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -4418,7 +4381,7 @@ function _classCallCheck(instance, Constructor) {
  * It just retrives content by 'get' method.
  */
 
-var DocumentRetriver = exports.DocumentRetriver = function () {
+var DocumentRetriver = exports.DocumentRetriver = (function () {
   function DocumentRetriver(db) {
     _classCallCheck(this, DocumentRetriver);
 
@@ -4529,22 +4492,16 @@ var DocumentRetriver = exports.DocumentRetriver = function () {
   }]);
 
   return DocumentRetriver;
-}();
+})();
 
 exports.default = DocumentRetriver;
 
 },{"./Document":8,"check-types":21,"fast.js/array/filter":25,"fast.js/map":38}],13:[function(require,module,exports){
 'use strict';
 
-var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
 
-var _typeof = typeof Symbol === "function" && _typeof2(Symbol.iterator) === "symbol" ? function (obj) {
-  return typeof obj === "undefined" ? "undefined" : _typeof2(obj);
-} : function (obj) {
-  return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
-};
-
-var _createClass = function () {
+var _createClass = (function () {
   function defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
@@ -4552,7 +4509,7 @@ var _createClass = function () {
   }return function (Constructor, protoProps, staticProps) {
     if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
   };
-}();
+})();
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -4593,6 +4550,10 @@ function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : { default: obj };
 }
 
+function _typeof(obj) {
+  return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
+}
+
 function _classCallCheck(instance, Constructor) {
   if (!(instance instanceof Constructor)) {
     throw new TypeError("Cannot call a class as a function");
@@ -4612,7 +4573,7 @@ function _classCallCheck(instance, Constructor) {
 // first object comes first in order, 1 if the second object comes
 // first, or 0 if neither object comes before the other.
 
-var DocumentSorter = exports.DocumentSorter = function () {
+var DocumentSorter = exports.DocumentSorter = (function () {
   function DocumentSorter(spec) {
     var _this = this;
 
@@ -5026,7 +4987,7 @@ var DocumentSorter = exports.DocumentSorter = function () {
   }]);
 
   return DocumentSorter;
-}();
+})();
 
 exports.default = DocumentSorter;
 
@@ -5050,9 +5011,9 @@ var composeComparators = function composeComparators(comparatorArray) {
 },{"./Document":8,"./DocumentMatcher":9,"check-types":21,"fast.js/array/every":24,"fast.js/array/indexOf":27,"fast.js/forEach":31,"fast.js/map":38,"fast.js/object/keys":41}],14:[function(require,module,exports){
 'use strict';
 
-var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
 
-var _createClass = function () {
+var _createClass = (function () {
   function defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
@@ -5060,17 +5021,7 @@ var _createClass = function () {
   }return function (Constructor, protoProps, staticProps) {
     if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
   };
-}();
-
-var _typeof = typeof Symbol === "function" && _typeof2(Symbol.iterator) === "symbol" ? function (obj) {
-  return typeof obj === "undefined" ? "undefined" : _typeof2(obj);
-} : function (obj) {
-  return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
-}; /**
-    * Based on Meteor's EJSON package.
-    * Rewrite with ES6 and better formated for passing
-    * linter
-    */
+})();
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -5107,6 +5058,14 @@ function _classCallCheck(instance, Constructor) {
   }
 }
 
+function _typeof(obj) {
+  return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
+} /**
+   * Based on Meteor's EJSON package.
+   * Rewrite with ES6 and better formated for passing
+   * linter
+   */
+
 // Internal utils
 function _isNaN(val) {
   return typeof val === 'number' && val != +val;
@@ -5121,7 +5080,7 @@ function _isArguments(val) {
   return !!val && (typeof val === 'undefined' ? 'undefined' : _typeof(val)) == 'object' && Object.prototype.hasOwnProperty.call(val, 'callee') && !Object.prototype.propertyIsEnumerable.call(val, 'callee');
 }
 
-var EJSON = exports.EJSON = function () {
+var EJSON = exports.EJSON = (function () {
   // @ngInject
 
   function EJSON() {
@@ -5632,14 +5591,14 @@ var EJSON = exports.EJSON = function () {
   }]);
 
   return EJSON;
-}();
+})();
 
 exports.default = new EJSON();
 
 },{"./Base64":2,"check-types":21,"fast.js/array/some":30,"fast.js/forEach":31,"fast.js/object/keys":41}],15:[function(require,module,exports){
 'use strict';
 
-var _createClass = function () {
+var _createClass = (function () {
   function defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
@@ -5647,7 +5606,7 @@ var _createClass = function () {
   }return function (Constructor, protoProps, staticProps) {
     if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
   };
-}();
+})();
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -5704,7 +5663,7 @@ function _classCallCheck(instance, Constructor) {
  */
 /* istanbul ignore next */
 
-var IndexManager = exports.IndexManager = function () {
+var IndexManager = exports.IndexManager = (function () {
   function IndexManager(db) {
     var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
@@ -5922,14 +5881,14 @@ var IndexManager = exports.IndexManager = function () {
   }]);
 
   return IndexManager;
-}();
+})();
 
 exports.default = IndexManager;
 
 },{"./CollectionIndex":5,"./DocumentRetriver":12,"./PromiseQueue":16,"fast.js/forEach":31,"fast.js/function/bind":34,"fast.js/map":38,"fast.js/object/keys":41,"invariant":45}],16:[function(require,module,exports){
 'use strict';
 
-var _createClass = function () {
+var _createClass = (function () {
   function defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
@@ -5937,7 +5896,7 @@ var _createClass = function () {
   }return function (Constructor, protoProps, staticProps) {
     if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
   };
-}();
+})();
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -5969,7 +5928,7 @@ function _classCallCheck(instance, Constructor) {
  * @constructor
  */
 
-var PromiseQueue = function () {
+var PromiseQueue = (function () {
   function PromiseQueue() {
     var maxPendingPromises = arguments.length <= 0 || arguments[0] === undefined ? Infinity : arguments[0];
     var maxQueuedPromises = arguments.length <= 1 || arguments[1] === undefined ? Infinity : arguments[1];
@@ -6087,22 +6046,16 @@ var PromiseQueue = function () {
   }]);
 
   return PromiseQueue;
-}();
+})();
 
 exports.default = PromiseQueue;
 
 },{"double-ended-queue":22,"fast.js/function/try":37}],17:[function(require,module,exports){
 'use strict';
 
-var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
 
-var _typeof = typeof Symbol === "function" && _typeof2(Symbol.iterator) === "symbol" ? function (obj) {
-  return typeof obj === "undefined" ? "undefined" : _typeof2(obj);
-} : function (obj) {
-  return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
-};
-
-var _createClass = function () {
+var _createClass = (function () {
   function defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
@@ -6110,7 +6063,7 @@ var _createClass = function () {
   }return function (Constructor, protoProps, staticProps) {
     if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
   };
-}();
+})();
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -6127,6 +6080,10 @@ var _invariant2 = _interopRequireDefault(_invariant);
 
 function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : { default: obj };
+}
+
+function _typeof(obj) {
+  return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
 }
 
 function _classCallCheck(instance, Constructor) {
@@ -6170,7 +6127,7 @@ var Alea = function Alea() {
     return mash;
   }
 
-  return function (args) {
+  return (function (args) {
     var s0 = 0;
     var s1 = 0;
     var s2 = 0;
@@ -6215,7 +6172,7 @@ var Alea = function Alea() {
     random.version = 'Alea 0.9';
     random.args = args;
     return random;
-  }(Array.prototype.slice.call(arguments));
+  })(Array.prototype.slice.call(arguments));
 };
 
 /**
@@ -6237,7 +6194,7 @@ function _getBrowserSeeds() {
  * with minor modifications and refactoring.
  */
 
-var Random = function () {
+var Random = (function () {
   function Random(type) {
     var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
@@ -6273,7 +6230,7 @@ var Random = function () {
     key: 'hexString',
     value: function hexString(digits) {
       if (this.type === RANDOM_GENERATOR_TYPE.NODE_CRYPTO) {
-        var _ret = function () {
+        var _ret = (function () {
           var nodeCrypto = require('crypto');
           var numBytes = Math.ceil(digits / 2);
 
@@ -6292,7 +6249,7 @@ var Random = function () {
           return {
             v: result.substring(0, digits)
           };
-        }();
+        })();
 
         if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
       } else {
@@ -6364,7 +6321,7 @@ var Random = function () {
   }]);
 
   return Random;
-}();
+})();
 
 exports.default = Random;
 exports.default = Random;
@@ -6372,7 +6329,7 @@ exports.default = Random;
 },{"crypto":undefined,"fast.js/function/try":37,"invariant":45}],18:[function(require,module,exports){
 'use strict';
 
-var _createClass = function () {
+var _createClass = (function () {
   function defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
@@ -6380,7 +6337,7 @@ var _createClass = function () {
   }return function (Constructor, protoProps, staticProps) {
     if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
   };
-}();
+})();
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -6420,7 +6377,7 @@ function _classCallCheck(instance, Constructor) {
  * and use another storage (with levelup, for example)
  */
 
-var StorageManager = exports.StorageManager = function () {
+var StorageManager = exports.StorageManager = (function () {
   function StorageManager(db) {
     var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
@@ -6511,7 +6468,7 @@ var StorageManager = exports.StorageManager = function () {
   }]);
 
   return StorageManager;
-}();
+})();
 
 exports.default = StorageManager;
 
@@ -6537,7 +6494,7 @@ function debounce(func, wait, batchSize) {
   var callsCount = 0;
   var promise = null;
   var doNotResolve = true;
-  var _maybeResolve = null;
+  var maybeResolve = null;
 
   var debouncer = function debouncer() {
     var context = this;
@@ -6545,9 +6502,9 @@ function debounce(func, wait, batchSize) {
 
     if (!promise) {
       promise = new Promise(function (resolve, reject) {
-        _maybeResolve = function maybeResolve() {
+        maybeResolve = function () {
           if (doNotResolve) {
-            timeout = setTimeout(_maybeResolve, wait);
+            timeout = setTimeout(maybeResolve, wait);
             doNotResolve = false;
           } else {
             resolve(func.apply(context, args));
@@ -6555,20 +6512,20 @@ function debounce(func, wait, batchSize) {
             callsCount = 0;
             timeout = null;
             doNotResolve = true;
-            _maybeResolve = null;
+            maybeResolve = null;
           }
         };
-        _maybeResolve();
+        maybeResolve();
       });
     } else {
       var callNow = batchSize && callsCount >= batchSize;
       doNotResolve = !callNow;
 
-      if (callNow && _maybeResolve) {
+      if (callNow && maybeResolve) {
         var returnPromise = promise;
         returnPromise.debouncePassed = true;
         clearTimeout(timeout);
-        _maybeResolve();
+        maybeResolve();
         callsCount += 1;
         return returnPromise;
       }
@@ -6598,7 +6555,7 @@ function debounce(func, wait, batchSize) {
 },{}],20:[function(require,module,exports){
 'use strict';
 
-var EventEmitter = require('eventemitter3');
+var EventEmitter = require('./dist/AsyncEventEmitter').default;
 var Collection = require('./dist/Collection').default;
 var CursorObservable = require('./dist/CursorObservable').default;
 var debounce = require('./dist/debounce').default;
@@ -6606,6 +6563,7 @@ var StorageManager = require('./dist/StorageManager').default;
 var Random = require('./dist/Random').default;
 var EJSON = require('./dist/EJSON').default;
 var Base64 = require('./dist/Base64').default;
+var PromiseQueue = require('./dist/PromiseQueue').default;
 
 module.exports = {
   __esModule: true,
@@ -6617,10 +6575,11 @@ module.exports = {
   CursorObservable: CursorObservable,
   StorageManager: StorageManager,
   EventEmitter: EventEmitter,
+  PromiseQueue: PromiseQueue,
   debounce: debounce
 };
 
-},{"./dist/Base64":2,"./dist/Collection":3,"./dist/CursorObservable":7,"./dist/EJSON":14,"./dist/Random":17,"./dist/StorageManager":18,"./dist/debounce":19,"eventemitter3":23}],21:[function(require,module,exports){
+},{"./dist/AsyncEventEmitter":1,"./dist/Base64":2,"./dist/Collection":3,"./dist/CursorObservable":7,"./dist/EJSON":14,"./dist/PromiseQueue":16,"./dist/Random":17,"./dist/StorageManager":18,"./dist/debounce":19}],21:[function(require,module,exports){
 /*globals define, module, Symbol */
 
 (function (globals) {

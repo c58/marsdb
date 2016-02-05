@@ -1,8 +1,6 @@
 'use strict';
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -29,6 +27,10 @@ var _EJSON = require('./EJSON');
 
 var _EJSON2 = _interopRequireDefault(_EJSON);
 
+var _Random = require('./Random');
+
+var _Random2 = _interopRequireDefault(_Random);
+
 var _DocumentMatcher = require('./DocumentMatcher');
 
 var _DocumentMatcher2 = _interopRequireDefault(_DocumentMatcher);
@@ -41,9 +43,11 @@ var _Document = require('./Document');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var DocumentModifier = exports.DocumentModifier = function () {
+var DocumentModifier = exports.DocumentModifier = (function () {
   function DocumentModifier() {
     var query = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -55,14 +59,16 @@ var DocumentModifier = exports.DocumentModifier = function () {
 
   _createClass(DocumentModifier, [{
     key: 'modify',
-    value: function modify(docs, mod) {
+    value: function modify(docs) {
       var _this = this;
 
+      var mod = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
       var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
       var oldResults = [];
       var newResults = [];
 
+      // Regular update
       (0, _forEach2.default)(docs, function (d) {
         var match = _this._matcher.documentMatches(d);
         if (match.result) {
@@ -73,8 +79,10 @@ var DocumentModifier = exports.DocumentModifier = function () {
         }
       });
 
-      if (!docs.length && options.upsert) {
-        var newDoc = (0, _Document.removeDollarOperators)(this._query);
+      // Upsert update
+      if (!newResults.length && options.upsert) {
+        var newDoc = documentBySelector(this._query);
+        newDoc._id = newDoc._id || _Random2.default.default().id(17);
         newDoc = this._modifyDocument(newDoc, mod, { isInsert: true });
         newResults.push(newDoc);
         oldResults.push(null);
@@ -114,7 +122,7 @@ var DocumentModifier = exports.DocumentModifier = function () {
       var newDoc;
 
       if (!isModifier) {
-        if (mod._id && !_EJSON2.default.equals(doc._id, mod._id)) {
+        if (!options.isInsert && mod._id && !_EJSON2.default.equals(doc._id, mod._id)) {
           throw new Error('Cannot change the _id of a document');
         }
 
@@ -143,9 +151,8 @@ var DocumentModifier = exports.DocumentModifier = function () {
             if (keypath === '') {
               throw new Error('An empty update path is not valid.');
             }
-
-            if (keypath === '_id') {
-              throw new Error('Mod on _id not allowed');
+            if (keypath === '_id' && !options.isInsert) {
+              throw new Error('Mod on _id not allowed for update.');
             }
 
             var keyparts = keypath.split('.');
@@ -172,9 +179,26 @@ var DocumentModifier = exports.DocumentModifier = function () {
   }]);
 
   return DocumentModifier;
-}();
+})();
 
 exports.default = DocumentModifier;
+
+// by given selector returns an object that should
+// be used for upsert operation
+
+var documentBySelector = function documentBySelector(selector) {
+  var selectorDoc = {};
+  (0, _forEach2.default)(selector, function (v, k) {
+    if (k.substr(0, 1) !== '$' && !(0, _Document.isOperatorObject)(v, true)) {
+      var keyparts = k.split('.');
+      var modTarget = findModTarget(selectorDoc, keyparts);
+      if (modTarget) {
+        modTarget[keyparts[keyparts.length - 1]] = v;
+      }
+    }
+  });
+  return selectorDoc;
+};
 
 // for a.b.c.2.d.e, keyparts should be ['a', 'b', 'c', '2', 'd', 'e'],
 // and then you would operate on the 'e' property of the returned
@@ -193,7 +217,6 @@ exports.default = DocumentModifier;
 //
 // if options.arrayIndices is set, use its first element for the (first) '$' in
 // the path.
-
 var findModTarget = function findModTarget(doc, keyparts, options) {
   options = options || {};
   var usedArrayIndex = false;

@@ -1,10 +1,6 @@
 'use strict';
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
-
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -30,7 +26,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
  * normal MarsDB approach – within a browser.
  */
 
-var CollectionDelegate = exports.CollectionDelegate = function () {
+var CollectionDelegate = exports.CollectionDelegate = (function () {
   function CollectionDelegate(db) {
     _classCallCheck(this, CollectionDelegate);
 
@@ -97,35 +93,19 @@ var CollectionDelegate = exports.CollectionDelegate = function () {
         var original = _ref3.original;
         var updated = _ref3.updated;
 
-        if (upsert && original.length && original[0] === null) {
-          var _ret = function () {
-            var newDoc = updated[0];
-            return {
-              v: _this3.db.insert(newDoc, { quiet: true }).then(function (docId) {
-                return {
-                  modified: 0, original: [], updated: [],
-                  inserted: _extends({ _id: docId }, newDoc)
-                };
-              })
-            };
-          }();
-
-          if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
-        } else {
-          var updateStorgePromises = (0, _map3.default)(updated, function (d) {
-            return _this3.db.storageManager.persist(d._id, d);
-          });
-          var updateIndexPromises = (0, _map3.default)(updated, function (d, i) {
-            return _this3.db.indexManager.reindexDocument(original[i], d);
-          });
-          return Promise.all([].concat(_toConsumableArray(updateStorgePromises), _toConsumableArray(updateIndexPromises))).then(function () {
-            return {
-              modified: updated.length,
-              original: original,
-              updated: updated
-            };
-          });
-        }
+        var updateStorgePromises = (0, _map3.default)(updated, function (d) {
+          return _this3.db.storageManager.persist(d._id, d);
+        });
+        var updateIndexPromises = (0, _map3.default)(updated, function (d, i) {
+          return _this3.db.indexManager.reindexDocument(original[i], d);
+        });
+        return Promise.all([].concat(_toConsumableArray(updateStorgePromises), _toConsumableArray(updateIndexPromises))).then(function () {
+          return {
+            modified: updated.length,
+            original: original,
+            updated: updated
+          };
+        });
       });
     }
   }, {
@@ -168,6 +148,6 @@ var CollectionDelegate = exports.CollectionDelegate = function () {
   }]);
 
   return CollectionDelegate;
-}();
+})();
 
 exports.default = CollectionDelegate;
