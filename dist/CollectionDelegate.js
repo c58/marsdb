@@ -1,6 +1,6 @@
 'use strict';
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -26,7 +26,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
  * normal MarsDB approach – within a browser.
  */
 
-var CollectionDelegate = exports.CollectionDelegate = (function () {
+var CollectionDelegate = exports.CollectionDelegate = function () {
   function CollectionDelegate(db) {
     _classCallCheck(this, CollectionDelegate);
 
@@ -148,6 +148,6 @@ var CollectionDelegate = exports.CollectionDelegate = (function () {
   }]);
 
   return CollectionDelegate;
-})();
+}();
 
 exports.default = CollectionDelegate;

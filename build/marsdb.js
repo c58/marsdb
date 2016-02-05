@@ -1,9 +1,9 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Mars = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
-function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
-var _createClass = (function () {
+var _createClass = function () {
   function defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
@@ -11,7 +11,7 @@ var _createClass = (function () {
   }return function (Constructor, protoProps, staticProps) {
     if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
   };
-})();
+}();
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -50,7 +50,7 @@ function _inherits(subClass, superClass) {
  */
 /* istanbul ignore next */
 
-var AsyncEventEmitter = (function (_EventEmitter) {
+var AsyncEventEmitter = function (_EventEmitter) {
   _inherits(AsyncEventEmitter, _EventEmitter);
 
   function AsyncEventEmitter() {
@@ -139,14 +139,14 @@ var AsyncEventEmitter = (function (_EventEmitter) {
   }]);
 
   return AsyncEventEmitter;
-})(_eventemitter2.default);
+}(_eventemitter2.default);
 
 exports.default = AsyncEventEmitter;
 
-},{"eventemitter3":23}],2:[function(require,module,exports){
+},{"eventemitter3":24}],2:[function(require,module,exports){
 'use strict';
 
-var _createClass = (function () {
+var _createClass = function () {
   function defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
@@ -154,7 +154,7 @@ var _createClass = (function () {
   }return function (Constructor, protoProps, staticProps) {
     if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
   };
-})();
+}();
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -193,7 +193,7 @@ var getVal = function getVal(ch) {
 
 // Base 64 encoding
 
-var Base64 = exports.Base64 = (function () {
+var Base64 = exports.Base64 = function () {
   function Base64() {
     _classCallCheck(this, Base64);
   }
@@ -324,16 +324,16 @@ var Base64 = exports.Base64 = (function () {
   }]);
 
   return Base64;
-})();
+}();
 
 exports.default = new Base64();
 
 },{}],3:[function(require,module,exports){
 'use strict';
 
-function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
-var _createClass = (function () {
+var _createClass = function () {
   function defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
@@ -341,7 +341,7 @@ var _createClass = (function () {
   }return function (Constructor, protoProps, staticProps) {
     if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
   };
-})();
+}();
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -384,9 +384,9 @@ var _CursorObservable = require('./CursorObservable');
 
 var _CursorObservable2 = _interopRequireDefault(_CursorObservable);
 
-var _Random = require('./Random');
+var _ShortIdGenerator = require('./ShortIdGenerator');
 
-var _Random2 = _interopRequireDefault(_Random);
+var _ShortIdGenerator2 = _interopRequireDefault(_ShortIdGenerator);
 
 var _EJSON = require('./EJSON');
 
@@ -420,16 +420,9 @@ var _defaultCursor = _CursorObservable2.default;
 var _defaultDelegate = _CollectionDelegate2.default;
 var _defaultStorageManager = _StorageManager2.default;
 var _defaultIndexManager = _IndexManager2.default;
-var _defaultIdGenerator = function _defaultIdGenerator(modelName) {
-  var nextSeed = _Random2.default.default().hexString(20);
-  var sequenceSeed = [nextSeed, '/collection/' + modelName];
-  return {
-    value: _Random2.default.createWithSeeds.apply(null, sequenceSeed).id(17),
-    seed: nextSeed
-  };
-};
+var _defaultIdGenerator = _ShortIdGenerator2.default;
 
-var Collection = exports.Collection = (function (_EventEmitter) {
+var Collection = exports.Collection = function (_EventEmitter) {
   _inherits(Collection, _EventEmitter);
 
   function Collection(name) {
@@ -439,9 +432,20 @@ var Collection = exports.Collection = (function (_EventEmitter) {
 
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Collection).call(this));
 
+    _this.options = options;
     _this._modelName = name;
     _this._writeQueue = new _PromiseQueue2.default(options.writeConcurrency || 5);
 
+    // Shorthand for defining in-memory collection
+    if (options.inMemory) {
+      options.cursorClass = _CursorObservable2.default;
+      options.delegate = _CollectionDelegate2.default;
+      options.storageManager = _StorageManager2.default;
+      options.indexManager = _IndexManager2.default;
+      options.idGenerator = _ShortIdGenerator2.default;
+    }
+
+    // Create managers
     var storageManagerClass = options.storageManager || _defaultStorageManager;
     var delegateClass = options.delegate || _defaultDelegate;
     var indexManagerClass = options.indexManager || _defaultIndexManager;
@@ -451,6 +455,7 @@ var Collection = exports.Collection = (function (_EventEmitter) {
     _this.storageManager = new storageManagerClass(_this, options);
     _this.delegate = new delegateClass(_this, options);
 
+    // Listen to change default updates
     if (options.upgradeDefaults) {
       _this._registerDefaultUpgradeHandlers(options);
     }
@@ -804,14 +809,14 @@ var Collection = exports.Collection = (function (_EventEmitter) {
   }]);
 
   return Collection;
-})(_eventemitter2.default);
+}(_eventemitter2.default);
 
 exports.default = Collection;
 
-},{"./CollectionDelegate":4,"./CursorObservable":7,"./EJSON":14,"./IndexManager":15,"./PromiseQueue":16,"./Random":17,"./StorageManager":18,"check-types":21,"eventemitter3":23,"fast.js/forEach":31,"fast.js/map":38}],4:[function(require,module,exports){
+},{"./CollectionDelegate":4,"./CursorObservable":7,"./EJSON":14,"./IndexManager":15,"./PromiseQueue":16,"./ShortIdGenerator":18,"./StorageManager":19,"check-types":22,"eventemitter3":24,"fast.js/forEach":32,"fast.js/map":39}],4:[function(require,module,exports){
 'use strict';
 
-var _createClass = (function () {
+var _createClass = function () {
   function defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
@@ -819,7 +824,7 @@ var _createClass = (function () {
   }return function (Constructor, protoProps, staticProps) {
     if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
   };
-})();
+}();
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -859,7 +864,7 @@ function _classCallCheck(instance, Constructor) {
  * normal MarsDB approach – within a browser.
  */
 
-var CollectionDelegate = exports.CollectionDelegate = (function () {
+var CollectionDelegate = exports.CollectionDelegate = function () {
   function CollectionDelegate(db) {
     _classCallCheck(this, CollectionDelegate);
 
@@ -981,14 +986,14 @@ var CollectionDelegate = exports.CollectionDelegate = (function () {
   }]);
 
   return CollectionDelegate;
-})();
+}();
 
 exports.default = CollectionDelegate;
 
-},{"./DocumentModifier":10,"fast.js/map":38}],5:[function(require,module,exports){
+},{"./DocumentModifier":10,"fast.js/map":39}],5:[function(require,module,exports){
 'use strict';
 
-var _createClass = (function () {
+var _createClass = function () {
   function defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
@@ -996,7 +1001,7 @@ var _createClass = (function () {
   }return function (Constructor, protoProps, staticProps) {
     if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
   };
-})();
+}();
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -1017,7 +1022,7 @@ function _classCallCheck(instance, Constructor) {
   }
 }
 
-var CollectionIndex = exports.CollectionIndex = (function () {
+var CollectionIndex = exports.CollectionIndex = function () {
   function CollectionIndex() {
     var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -1071,16 +1076,22 @@ var CollectionIndex = exports.CollectionIndex = (function () {
   }]);
 
   return CollectionIndex;
-})();
+}();
 
 exports.default = CollectionIndex;
 
-},{"invariant":45}],6:[function(require,module,exports){
+},{"invariant":46}],6:[function(require,module,exports){
 'use strict';
 
-function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
+var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
-var _createClass = (function () {
+var _typeof = typeof Symbol === "function" && _typeof2(Symbol.iterator) === "symbol" ? function (obj) {
+  return typeof obj === "undefined" ? "undefined" : _typeof2(obj);
+} : function (obj) {
+  return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
+};
+
+var _createClass = function () {
   function defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
@@ -1088,7 +1099,7 @@ var _createClass = (function () {
   }return function (Constructor, protoProps, staticProps) {
     if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
   };
-})();
+}();
 
 var _PIPELINE_PROCESSORS;
 
@@ -1159,10 +1170,6 @@ var _EJSON2 = _interopRequireDefault(_EJSON);
 
 function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : { default: obj };
-}
-
-function _typeof(obj) {
-  return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
 }
 
 function _classCallCheck(instance, Constructor) {
@@ -1268,7 +1275,7 @@ var PIPELINE_PROCESSORS = exports.PIPELINE_PROCESSORS = (_PIPELINE_PROCESSORS = 
  * fully customizable response
  */
 
-var Cursor = (function (_AsyncEventEmitter) {
+var Cursor = function (_AsyncEventEmitter) {
   _inherits(Cursor, _AsyncEventEmitter);
 
   function Cursor(db) {
@@ -1553,17 +1560,17 @@ var Cursor = (function (_AsyncEventEmitter) {
   }]);
 
   return Cursor;
-})(_AsyncEventEmitter3.default);
+}(_AsyncEventEmitter3.default);
 
 exports.Cursor = Cursor;
 exports.default = Cursor;
 
-},{"./AsyncEventEmitter":1,"./DocumentMatcher":9,"./DocumentProjector":11,"./DocumentRetriver":12,"./DocumentSorter":13,"./EJSON":14,"check-types":21,"fast.js/array/filter":25,"fast.js/array/reduce":29,"fast.js/forEach":31,"fast.js/function/bind":34,"fast.js/map":38,"fast.js/object/assign":39,"fast.js/object/keys":41,"invariant":45}],7:[function(require,module,exports){
+},{"./AsyncEventEmitter":1,"./DocumentMatcher":9,"./DocumentProjector":11,"./DocumentRetriver":12,"./DocumentSorter":13,"./EJSON":14,"check-types":22,"fast.js/array/filter":26,"fast.js/array/reduce":30,"fast.js/forEach":32,"fast.js/function/bind":35,"fast.js/map":39,"fast.js/object/assign":40,"fast.js/object/keys":42,"invariant":46}],7:[function(require,module,exports){
 'use strict';
 
-function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
-var _createClass = (function () {
+var _createClass = function () {
   function defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
@@ -1571,7 +1578,7 @@ var _createClass = (function () {
   }return function (Constructor, protoProps, staticProps) {
     if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
   };
-})();
+}();
 
 var _get = function get(object, property, receiver) {
   if (object === null) object = Function.prototype;var desc = Object.getOwnPropertyDescriptor(object, property);if (desc === undefined) {
@@ -1657,7 +1664,7 @@ var _defaultBatchSize = 10;
  * after some changes is happen in a database.
  */
 
-var CursorObservable = (function (_Cursor) {
+var CursorObservable = function (_Cursor) {
   _inherits(CursorObservable, _Cursor);
 
   function CursorObservable(db, query, options) {
@@ -1961,12 +1968,12 @@ var CursorObservable = (function (_Cursor) {
   }]);
 
   return CursorObservable;
-})(_Cursor3.default);
+}(_Cursor3.default);
 
 exports.CursorObservable = CursorObservable;
 exports.default = CursorObservable;
 
-},{"./Cursor":6,"./EJSON":14,"./PromiseQueue":16,"./debounce":19,"check-types":21,"fast.js/function/bind":34,"fast.js/map":38,"fast.js/object/values":43}],8:[function(require,module,exports){
+},{"./Cursor":6,"./EJSON":14,"./PromiseQueue":16,"./debounce":20,"check-types":22,"fast.js/function/bind":35,"fast.js/map":39,"fast.js/object/values":44}],8:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2248,12 +2255,18 @@ var MongoTypeComp = exports.MongoTypeComp = {
   }
 };
 
-},{"./EJSON":14,"check-types":21,"fast.js/forEach":31,"fast.js/object/keys":41}],9:[function(require,module,exports){
+},{"./EJSON":14,"check-types":22,"fast.js/forEach":32,"fast.js/object/keys":42}],9:[function(require,module,exports){
 'use strict';
 
-function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
+var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
-var _createClass = (function () {
+var _typeof = typeof Symbol === "function" && _typeof2(Symbol.iterator) === "symbol" ? function (obj) {
+  return typeof obj === "undefined" ? "undefined" : _typeof2(obj);
+} : function (obj) {
+  return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
+};
+
+var _createClass = function () {
   function defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
@@ -2261,7 +2274,7 @@ var _createClass = (function () {
   }return function (Constructor, protoProps, staticProps) {
     if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
   };
-})();
+}();
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -2314,10 +2327,6 @@ function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : { default: obj };
 }
 
-function _typeof(obj) {
-  return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
-}
-
 function _classCallCheck(instance, Constructor) {
   if (!(instance instanceof Constructor)) {
     throw new TypeError("Cannot call a class as a function");
@@ -2345,7 +2354,7 @@ function _classCallCheck(instance, Constructor) {
 //   var matcher = new Minimongo.Matcher({a: {$gt: 5}});
 //   if (matcher.documentMatches({a: 7})) ...
 
-var DocumentMatcher = exports.DocumentMatcher = (function () {
+var DocumentMatcher = exports.DocumentMatcher = function () {
   function DocumentMatcher(selector) {
     _classCallCheck(this, DocumentMatcher);
 
@@ -2453,7 +2462,7 @@ var DocumentMatcher = exports.DocumentMatcher = (function () {
   }]);
 
   return DocumentMatcher;
-})();
+}();
 
 exports.default = DocumentMatcher;
 
@@ -2787,7 +2796,7 @@ var VALUE_OPERATORS = {
       // GeoJSON '2dsphere' mode.
       maxDistance = operand.$maxDistance;
       point = operand.$geometry;
-      distance = function (value) {
+      distance = function distance(value) {
         // XXX: for now, we don't calculate the actual distance between, say,
         // polygon and circle. If people care about this use-case it will get
         // a priority.
@@ -2806,7 +2815,7 @@ var VALUE_OPERATORS = {
         throw Error('$near argument must be coordinate pair or GeoJSON');
       }
       point = pointToArray(operand);
-      distance = function (value) {
+      distance = function distance(value) {
         if (!(0, _Document.isArray)(value) && !(0, _Document.isPlainObject)(value)) {
           return null;
         }
@@ -3332,12 +3341,18 @@ var andSomeMatchers = function andSomeMatchers(subMatchers) {
 var andDocumentMatchers = andSomeMatchers;
 var andBranchedMatchers = andSomeMatchers;
 
-},{"./Document":8,"./EJSON":14,"check-types":21,"fast.js/array/every":24,"fast.js/array/indexOf":27,"fast.js/array/some":30,"fast.js/forEach":31,"fast.js/map":38,"fast.js/object/keys":41,"geojson-utils":44}],10:[function(require,module,exports){
+},{"./Document":8,"./EJSON":14,"check-types":22,"fast.js/array/every":25,"fast.js/array/indexOf":28,"fast.js/array/some":31,"fast.js/forEach":32,"fast.js/map":39,"fast.js/object/keys":42,"geojson-utils":45}],10:[function(require,module,exports){
 'use strict';
 
-function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
+var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
-var _createClass = (function () {
+var _typeof = typeof Symbol === "function" && _typeof2(Symbol.iterator) === "symbol" ? function (obj) {
+  return typeof obj === "undefined" ? "undefined" : _typeof2(obj);
+} : function (obj) {
+  return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
+};
+
+var _createClass = function () {
   function defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
@@ -3345,7 +3360,7 @@ var _createClass = (function () {
   }return function (Constructor, protoProps, staticProps) {
     if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
   };
-})();
+}();
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -3390,17 +3405,13 @@ function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : { default: obj };
 }
 
-function _typeof(obj) {
-  return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
-}
-
 function _classCallCheck(instance, Constructor) {
   if (!(instance instanceof Constructor)) {
     throw new TypeError("Cannot call a class as a function");
   }
 }
 
-var DocumentModifier = exports.DocumentModifier = (function () {
+var DocumentModifier = exports.DocumentModifier = function () {
   function DocumentModifier() {
     var query = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -3532,7 +3543,7 @@ var DocumentModifier = exports.DocumentModifier = (function () {
   }]);
 
   return DocumentModifier;
-})();
+}();
 
 exports.default = DocumentModifier;
 
@@ -3944,12 +3955,18 @@ var MODIFIERS = {
   }
 };
 
-},{"./Document":8,"./DocumentMatcher":9,"./DocumentSorter":13,"./EJSON":14,"./Random":17,"check-types":21,"fast.js/array/every":24,"fast.js/forEach":31,"fast.js/object/assign":39}],11:[function(require,module,exports){
+},{"./Document":8,"./DocumentMatcher":9,"./DocumentSorter":13,"./EJSON":14,"./Random":17,"check-types":22,"fast.js/array/every":25,"fast.js/forEach":32,"fast.js/object/assign":40}],11:[function(require,module,exports){
 'use strict';
 
-function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
+var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
-var _createClass = (function () {
+var _typeof = typeof Symbol === "function" && _typeof2(Symbol.iterator) === "symbol" ? function (obj) {
+  return typeof obj === "undefined" ? "undefined" : _typeof2(obj);
+} : function (obj) {
+  return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
+};
+
+var _createClass = function () {
   function defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
@@ -3957,7 +3974,7 @@ var _createClass = (function () {
   }return function (Constructor, protoProps, staticProps) {
     if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
   };
-})();
+}();
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -4012,10 +4029,6 @@ function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : { default: obj };
 }
 
-function _typeof(obj) {
-  return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
-}
-
 function _classCallCheck(instance, Constructor) {
   if (!(instance instanceof Constructor)) {
     throw new TypeError("Cannot call a class as a function");
@@ -4031,7 +4044,7 @@ function _has(obj, key) {
  * A wrapper around pojection functions.
  */
 
-var DocumentProjector = (function () {
+var DocumentProjector = function () {
   function DocumentProjector(fields) {
     _classCallCheck(this, DocumentProjector);
 
@@ -4055,7 +4068,7 @@ var DocumentProjector = (function () {
   }]);
 
   return DocumentProjector;
-})();
+}();
 
 // Knows how to compile a fields projection to a predicate function.
 // @returns - Function: a closure that filters out an object according to the
@@ -4331,10 +4344,10 @@ var treeToPaths = function treeToPaths(tree, prefix) {
   return result;
 };
 
-},{"./Document":8,"./EJSON":14,"check-types":21,"fast.js/array/every":24,"fast.js/array/filter":25,"fast.js/array/indexOf":27,"fast.js/forEach":31,"fast.js/map":38,"fast.js/object/assign":39,"fast.js/object/keys":41}],12:[function(require,module,exports){
+},{"./Document":8,"./EJSON":14,"check-types":22,"fast.js/array/every":25,"fast.js/array/filter":26,"fast.js/array/indexOf":28,"fast.js/forEach":32,"fast.js/map":39,"fast.js/object/assign":40,"fast.js/object/keys":42}],12:[function(require,module,exports){
 'use strict';
 
-var _createClass = (function () {
+var _createClass = function () {
   function defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
@@ -4342,7 +4355,7 @@ var _createClass = (function () {
   }return function (Constructor, protoProps, staticProps) {
     if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
   };
-})();
+}();
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -4381,7 +4394,7 @@ function _classCallCheck(instance, Constructor) {
  * It just retrives content by 'get' method.
  */
 
-var DocumentRetriver = exports.DocumentRetriver = (function () {
+var DocumentRetriver = exports.DocumentRetriver = function () {
   function DocumentRetriver(db) {
     _classCallCheck(this, DocumentRetriver);
 
@@ -4492,16 +4505,22 @@ var DocumentRetriver = exports.DocumentRetriver = (function () {
   }]);
 
   return DocumentRetriver;
-})();
+}();
 
 exports.default = DocumentRetriver;
 
-},{"./Document":8,"check-types":21,"fast.js/array/filter":25,"fast.js/map":38}],13:[function(require,module,exports){
+},{"./Document":8,"check-types":22,"fast.js/array/filter":26,"fast.js/map":39}],13:[function(require,module,exports){
 'use strict';
 
-function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
+var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
-var _createClass = (function () {
+var _typeof = typeof Symbol === "function" && _typeof2(Symbol.iterator) === "symbol" ? function (obj) {
+  return typeof obj === "undefined" ? "undefined" : _typeof2(obj);
+} : function (obj) {
+  return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
+};
+
+var _createClass = function () {
   function defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
@@ -4509,7 +4528,7 @@ var _createClass = (function () {
   }return function (Constructor, protoProps, staticProps) {
     if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
   };
-})();
+}();
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -4550,10 +4569,6 @@ function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : { default: obj };
 }
 
-function _typeof(obj) {
-  return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
-}
-
 function _classCallCheck(instance, Constructor) {
   if (!(instance instanceof Constructor)) {
     throw new TypeError("Cannot call a class as a function");
@@ -4573,7 +4588,7 @@ function _classCallCheck(instance, Constructor) {
 // first object comes first in order, 1 if the second object comes
 // first, or 0 if neither object comes before the other.
 
-var DocumentSorter = exports.DocumentSorter = (function () {
+var DocumentSorter = exports.DocumentSorter = function () {
   function DocumentSorter(spec) {
     var _this = this;
 
@@ -4987,7 +5002,7 @@ var DocumentSorter = exports.DocumentSorter = (function () {
   }]);
 
   return DocumentSorter;
-})();
+}();
 
 exports.default = DocumentSorter;
 
@@ -5008,12 +5023,12 @@ var composeComparators = function composeComparators(comparatorArray) {
   };
 };
 
-},{"./Document":8,"./DocumentMatcher":9,"check-types":21,"fast.js/array/every":24,"fast.js/array/indexOf":27,"fast.js/forEach":31,"fast.js/map":38,"fast.js/object/keys":41}],14:[function(require,module,exports){
+},{"./Document":8,"./DocumentMatcher":9,"check-types":22,"fast.js/array/every":25,"fast.js/array/indexOf":28,"fast.js/forEach":32,"fast.js/map":39,"fast.js/object/keys":42}],14:[function(require,module,exports){
 'use strict';
 
-function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
+var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
-var _createClass = (function () {
+var _createClass = function () {
   function defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
@@ -5021,7 +5036,17 @@ var _createClass = (function () {
   }return function (Constructor, protoProps, staticProps) {
     if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
   };
-})();
+}();
+
+var _typeof = typeof Symbol === "function" && _typeof2(Symbol.iterator) === "symbol" ? function (obj) {
+  return typeof obj === "undefined" ? "undefined" : _typeof2(obj);
+} : function (obj) {
+  return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
+}; /**
+    * Based on Meteor's EJSON package.
+    * Rewrite with ES6 and better formated for passing
+    * linter
+    */
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -5058,14 +5083,6 @@ function _classCallCheck(instance, Constructor) {
   }
 }
 
-function _typeof(obj) {
-  return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
-} /**
-   * Based on Meteor's EJSON package.
-   * Rewrite with ES6 and better formated for passing
-   * linter
-   */
-
 // Internal utils
 function _isNaN(val) {
   return typeof val === 'number' && val != +val;
@@ -5080,7 +5097,7 @@ function _isArguments(val) {
   return !!val && (typeof val === 'undefined' ? 'undefined' : _typeof(val)) == 'object' && Object.prototype.hasOwnProperty.call(val, 'callee') && !Object.prototype.propertyIsEnumerable.call(val, 'callee');
 }
 
-var EJSON = exports.EJSON = (function () {
+var EJSON = exports.EJSON = function () {
   // @ngInject
 
   function EJSON() {
@@ -5591,14 +5608,14 @@ var EJSON = exports.EJSON = (function () {
   }]);
 
   return EJSON;
-})();
+}();
 
 exports.default = new EJSON();
 
-},{"./Base64":2,"check-types":21,"fast.js/array/some":30,"fast.js/forEach":31,"fast.js/object/keys":41}],15:[function(require,module,exports){
+},{"./Base64":2,"check-types":22,"fast.js/array/some":31,"fast.js/forEach":32,"fast.js/object/keys":42}],15:[function(require,module,exports){
 'use strict';
 
-var _createClass = (function () {
+var _createClass = function () {
   function defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
@@ -5606,7 +5623,7 @@ var _createClass = (function () {
   }return function (Constructor, protoProps, staticProps) {
     if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
   };
-})();
+}();
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -5663,7 +5680,7 @@ function _classCallCheck(instance, Constructor) {
  */
 /* istanbul ignore next */
 
-var IndexManager = exports.IndexManager = (function () {
+var IndexManager = exports.IndexManager = function () {
   function IndexManager(db) {
     var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
@@ -5881,14 +5898,14 @@ var IndexManager = exports.IndexManager = (function () {
   }]);
 
   return IndexManager;
-})();
+}();
 
 exports.default = IndexManager;
 
-},{"./CollectionIndex":5,"./DocumentRetriver":12,"./PromiseQueue":16,"fast.js/forEach":31,"fast.js/function/bind":34,"fast.js/map":38,"fast.js/object/keys":41,"invariant":45}],16:[function(require,module,exports){
+},{"./CollectionIndex":5,"./DocumentRetriver":12,"./PromiseQueue":16,"fast.js/forEach":32,"fast.js/function/bind":35,"fast.js/map":39,"fast.js/object/keys":42,"invariant":46}],16:[function(require,module,exports){
 'use strict';
 
-var _createClass = (function () {
+var _createClass = function () {
   function defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
@@ -5896,7 +5913,7 @@ var _createClass = (function () {
   }return function (Constructor, protoProps, staticProps) {
     if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
   };
-})();
+}();
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -5928,7 +5945,7 @@ function _classCallCheck(instance, Constructor) {
  * @constructor
  */
 
-var PromiseQueue = (function () {
+var PromiseQueue = function () {
   function PromiseQueue() {
     var maxPendingPromises = arguments.length <= 0 || arguments[0] === undefined ? Infinity : arguments[0];
     var maxQueuedPromises = arguments.length <= 1 || arguments[1] === undefined ? Infinity : arguments[1];
@@ -6046,16 +6063,22 @@ var PromiseQueue = (function () {
   }]);
 
   return PromiseQueue;
-})();
+}();
 
 exports.default = PromiseQueue;
 
-},{"double-ended-queue":22,"fast.js/function/try":37}],17:[function(require,module,exports){
+},{"double-ended-queue":23,"fast.js/function/try":38}],17:[function(require,module,exports){
 'use strict';
 
-function _typeof2(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
+var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
-var _createClass = (function () {
+var _typeof = typeof Symbol === "function" && _typeof2(Symbol.iterator) === "symbol" ? function (obj) {
+  return typeof obj === "undefined" ? "undefined" : _typeof2(obj);
+} : function (obj) {
+  return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
+};
+
+var _createClass = function () {
   function defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
@@ -6063,7 +6086,7 @@ var _createClass = (function () {
   }return function (Constructor, protoProps, staticProps) {
     if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
   };
-})();
+}();
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -6080,10 +6103,6 @@ var _invariant2 = _interopRequireDefault(_invariant);
 
 function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : { default: obj };
-}
-
-function _typeof(obj) {
-  return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
 }
 
 function _classCallCheck(instance, Constructor) {
@@ -6127,7 +6146,7 @@ var Alea = function Alea() {
     return mash;
   }
 
-  return (function (args) {
+  return function (args) {
     var s0 = 0;
     var s1 = 0;
     var s2 = 0;
@@ -6172,7 +6191,7 @@ var Alea = function Alea() {
     random.version = 'Alea 0.9';
     random.args = args;
     return random;
-  })(Array.prototype.slice.call(arguments));
+  }(Array.prototype.slice.call(arguments));
 };
 
 /**
@@ -6194,7 +6213,7 @@ function _getBrowserSeeds() {
  * with minor modifications and refactoring.
  */
 
-var Random = (function () {
+var Random = function () {
   function Random(type) {
     var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
@@ -6230,7 +6249,7 @@ var Random = (function () {
     key: 'hexString',
     value: function hexString(digits) {
       if (this.type === RANDOM_GENERATOR_TYPE.NODE_CRYPTO) {
-        var _ret = (function () {
+        var _ret = function () {
           var nodeCrypto = require('crypto');
           var numBytes = Math.ceil(digits / 2);
 
@@ -6249,7 +6268,7 @@ var Random = (function () {
           return {
             v: result.substring(0, digits)
           };
-        })();
+        }();
 
         if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
       } else {
@@ -6321,15 +6340,39 @@ var Random = (function () {
   }]);
 
   return Random;
-})();
+}();
 
 exports.default = Random;
 exports.default = Random;
 
-},{"crypto":undefined,"fast.js/function/try":37,"invariant":45}],18:[function(require,module,exports){
+},{"crypto":undefined,"fast.js/function/try":38,"invariant":46}],18:[function(require,module,exports){
 'use strict';
 
-var _createClass = (function () {
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+exports.default = function (modelName) {
+  var nextSeed = _Random2.default.default().hexString(20);
+  var sequenceSeed = [nextSeed, '/collection/' + modelName];
+  return {
+    value: _Random2.default.createWithSeeds.apply(null, sequenceSeed).id(17),
+    seed: nextSeed
+  };
+};
+
+var _Random = require('./Random');
+
+var _Random2 = _interopRequireDefault(_Random);
+
+function _interopRequireDefault(obj) {
+  return obj && obj.__esModule ? obj : { default: obj };
+}
+
+},{"./Random":17}],19:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () {
   function defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
@@ -6337,7 +6380,7 @@ var _createClass = (function () {
   }return function (Constructor, protoProps, staticProps) {
     if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
   };
-})();
+}();
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -6377,7 +6420,7 @@ function _classCallCheck(instance, Constructor) {
  * and use another storage (with levelup, for example)
  */
 
-var StorageManager = exports.StorageManager = (function () {
+var StorageManager = exports.StorageManager = function () {
   function StorageManager(db) {
     var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
@@ -6468,11 +6511,11 @@ var StorageManager = exports.StorageManager = (function () {
   }]);
 
   return StorageManager;
-})();
+}();
 
 exports.default = StorageManager;
 
-},{"./EJSON":14,"./PromiseQueue":16,"eventemitter3":23,"fast.js/forEach":31}],19:[function(require,module,exports){
+},{"./EJSON":14,"./PromiseQueue":16,"eventemitter3":24,"fast.js/forEach":32}],20:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6494,7 +6537,7 @@ function debounce(func, wait, batchSize) {
   var callsCount = 0;
   var promise = null;
   var doNotResolve = true;
-  var maybeResolve = null;
+  var _maybeResolve = null;
 
   var debouncer = function debouncer() {
     var context = this;
@@ -6502,9 +6545,9 @@ function debounce(func, wait, batchSize) {
 
     if (!promise) {
       promise = new Promise(function (resolve, reject) {
-        maybeResolve = function () {
+        _maybeResolve = function maybeResolve() {
           if (doNotResolve) {
-            timeout = setTimeout(maybeResolve, wait);
+            timeout = setTimeout(_maybeResolve, wait);
             doNotResolve = false;
           } else {
             resolve(func.apply(context, args));
@@ -6512,20 +6555,20 @@ function debounce(func, wait, batchSize) {
             callsCount = 0;
             timeout = null;
             doNotResolve = true;
-            maybeResolve = null;
+            _maybeResolve = null;
           }
         };
-        maybeResolve();
+        _maybeResolve();
       });
     } else {
       var callNow = batchSize && callsCount >= batchSize;
       doNotResolve = !callNow;
 
-      if (callNow && maybeResolve) {
+      if (callNow && _maybeResolve) {
         var returnPromise = promise;
         returnPromise.debouncePassed = true;
         clearTimeout(timeout);
-        maybeResolve();
+        _maybeResolve();
         callsCount += 1;
         return returnPromise;
       }
@@ -6552,7 +6595,7 @@ function debounce(func, wait, batchSize) {
   return debouncer;
 }
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 'use strict';
 
 var EventEmitter = require('./dist/AsyncEventEmitter').default;
@@ -6579,7 +6622,7 @@ module.exports = {
   debounce: debounce
 };
 
-},{"./dist/AsyncEventEmitter":1,"./dist/Base64":2,"./dist/Collection":3,"./dist/CursorObservable":7,"./dist/EJSON":14,"./dist/PromiseQueue":16,"./dist/Random":17,"./dist/StorageManager":18,"./dist/debounce":19}],21:[function(require,module,exports){
+},{"./dist/AsyncEventEmitter":1,"./dist/Base64":2,"./dist/Collection":3,"./dist/CursorObservable":7,"./dist/EJSON":14,"./dist/PromiseQueue":16,"./dist/Random":17,"./dist/StorageManager":19,"./dist/debounce":20}],22:[function(require,module,exports){
 /*globals define, module, Symbol */
 
 (function (globals) {
@@ -7440,7 +7483,7 @@ module.exports = {
   }
 }(this));
 
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 /**
  * Copyright (c) 2013 Petka Antonov
  * 
@@ -7729,7 +7772,7 @@ function getCapacity(capacity) {
 
 module.exports = Deque;
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 'use strict';
 
 //
@@ -7993,7 +8036,7 @@ if ('undefined' !== typeof module) {
   module.exports = EventEmitter;
 }
 
-},{}],24:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 'use strict';
 
 var bindInternal3 = require('../function/bindInternal3');
@@ -8020,7 +8063,7 @@ module.exports = function fastEvery (subject, fn, thisContext) {
   return true;
 };
 
-},{"../function/bindInternal3":35}],25:[function(require,module,exports){
+},{"../function/bindInternal3":36}],26:[function(require,module,exports){
 'use strict';
 
 var bindInternal3 = require('../function/bindInternal3');
@@ -8048,7 +8091,7 @@ module.exports = function fastFilter (subject, fn, thisContext) {
   return result;
 };
 
-},{"../function/bindInternal3":35}],26:[function(require,module,exports){
+},{"../function/bindInternal3":36}],27:[function(require,module,exports){
 'use strict';
 
 var bindInternal3 = require('../function/bindInternal3');
@@ -8071,7 +8114,7 @@ module.exports = function fastForEach (subject, fn, thisContext) {
   }
 };
 
-},{"../function/bindInternal3":35}],27:[function(require,module,exports){
+},{"../function/bindInternal3":36}],28:[function(require,module,exports){
 'use strict';
 
 /**
@@ -8106,7 +8149,7 @@ module.exports = function fastIndexOf (subject, target, fromIndex) {
   return -1;
 };
 
-},{}],28:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 'use strict';
 
 var bindInternal3 = require('../function/bindInternal3');
@@ -8132,7 +8175,7 @@ module.exports = function fastMap (subject, fn, thisContext) {
   return result;
 };
 
-},{"../function/bindInternal3":35}],29:[function(require,module,exports){
+},{"../function/bindInternal3":36}],30:[function(require,module,exports){
 'use strict';
 
 var bindInternal4 = require('../function/bindInternal4');
@@ -8169,7 +8212,7 @@ module.exports = function fastReduce (subject, fn, initialValue, thisContext) {
   return result;
 };
 
-},{"../function/bindInternal4":36}],30:[function(require,module,exports){
+},{"../function/bindInternal4":37}],31:[function(require,module,exports){
 'use strict';
 
 var bindInternal3 = require('../function/bindInternal3');
@@ -8196,7 +8239,7 @@ module.exports = function fastSome (subject, fn, thisContext) {
   return false;
 };
 
-},{"../function/bindInternal3":35}],31:[function(require,module,exports){
+},{"../function/bindInternal3":36}],32:[function(require,module,exports){
 'use strict';
 
 var forEachArray = require('./array/forEach'),
@@ -8219,7 +8262,7 @@ module.exports = function fastForEach (subject, fn, thisContext) {
     return forEachObject(subject, fn, thisContext);
   }
 };
-},{"./array/forEach":26,"./object/forEach":40}],32:[function(require,module,exports){
+},{"./array/forEach":27,"./object/forEach":41}],33:[function(require,module,exports){
 'use strict';
 
 /**
@@ -8250,7 +8293,7 @@ module.exports = function applyNoContext (subject, args) {
   }
 };
 
-},{}],33:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 'use strict';
 
 /**
@@ -8281,7 +8324,7 @@ module.exports = function applyWithContext (subject, thisContext, args) {
   }
 };
 
-},{}],34:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 'use strict';
 
 var applyWithContext = require('./applyWithContext');
@@ -8354,7 +8397,7 @@ module.exports = function fastBind (fn, thisContext) {
   }
 };
 
-},{"./applyNoContext":32,"./applyWithContext":33}],35:[function(require,module,exports){
+},{"./applyNoContext":33,"./applyWithContext":34}],36:[function(require,module,exports){
 'use strict';
 
 /**
@@ -8367,7 +8410,7 @@ module.exports = function bindInternal3 (func, thisContext) {
   };
 };
 
-},{}],36:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 'use strict';
 
 /**
@@ -8380,7 +8423,7 @@ module.exports = function bindInternal4 (func, thisContext) {
   };
 };
 
-},{}],37:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 'use strict';
 
 /**
@@ -8417,7 +8460,7 @@ module.exports = function fastTry (fn) {
   }
 };
 
-},{}],38:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 'use strict';
 
 var mapArray = require('./array/map'),
@@ -8441,7 +8484,7 @@ module.exports = function fastMap (subject, fn, thisContext) {
     return mapObject(subject, fn, thisContext);
   }
 };
-},{"./array/map":28,"./object/map":42}],39:[function(require,module,exports){
+},{"./array/map":29,"./object/map":43}],40:[function(require,module,exports){
 'use strict';
 
 /**
@@ -8477,7 +8520,7 @@ module.exports = function fastAssign (target) {
   return target;
 };
 
-},{}],40:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 'use strict';
 
 var bindInternal3 = require('../function/bindInternal3');
@@ -8502,7 +8545,7 @@ module.exports = function fastForEachObject (subject, fn, thisContext) {
   }
 };
 
-},{"../function/bindInternal3":35}],41:[function(require,module,exports){
+},{"../function/bindInternal3":36}],42:[function(require,module,exports){
 'use strict';
 
 /**
@@ -8520,7 +8563,7 @@ module.exports = typeof Object.keys === "function" ? Object.keys : /* istanbul i
   }
   return keys;
 };
-},{}],42:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 'use strict';
 
 var bindInternal3 = require('../function/bindInternal3');
@@ -8548,7 +8591,7 @@ module.exports = function fastMapObject (subject, fn, thisContext) {
   return result;
 };
 
-},{"../function/bindInternal3":35}],43:[function(require,module,exports){
+},{"../function/bindInternal3":36}],44:[function(require,module,exports){
 'use strict';
 
 /**
@@ -8569,7 +8612,7 @@ module.exports = function fastValues (obj) {
   }
   return values;
 };
-},{}],44:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 (function () {
   var gju = this.gju = {};
 
@@ -8979,7 +9022,7 @@ module.exports = function fastValues (obj) {
 
 })();
 
-},{}],45:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -9032,5 +9075,5 @@ var invariant = function(condition, format, a, b, c, d, e, f) {
 
 module.exports = invariant;
 
-},{}]},{},[20])(20)
+},{}]},{},[21])(21)
 });
