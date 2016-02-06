@@ -1,6 +1,8 @@
 'use strict';
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -51,8 +53,6 @@ var _Document = require('./Document');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 // The minimongo selector compiler!
@@ -76,7 +76,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 //   var matcher = new Minimongo.Matcher({a: {$gt: 5}});
 //   if (matcher.documentMatches({a: 7})) ...
 
-var DocumentMatcher = exports.DocumentMatcher = (function () {
+var DocumentMatcher = exports.DocumentMatcher = function () {
   function DocumentMatcher(selector) {
     _classCallCheck(this, DocumentMatcher);
 
@@ -184,7 +184,7 @@ var DocumentMatcher = exports.DocumentMatcher = (function () {
   }]);
 
   return DocumentMatcher;
-})();
+}();
 
 exports.default = DocumentMatcher;
 
@@ -518,7 +518,7 @@ var VALUE_OPERATORS = {
       // GeoJSON '2dsphere' mode.
       maxDistance = operand.$maxDistance;
       point = operand.$geometry;
-      distance = function (value) {
+      distance = function distance(value) {
         // XXX: for now, we don't calculate the actual distance between, say,
         // polygon and circle. If people care about this use-case it will get
         // a priority.
@@ -537,7 +537,7 @@ var VALUE_OPERATORS = {
         throw Error('$near argument must be coordinate pair or GeoJSON');
       }
       point = pointToArray(operand);
-      distance = function (value) {
+      distance = function distance(value) {
         if (!(0, _Document.isArray)(value) && !(0, _Document.isPlainObject)(value)) {
           return null;
         }

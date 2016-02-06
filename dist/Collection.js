@@ -1,6 +1,6 @@
 'use strict';
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -43,9 +43,9 @@ var _CursorObservable = require('./CursorObservable');
 
 var _CursorObservable2 = _interopRequireDefault(_CursorObservable);
 
-var _Random = require('./Random');
+var _ShortIdGenerator = require('./ShortIdGenerator');
 
-var _Random2 = _interopRequireDefault(_Random);
+var _ShortIdGenerator2 = _interopRequireDefault(_ShortIdGenerator);
 
 var _EJSON = require('./EJSON');
 
@@ -65,16 +65,9 @@ var _defaultCursor = _CursorObservable2.default;
 var _defaultDelegate = _CollectionDelegate2.default;
 var _defaultStorageManager = _StorageManager2.default;
 var _defaultIndexManager = _IndexManager2.default;
-var _defaultIdGenerator = function _defaultIdGenerator(modelName) {
-  var nextSeed = _Random2.default.default().hexString(20);
-  var sequenceSeed = [nextSeed, '/collection/' + modelName];
-  return {
-    value: _Random2.default.createWithSeeds.apply(null, sequenceSeed).id(17),
-    seed: nextSeed
-  };
-};
+var _defaultIdGenerator = _ShortIdGenerator2.default;
 
-var Collection = exports.Collection = (function (_EventEmitter) {
+var Collection = exports.Collection = function (_EventEmitter) {
   _inherits(Collection, _EventEmitter);
 
   function Collection(name) {
@@ -84,9 +77,20 @@ var Collection = exports.Collection = (function (_EventEmitter) {
 
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Collection).call(this));
 
+    _this.options = options;
     _this._modelName = name;
     _this._writeQueue = new _PromiseQueue2.default(options.writeConcurrency || 5);
 
+    // Shorthand for defining in-memory collection
+    if (options.inMemory) {
+      options.cursorClass = _CursorObservable2.default;
+      options.delegate = _CollectionDelegate2.default;
+      options.storageManager = _StorageManager2.default;
+      options.indexManager = _IndexManager2.default;
+      options.idGenerator = _ShortIdGenerator2.default;
+    }
+
+    // Create managers
     var storageManagerClass = options.storageManager || _defaultStorageManager;
     var delegateClass = options.delegate || _defaultDelegate;
     var indexManagerClass = options.indexManager || _defaultIndexManager;
@@ -96,6 +100,7 @@ var Collection = exports.Collection = (function (_EventEmitter) {
     _this.storageManager = new storageManagerClass(_this, options);
     _this.delegate = new delegateClass(_this, options);
 
+    // Listen to change default updates
     if (options.upgradeDefaults) {
       _this._registerDefaultUpgradeHandlers(options);
     }
@@ -449,6 +454,6 @@ var Collection = exports.Collection = (function (_EventEmitter) {
   }]);
 
   return Collection;
-})(_eventemitter2.default);
+}(_eventemitter2.default);
 
 exports.default = Collection;
