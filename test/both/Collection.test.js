@@ -39,6 +39,7 @@ describe('Collection', () => {
         delegate: NewDelegate,
       });
 
+      db._lazyInitCollection();
       db.storageManager.should.be.an.instanceof(NewStorageManager);
       db.idGenerator.should.be.equal(new_id_generator);
       db.indexManager.should.be.an.instanceof(NewIndexManager);
@@ -68,11 +69,12 @@ describe('Collection', () => {
       Collection.defaultCursor(NewCursor);
       Collection.defaultCursor().should.be.equal(NewCursor);
     });
-    it('should upgrade all collections uses defaults', function () {
-      const defColl = new Collection('test', {upgradeDefaults: true});
-      defColl.cursorClass.should.be.equal(Collection.defaultCursor());
+    it('should initialize lazy', function () {
+      const defColl = new Collection('test');
+      expect(defColl.cursorClass).to.be.undefined;
       class NewCursor {}
       Collection.defaultCursor(NewCursor);
+      defColl._lazyInitCollection();
       defColl.cursorClass.should.be.equal(NewCursor);
     });
   });
@@ -84,8 +86,8 @@ describe('Collection', () => {
       Collection.defaultStorageManager().should.be.equal(NewStorageManager);
     });
     it('should upgrade all collections uses defaults', function () {
-      const defColl = new Collection('test', {upgradeDefaults: true});
-      defColl.storage.should.be.instanceof(Collection.defaultStorageManager());
+      const defColl = new Collection('test');
+      expect(defColl.storageManager).to.be.undefined;
       class NewStorageManager {}
       Collection.defaultStorageManager(NewStorageManager);
       defColl.storage.should.be.instanceof(NewStorageManager);
@@ -99,10 +101,10 @@ describe('Collection', () => {
       Collection.defaultIdGenerator().should.be.equal(new_id_generator);
     });
     it('should upgrade all collections uses defaults', function () {
-      const defColl = new Collection('test', {upgradeDefaults: true});
-      defColl.idGenerator.should.be.equal(Collection.defaultIdGenerator());
+      const defColl = new Collection('test');
       function new_id_generator() {}
       Collection.defaultIdGenerator(new_id_generator);
+      defColl._lazyInitCollection();
       defColl.idGenerator.should.be.equal(new_id_generator);
     });
   });
@@ -114,10 +116,10 @@ describe('Collection', () => {
       Collection.defaultDelegate().should.be.equal(NewDelegate);
     });
     it('should upgrade all collections uses defaults', function () {
-      const defColl = new Collection('test', {upgradeDefaults: true});
-      defColl.delegate.should.be.instanceof(Collection.defaultDelegate());
+      const defColl = new Collection('test');
       class NewDelegate {}
       Collection.defaultDelegate(NewDelegate);
+      defColl._lazyInitCollection();
       defColl.delegate.should.be.instanceof(NewDelegate);
     });
   });
@@ -129,10 +131,10 @@ describe('Collection', () => {
       Collection.defaultIndexManager().should.be.equal(NewIndexManager);
     });
     it('should upgrade all collections uses defaults', function () {
-      const defColl = new Collection('test', {upgradeDefaults: true});
-      defColl.indexManager.should.be.instanceof(Collection.defaultIndexManager());
+      const defColl = new Collection('test');
       class NewIndexManager {}
       Collection.defaultIndexManager(NewIndexManager);
+      defColl._lazyInitCollection();
       defColl.indexManager.should.be.instanceof(NewIndexManager);
     });
   });
