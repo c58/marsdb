@@ -9,7 +9,7 @@
 [![Dependency Status](https://david-dm.org/c58/marsdb.svg)](https://david-dm.org/c58/marsdb)
 [![bitHound Overall Score](https://www.bithound.io/github/c58/marsdb/badges/score.svg)](https://www.bithound.io/github/c58/marsdb)
 [![Join the chat at https://gitter.im/c58/marsdb](https://badges.gitter.im/c58/marsdb.svg)](https://gitter.im/c58/marsdb?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![GitHub stars][https://img.shields.io/github/stars/c58/marsdb.svg?style=social]](https://github.com/c58/marsdb)
+[![GitHub stars](https://img.shields.io/github/stars/c58/marsdb.svg?style=social)](https://github.com/c58/marsdb)
 
 MarsDB is a lightweight client-side database.
 It's based on a Meteor's **minimongo** matching/modifying implementation. It's carefully written on **ES6**, have a **Promise based** interface and may be backed with any storage implementation ([see plugins](https://github.com/c58/marsdb#plugins)). It's also supports **observable** cursors.
