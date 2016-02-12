@@ -311,6 +311,7 @@ var Collection = exports.Collection = function (_EventEmitter) {
     key: '_lazyInitCollection',
     value: function _lazyInitCollection() {
       if (!this._initialized) {
+        this._initialized = true;
         var options = this.options;
         var storageManagerClass = options.storageManager || _defaultStorageManager;
         var delegateClass = options.delegate || _defaultDelegate;
@@ -320,7 +321,6 @@ var Collection = exports.Collection = function (_EventEmitter) {
         this.indexManager = new indexManagerClass(this, options);
         this.storageManager = new storageManagerClass(this, options);
         this.delegate = new delegateClass(this, options);
-        this._initialized = true;
       }
     }
 
