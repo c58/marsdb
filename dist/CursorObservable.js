@@ -67,10 +67,10 @@ var CursorObservable = function (_Cursor) {
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(CursorObservable).call(this, db, query, options));
 
     _this.maybeUpdate = (0, _bind3.default)(_this.maybeUpdate, _this);
+    _this._observers = 0;
     _this._updateQueue = new _PromiseQueue2.default(1);
     _this._propagateUpdate = (0, _debounce2.default)((0, _bind3.default)(_this._propagateUpdate, _this), 0, 0);
     _this._doUpdate = (0, _debounce2.default)((0, _bind3.default)(_this._doUpdate, _this), _defaultDebounce, _defaultBatchSize);
-    _this._observers = 0;
     return _this;
   }
 
@@ -118,51 +118,55 @@ var CursorObservable = function (_Cursor) {
   }, {
     key: 'observe',
     value: function observe(listener) {
-      var _this2 = this;
-
       var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
-      // Make new wrapper for make possible to observe
-      // multiple times (for removeListener)
-      var updateWrapper = function updateWrapper(a, b) {
-        return _this2.maybeUpdate(a, b);
-      };
+      // Make possible to obbserver w/o callback
       listener = listener || function () {};
 
-      this.db.on('insert', updateWrapper);
-      this.db.on('update', updateWrapper);
-      this.db.on('remove', updateWrapper);
+      // Start observing when no observers created
+      if (this._observers <= 0) {
+        this.db.on('insert', this.maybeUpdate);
+        this.db.on('update', this.maybeUpdate);
+        this.db.on('remove', this.maybeUpdate);
+      }
 
+      // Create observe stopper for current listeners
       var running = true;
       var self = this;
       function stopper() {
         if (running) {
-          self.db.removeListener('insert', updateWrapper);
-          self.db.removeListener('update', updateWrapper);
-          self.db.removeListener('remove', updateWrapper);
+          running = false;
+          self._observers -= 1;
           self.removeListener('update', listener);
           self.removeListener('stop', stopper);
 
-          running = false;
-          self._observers -= 1;
+          // Stop observing a cursor if no more observers
           if (self._observers === 0) {
             self._latestIds = null;
             self._latestResult = null;
+            this._updatePromise = null;
             self.emit('observeStopped');
+            self.db.removeListener('insert', this.maybeUpdate);
+            self.db.removeListener('update', this.maybeUpdate);
+            self.db.removeListener('remove', this.maybeUpdate);
           }
         }
       }
 
+      // Start listening for updates and global stop
       this._observers += 1;
       this.on('update', listener);
       this.on('stop', stopper);
 
+      // Get first result for observer or initiate
+      // update at first time
       if (!this._updatePromise) {
         this.update(true, true);
       } else if (this._latestResult !== null) {
         listener(this._latestResult);
       }
 
+      // Wrap returned promise with useful fields
       var cursorPromiseMixin = { stop: stopper };
       return this._createCursorPromise(this._updatePromise, cursorPromiseMixin);
     }
@@ -193,25 +197,25 @@ var CursorObservable = function (_Cursor) {
   }, {
     key: 'update',
     value: function update() {
-      var _this3 = this;
+      var _this2 = this;
 
       var firstRun = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
       var immidiatelly = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
 
       this._updatePromise = this._updateQueue.add(function () {
-        _this3._updatePromise = immidiatelly ? _this3._doUpdate.func(firstRun) : _this3._doUpdate(firstRun);
+        _this2._updatePromise = immidiatelly ? _this2._doUpdate.func(firstRun) : _this2._doUpdate(firstRun);
 
         if (immidiatelly) {
-          return _this3._updatePromise;
+          return _this2._updatePromise;
         } else {
-          if (_this3._updatePromise.debouncePassed) {
-            return _this3._updatePromise;
+          if (_this2._updatePromise.debouncePassed) {
+            return _this2._updatePromise;
           } else {
             return Promise.resolve('__debounced__');
           }
         }
       }).then(function (res) {
-        return res === '__debounced__' ? _this3._updatePromise : res;
+        return res === '__debounced__' ? _this2._updatePromise : res;
       });
 
       return this._updatePromise;
@@ -299,13 +303,13 @@ var CursorObservable = function (_Cursor) {
   }, {
     key: '_doUpdate',
     value: function _doUpdate() {
-      var _this4 = this;
+      var _this3 = this;
 
       var firstRun = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
 
       return this.exec().then(function (result) {
-        _this4._updateLatestIds();
-        return _this4._propagateUpdate(firstRun).then(function () {
+        _this3._updateLatestIds();
+        return _this3._propagateUpdate(firstRun).then(function () {
           return result;
         });
       });

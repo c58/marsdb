@@ -360,9 +360,9 @@ var _checkTypes = require('check-types');
 
 var _checkTypes2 = _interopRequireDefault(_checkTypes);
 
-var _eventemitter = require('eventemitter3');
+var _AsyncEventEmitter = require('./AsyncEventEmitter');
 
-var _eventemitter2 = _interopRequireDefault(_eventemitter);
+var _AsyncEventEmitter2 = _interopRequireDefault(_AsyncEventEmitter);
 
 var _IndexManager = require('./IndexManager');
 
@@ -415,12 +415,17 @@ function _inherits(subClass, superClass) {
 }
 
 // Defaults
-var _defaultUpgradeEmitter = new _eventemitter2.default();
 var _defaultCursor = _CursorObservable2.default;
 var _defaultDelegate = _CollectionDelegate2.default;
 var _defaultStorageManager = _StorageManager2.default;
 var _defaultIndexManager = _IndexManager2.default;
 var _defaultIdGenerator = _ShortIdGenerator2.default;
+
+/**
+ * Core class of the database.
+ * It delegates almost all it's methods to managers
+ * and emits events for live queries and other cuctomisation.
+ */
 
 var Collection = exports.Collection = function (_EventEmitter) {
   _inherits(Collection, _EventEmitter);
@@ -434,30 +439,15 @@ var Collection = exports.Collection = function (_EventEmitter) {
 
     _this.options = options;
     _this._modelName = name;
-    _this._writeQueue = new _PromiseQueue2.default(options.writeConcurrency || 5);
+    _this._writeQueue = new _PromiseQueue2.default(1);
 
     // Shorthand for defining in-memory collection
     if (options.inMemory) {
-      options.cursorClass = _CursorObservable2.default;
-      options.delegate = _CollectionDelegate2.default;
-      options.storageManager = _StorageManager2.default;
-      options.indexManager = _IndexManager2.default;
-      options.idGenerator = _ShortIdGenerator2.default;
-    }
-
-    // Create managers
-    var storageManagerClass = options.storageManager || _defaultStorageManager;
-    var delegateClass = options.delegate || _defaultDelegate;
-    var indexManagerClass = options.indexManager || _defaultIndexManager;
-    _this.idGenerator = options.idGenerator || _defaultIdGenerator;
-    _this.cursorClass = options.cursorClass || _defaultCursor;
-    _this.indexManager = new indexManagerClass(_this, options);
-    _this.storageManager = new storageManagerClass(_this, options);
-    _this.delegate = new delegateClass(_this, options);
-
-    // Listen to change default updates
-    if (options.upgradeDefaults) {
-      _this._registerDefaultUpgradeHandlers(options);
+      options.cursorClass = options.cursorClass || _CursorObservable2.default;
+      options.delegate = options.delegate || _CollectionDelegate2.default;
+      options.storageManager = options.storageManager || _StorageManager2.default;
+      options.indexManager = options.indexManager || _IndexManager2.default;
+      options.idGenerator = options.idGenerator || _ShortIdGenerator2.default;
     }
     return _this;
   }
@@ -489,7 +479,7 @@ var Collection = exports.Collection = function (_EventEmitter) {
 
       var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
-      // Prepare document for insertion
+      this._lazyInitCollection();
       var randomId = this.idGenerator(this.modelName);
       doc = this.create(doc);
       doc._id = doc._id || randomId.value;
@@ -542,6 +532,7 @@ var Collection = exports.Collection = function (_EventEmitter) {
 
       var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
+      this._lazyInitCollection();
       return this._writeQueue.add(function () {
         _this4.emit('beforeRemove', query, options);
         if (!options.quiet) {
@@ -573,6 +564,7 @@ var Collection = exports.Collection = function (_EventEmitter) {
 
       var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
+      this._lazyInitCollection();
       return this._writeQueue.add(function () {
         _this5.emit('beforeUpdate', query, modifier, options);
         if (!options.quiet) {
@@ -602,6 +594,7 @@ var Collection = exports.Collection = function (_EventEmitter) {
     value: function find(query) {
       var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
+      this._lazyInitCollection();
       return this.delegate.find(query, options);
     }
 
@@ -619,6 +612,7 @@ var Collection = exports.Collection = function (_EventEmitter) {
     value: function findOne(query) {
       var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
+      this._lazyInitCollection();
       return this.delegate.findOne(query, options);
     }
 
@@ -637,6 +631,7 @@ var Collection = exports.Collection = function (_EventEmitter) {
     value: function count(query) {
       var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
+      this._lazyInitCollection();
       return this.delegate.count(query, options);
     }
 
@@ -652,64 +647,31 @@ var Collection = exports.Collection = function (_EventEmitter) {
     value: function ids(query) {
       var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
+      this._lazyInitCollection();
       return this.delegate.ids(query, options);
     }
 
     /**
-     * If defaults is not overrided by options, then collection
-     * registered in evenbus for default upgrade. This behaviour
-     * is optional and may be enabled by special constructor
-     * option.
-     * @param  {Object} options
+     * Initialize collection managers by stored options. It is
+     * used for solving execution order problem of Collection
+     * configuration functions.
      */
 
   }, {
-    key: '_registerDefaultUpgradeHandlers',
-    value: function _registerDefaultUpgradeHandlers() {
-      var _this6 = this;
-
-      var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-
-      if (!options.storageManager) {
-        _defaultUpgradeEmitter.on('storageManager', function () {
-          return _this6.storageManager = new _defaultStorageManager(_this6, options);
-        });
+    key: '_lazyInitCollection',
+    value: function _lazyInitCollection() {
+      if (!this._initialized) {
+        var options = this.options;
+        var storageManagerClass = options.storageManager || _defaultStorageManager;
+        var delegateClass = options.delegate || _defaultDelegate;
+        var indexManagerClass = options.indexManager || _defaultIndexManager;
+        this.idGenerator = options.idGenerator || _defaultIdGenerator;
+        this.cursorClass = options.cursorClass || _defaultCursor;
+        this.indexManager = new indexManagerClass(this, options);
+        this.storageManager = new storageManagerClass(this, options);
+        this.delegate = new delegateClass(this, options);
+        this._initialized = true;
       }
-      if (!options.idGenerator) {
-        _defaultUpgradeEmitter.on('idGenerator', function () {
-          return _this6.idGenerator = _defaultIdGenerator;
-        });
-      }
-      if (!options.delegate) {
-        _defaultUpgradeEmitter.on('delegate', function () {
-          return _this6.delegate = new _defaultDelegate(_this6, options);
-        });
-      }
-      if (!options.indexManager) {
-        _defaultUpgradeEmitter.on('indexManager', function () {
-          return _this6.indexManager = new _defaultIndexManager(_this6, options);
-        });
-      }
-      if (!options.cursorClass) {
-        _defaultUpgradeEmitter.on('cursor', function () {
-          return _this6.cursorClass = _defaultCursor;
-        });
-      }
-    }
-  }, {
-    key: 'modelName',
-    get: function get() {
-      return this._modelName;
-    }
-  }, {
-    key: 'indexes',
-    get: function get() {
-      return this.indexManager.indexes;
-    }
-  }, {
-    key: 'storage',
-    get: function get() {
-      return this.storageManager;
     }
 
     /**
@@ -720,12 +682,28 @@ var Collection = exports.Collection = function (_EventEmitter) {
      * @return {undefined|Class}
      */
 
+  }, {
+    key: 'modelName',
+    get: function get() {
+      return this._modelName;
+    }
+  }, {
+    key: 'indexes',
+    get: function get() {
+      this._lazyInitCollection();
+      return this.indexManager.indexes;
+    }
+  }, {
+    key: 'storage',
+    get: function get() {
+      this._lazyInitCollection();
+      return this.storageManager;
+    }
   }], [{
     key: 'defaultCursor',
     value: function defaultCursor() {
       if (arguments.length > 0) {
         _defaultCursor = arguments[0];
-        _defaultUpgradeEmitter.emit('cursor');
       } else {
         return _defaultCursor;
       }
@@ -744,7 +722,6 @@ var Collection = exports.Collection = function (_EventEmitter) {
     value: function defaultStorageManager() {
       if (arguments.length > 0) {
         _defaultStorageManager = arguments[0];
-        _defaultUpgradeEmitter.emit('storageManager');
       } else {
         return _defaultStorageManager;
       }
@@ -763,7 +740,6 @@ var Collection = exports.Collection = function (_EventEmitter) {
     value: function defaultIdGenerator() {
       if (arguments.length > 0) {
         _defaultIdGenerator = arguments[0];
-        _defaultUpgradeEmitter.emit('idGenerator');
       } else {
         return _defaultIdGenerator;
       }
@@ -782,7 +758,6 @@ var Collection = exports.Collection = function (_EventEmitter) {
     value: function defaultDelegate() {
       if (arguments.length > 0) {
         _defaultDelegate = arguments[0];
-        _defaultUpgradeEmitter.emit('delegate');
       } else {
         return _defaultDelegate;
       }
@@ -801,19 +776,31 @@ var Collection = exports.Collection = function (_EventEmitter) {
     value: function defaultIndexManager() {
       if (arguments.length > 0) {
         _defaultIndexManager = arguments[0];
-        _defaultUpgradeEmitter.emit('indexManager');
       } else {
         return _defaultIndexManager;
       }
     }
+
+    /**
+     * Execute some function after current execution cycle. For using fully
+     * configured collection.
+     * @param  {Function} fn
+     * @return {Promise}
+     */
+
+  }, {
+    key: 'startup',
+    value: function startup(fn) {
+      return Promise.resolve().then(fn);
+    }
   }]);
 
   return Collection;
-}(_eventemitter2.default);
+}(_AsyncEventEmitter2.default);
 
 exports.default = Collection;
 
-},{"./CollectionDelegate":4,"./CursorObservable":7,"./EJSON":14,"./IndexManager":15,"./PromiseQueue":16,"./ShortIdGenerator":18,"./StorageManager":19,"check-types":22,"eventemitter3":24,"fast.js/forEach":32,"fast.js/map":39}],4:[function(require,module,exports){
+},{"./AsyncEventEmitter":1,"./CollectionDelegate":4,"./CursorObservable":7,"./EJSON":14,"./IndexManager":15,"./PromiseQueue":16,"./ShortIdGenerator":18,"./StorageManager":19,"check-types":22,"fast.js/forEach":32,"fast.js/map":39}],4:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () {
@@ -1673,10 +1660,10 @@ var CursorObservable = function (_Cursor) {
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(CursorObservable).call(this, db, query, options));
 
     _this.maybeUpdate = (0, _bind3.default)(_this.maybeUpdate, _this);
+    _this._observers = 0;
     _this._updateQueue = new _PromiseQueue2.default(1);
     _this._propagateUpdate = (0, _debounce2.default)((0, _bind3.default)(_this._propagateUpdate, _this), 0, 0);
     _this._doUpdate = (0, _debounce2.default)((0, _bind3.default)(_this._doUpdate, _this), _defaultDebounce, _defaultBatchSize);
-    _this._observers = 0;
     return _this;
   }
 
@@ -1724,51 +1711,55 @@ var CursorObservable = function (_Cursor) {
   }, {
     key: 'observe',
     value: function observe(listener) {
-      var _this2 = this;
-
       var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
-      // Make new wrapper for make possible to observe
-      // multiple times (for removeListener)
-      var updateWrapper = function updateWrapper(a, b) {
-        return _this2.maybeUpdate(a, b);
-      };
+      // Make possible to obbserver w/o callback
       listener = listener || function () {};
 
-      this.db.on('insert', updateWrapper);
-      this.db.on('update', updateWrapper);
-      this.db.on('remove', updateWrapper);
+      // Start observing when no observers created
+      if (this._observers <= 0) {
+        this.db.on('insert', this.maybeUpdate);
+        this.db.on('update', this.maybeUpdate);
+        this.db.on('remove', this.maybeUpdate);
+      }
 
+      // Create observe stopper for current listeners
       var running = true;
       var self = this;
       function stopper() {
         if (running) {
-          self.db.removeListener('insert', updateWrapper);
-          self.db.removeListener('update', updateWrapper);
-          self.db.removeListener('remove', updateWrapper);
+          running = false;
+          self._observers -= 1;
           self.removeListener('update', listener);
           self.removeListener('stop', stopper);
 
-          running = false;
-          self._observers -= 1;
+          // Stop observing a cursor if no more observers
           if (self._observers === 0) {
             self._latestIds = null;
             self._latestResult = null;
+            this._updatePromise = null;
             self.emit('observeStopped');
+            self.db.removeListener('insert', this.maybeUpdate);
+            self.db.removeListener('update', this.maybeUpdate);
+            self.db.removeListener('remove', this.maybeUpdate);
           }
         }
       }
 
+      // Start listening for updates and global stop
       this._observers += 1;
       this.on('update', listener);
       this.on('stop', stopper);
 
+      // Get first result for observer or initiate
+      // update at first time
       if (!this._updatePromise) {
         this.update(true, true);
       } else if (this._latestResult !== null) {
         listener(this._latestResult);
       }
 
+      // Wrap returned promise with useful fields
       var cursorPromiseMixin = { stop: stopper };
       return this._createCursorPromise(this._updatePromise, cursorPromiseMixin);
     }
@@ -1799,25 +1790,25 @@ var CursorObservable = function (_Cursor) {
   }, {
     key: 'update',
     value: function update() {
-      var _this3 = this;
+      var _this2 = this;
 
       var firstRun = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
       var immidiatelly = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
 
       this._updatePromise = this._updateQueue.add(function () {
-        _this3._updatePromise = immidiatelly ? _this3._doUpdate.func(firstRun) : _this3._doUpdate(firstRun);
+        _this2._updatePromise = immidiatelly ? _this2._doUpdate.func(firstRun) : _this2._doUpdate(firstRun);
 
         if (immidiatelly) {
-          return _this3._updatePromise;
+          return _this2._updatePromise;
         } else {
-          if (_this3._updatePromise.debouncePassed) {
-            return _this3._updatePromise;
+          if (_this2._updatePromise.debouncePassed) {
+            return _this2._updatePromise;
           } else {
             return Promise.resolve('__debounced__');
           }
         }
       }).then(function (res) {
-        return res === '__debounced__' ? _this3._updatePromise : res;
+        return res === '__debounced__' ? _this2._updatePromise : res;
       });
 
       return this._updatePromise;
@@ -1905,13 +1896,13 @@ var CursorObservable = function (_Cursor) {
   }, {
     key: '_doUpdate',
     value: function _doUpdate() {
-      var _this4 = this;
+      var _this3 = this;
 
       var firstRun = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
 
       return this.exec().then(function (result) {
-        _this4._updateLatestIds();
-        return _this4._propagateUpdate(firstRun).then(function () {
+        _this3._updateLatestIds();
+        return _this3._propagateUpdate(firstRun).then(function () {
           return result;
         });
       });
