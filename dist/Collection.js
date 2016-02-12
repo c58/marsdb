@@ -94,6 +94,11 @@ var Collection = exports.Collection = function (_EventEmitter) {
       options.indexManager = options.indexManager || _IndexManager2.default;
       options.idGenerator = options.idGenerator || _ShortIdGenerator2.default;
     }
+
+    // Initialize collection only after configuration done
+    Collection.startup(function () {
+      return _this._lazyInitCollection();
+    });
     return _this;
   }
 
