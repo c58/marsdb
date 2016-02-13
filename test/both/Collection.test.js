@@ -1,5 +1,5 @@
 import {Document} from '../../lib/Document';
-import Collection from '../../lib/Collection';
+import Collection, { _resetStartup } from '../../lib/Collection';
 import StorageManager from '../../lib/StorageManager';
 import CursorObservable from '../../lib/CursorObservable';
 import CollectionDelegate from '../../lib/CollectionDelegate';
@@ -23,6 +23,7 @@ describe('Collection', () => {
     Collection.defaultStorageManager(_defaultStorageManager);
     Collection.defaultIndexManager(_defaultIndexManager);
     Collection.defaultIdGenerator(_defaultIdGenerator);
+    _resetStartup();
   });
 
   describe('#constructor', function () {
