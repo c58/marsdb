@@ -347,6 +347,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.Collection = undefined;
+exports._resetStartup = _resetStartup;
 
 var _map2 = require('fast.js/map');
 
@@ -420,6 +421,24 @@ var _defaultDelegate = _CollectionDelegate2.default;
 var _defaultStorageManager = _StorageManager2.default;
 var _defaultIndexManager = _IndexManager2.default;
 var _defaultIdGenerator = _ShortIdGenerator2.default;
+
+// Internals
+function _resetStartup() {
+  _startUpQueue = [];
+  _startedUp = false;
+  setTimeout(function () {
+    _startedUp = true;
+    (0, _forEach2.default)(_startUpQueue, function (fn) {
+      return fn();
+    });
+  }, 0);
+}
+
+// Startup all init dependent functions on
+// the second execution cycle
+var _startedUp = false;
+var _startUpQueue = [];
+_resetStartup();
 
 /**
  * Core class of the database.
@@ -790,13 +809,16 @@ var Collection = exports.Collection = function (_EventEmitter) {
      * Execute some function after current execution cycle. For using fully
      * configured collection.
      * @param  {Function} fn
-     * @return {Promise}
      */
 
   }, {
     key: 'startup',
     value: function startup(fn) {
-      return Promise.resolve().then(fn);
+      if (_startedUp) {
+        fn();
+      } else {
+        _startUpQueue.push(fn);
+      }
     }
   }]);
 
