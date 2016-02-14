@@ -18,12 +18,12 @@ describe('Collection', () => {
   const _defaultIndexManager = Collection.defaultIndexManager();
   const _defaultCursor = Collection.defaultCursor();
   beforeEach(function () {
+    _resetStartup();
     Collection.defaultCursor(_defaultCursor);
     Collection.defaultDelegate(_defaultDelegate);
     Collection.defaultStorageManager(_defaultStorageManager);
     Collection.defaultIndexManager(_defaultIndexManager);
     Collection.defaultIdGenerator(_defaultIdGenerator);
-    _resetStartup();
   });
 
   describe('#constructor', function () {
