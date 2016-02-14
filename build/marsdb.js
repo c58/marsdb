@@ -348,6 +348,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.Collection = undefined;
 exports._resetStartup = _resetStartup;
+exports._warnIfAlreadyStarted = _warnIfAlreadyStarted;
 
 var _map2 = require('fast.js/map');
 
@@ -422,22 +423,33 @@ var _defaultStorageManager = _StorageManager2.default;
 var _defaultIndexManager = _IndexManager2.default;
 var _defaultIdGenerator = _ShortIdGenerator2.default;
 
-// Internals
-function _resetStartup() {
-  _startUpQueue = [];
-  _startedUp = false;
-  setTimeout(function () {
-    _startedUp = true;
-    (0, _forEach2.default)(_startUpQueue, function (fn) {
-      return fn();
-    });
-  }, 0);
-}
-
 // Startup all init dependent functions on
 // the second execution cycle
 var _startedUp = false;
 var _startUpQueue = [];
+var _startUpTimeout = 0;
+
+// Internals
+function _resetStartup() {
+  clearTimeout(_startUpTimeout);
+  _startUpQueue = [];
+  _startedUp = false;
+  _startUpTimeout = setTimeout(function () {
+    _startedUp = true;
+    (0, _forEach2.default)(_startUpQueue, function (fn) {
+      return fn();
+    });
+    _startUpQueue = [];
+  }, 0);
+}
+
+function _warnIfAlreadyStarted() {
+  if (_startedUp) {
+    console.warn('You are trying to change some default of the Collection,' + 'but all collections is already initialized. It may be happened ' + 'because you are trying to configure Collection not at first ' + 'execution cycle of main script. Please consider to move all ' + 'configuration to first execution cycle.');
+  }
+}
+
+// Initiate startup
 _resetStartup();
 
 /**
@@ -726,6 +738,7 @@ var Collection = exports.Collection = function (_EventEmitter) {
   }], [{
     key: 'defaultCursor',
     value: function defaultCursor() {
+      _warnIfAlreadyStarted();
       if (arguments.length > 0) {
         _defaultCursor = arguments[0];
       } else {
@@ -744,6 +757,7 @@ var Collection = exports.Collection = function (_EventEmitter) {
   }, {
     key: 'defaultStorageManager',
     value: function defaultStorageManager() {
+      _warnIfAlreadyStarted();
       if (arguments.length > 0) {
         _defaultStorageManager = arguments[0];
       } else {
@@ -762,6 +776,7 @@ var Collection = exports.Collection = function (_EventEmitter) {
   }, {
     key: 'defaultIdGenerator',
     value: function defaultIdGenerator() {
+      _warnIfAlreadyStarted();
       if (arguments.length > 0) {
         _defaultIdGenerator = arguments[0];
       } else {
@@ -780,6 +795,7 @@ var Collection = exports.Collection = function (_EventEmitter) {
   }, {
     key: 'defaultDelegate',
     value: function defaultDelegate() {
+      _warnIfAlreadyStarted();
       if (arguments.length > 0) {
         _defaultDelegate = arguments[0];
       } else {
@@ -798,6 +814,7 @@ var Collection = exports.Collection = function (_EventEmitter) {
   }, {
     key: 'defaultIndexManager',
     value: function defaultIndexManager() {
+      _warnIfAlreadyStarted();
       if (arguments.length > 0) {
         _defaultIndexManager = arguments[0];
       } else {
