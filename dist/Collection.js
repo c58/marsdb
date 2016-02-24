@@ -383,8 +383,8 @@ var Collection = exports.Collection = function (_EventEmitter) {
   }], [{
     key: 'defaultCursor',
     value: function defaultCursor() {
-      _warnIfAlreadyStarted();
       if (arguments.length > 0) {
+        _warnIfAlreadyStarted();
         _defaultCursor = arguments[0];
       } else {
         return _defaultCursor;
@@ -402,8 +402,8 @@ var Collection = exports.Collection = function (_EventEmitter) {
   }, {
     key: 'defaultStorageManager',
     value: function defaultStorageManager() {
-      _warnIfAlreadyStarted();
       if (arguments.length > 0) {
+        _warnIfAlreadyStarted();
         _defaultStorageManager = arguments[0];
       } else {
         return _defaultStorageManager;
@@ -421,8 +421,8 @@ var Collection = exports.Collection = function (_EventEmitter) {
   }, {
     key: 'defaultIdGenerator',
     value: function defaultIdGenerator() {
-      _warnIfAlreadyStarted();
       if (arguments.length > 0) {
+        _warnIfAlreadyStarted();
         _defaultIdGenerator = arguments[0];
       } else {
         return _defaultIdGenerator;
@@ -440,8 +440,8 @@ var Collection = exports.Collection = function (_EventEmitter) {
   }, {
     key: 'defaultDelegate',
     value: function defaultDelegate() {
-      _warnIfAlreadyStarted();
       if (arguments.length > 0) {
+        _warnIfAlreadyStarted();
         _defaultDelegate = arguments[0];
       } else {
         return _defaultDelegate;
@@ -459,8 +459,8 @@ var Collection = exports.Collection = function (_EventEmitter) {
   }, {
     key: 'defaultIndexManager',
     value: function defaultIndexManager() {
-      _warnIfAlreadyStarted();
       if (arguments.length > 0) {
+        _warnIfAlreadyStarted();
         _defaultIndexManager = arguments[0];
       } else {
         return _defaultIndexManager;

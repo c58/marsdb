@@ -144,11 +144,11 @@ var CursorObservable = function (_Cursor) {
           if (self._observers === 0) {
             self._latestIds = null;
             self._latestResult = null;
-            this._updatePromise = null;
+            self._updatePromise = null;
             self.emit('observeStopped');
-            self.db.removeListener('insert', this.maybeUpdate);
-            self.db.removeListener('update', this.maybeUpdate);
-            self.db.removeListener('remove', this.maybeUpdate);
+            self.db.removeListener('insert', self.maybeUpdate);
+            self.db.removeListener('update', self.maybeUpdate);
+            self.db.removeListener('remove', self.maybeUpdate);
           }
         }
       }
