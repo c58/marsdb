@@ -412,6 +412,10 @@ describe('Collection', () => {
     testUpsert({a: 2}, {b: 3}, {b: 3})
     testUpsert({a: 2}, {$unset: {a: 1}}, {})
     testUpsert({a: 2, _id: '123'}, {$setOnInsert: {a: 1, _id: '123'}}, {a: 1}, '123');
+    testUpsert(null, {b: 3}, {b: 3});
+    testUpsert('test', {b: 3}, {b: 3}, 'test');
+    testUpsert({_id: null}, {b: 3}, {b: 3});
+    testUpsert({_id: 'test'}, {b: 3}, {b: 3}, 'test');
   });
 
   describe('#findOne', function () {
