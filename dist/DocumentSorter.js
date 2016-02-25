@@ -393,7 +393,7 @@ var DocumentSorter = exports.DocumentSorter = function () {
 
       // If the user just passed a literal function to find(), then we can't get a
       // key filter from it.
-      if (selector instanceof Function) {
+      if (selector instanceof Function || !selector) {
         return;
       }
 

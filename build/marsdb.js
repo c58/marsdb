@@ -3587,6 +3587,11 @@ exports.default = DocumentModifier;
 
 var documentBySelector = function documentBySelector(selector) {
   var selectorDoc = {};
+
+  if (!_checkTypes2.default.object(selector)) {
+    selector = { _id: selector };
+  }
+
   (0, _forEach2.default)(selector, function (v, k) {
     if (k.substr(0, 1) !== '$' && !(0, _Document.isOperatorObject)(v, true)) {
       var keyparts = k.split('.');
@@ -3596,6 +3601,7 @@ var documentBySelector = function documentBySelector(selector) {
       }
     }
   });
+
   return selectorDoc;
 };
 
@@ -4960,7 +4966,7 @@ var DocumentSorter = exports.DocumentSorter = function () {
 
       // If the user just passed a literal function to find(), then we can't get a
       // key filter from it.
-      if (selector instanceof Function) {
+      if (selector instanceof Function || !selector) {
         return;
       }
 
