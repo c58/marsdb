@@ -15,13 +15,13 @@ describe('Cursor', () => {
     db = new Collection('test');
 
     return Promise.all([
-      db.insert({a: 'a', b: 1, c: 'some text 1', g: 'g1', f: 1}),
-      db.insert({a: 'b', b: 2, c: 'some text 2', g: 'g1', f: 10}),
-      db.insert({a: 'c', b: 3, c: 'some text 3', g: 'g1', f: 11}),
-      db.insert({a: 'd', b: 4, c: 'some text 4', g: 'g1', f: 12}),
-      db.insert({a: 'e', b: 5, c: 'some text 5', g: 'g2', d: 234, f: 2}),
-      db.insert({a: 'f', b: 6, c: 'some text 6', g: 'g2', f: 20, k: {a: 1}}),
-      db.insert({a: 'g', b: 7, c: 'some text 7', g: 'g2', f: 21}),
+      db.insert({_id: '1', a: 'a', b: 1, c: 'some text 1', g: 'g1', f: 1, j: '2'}),
+      db.insert({_id: '2', a: 'b', b: 2, c: 'some text 2', g: 'g1', f: 10, j: '3'}),
+      db.insert({_id: '3', a: 'c', b: 3, c: 'some text 3', g: 'g1', f: 11, j: '4'}),
+      db.insert({_id: '4', a: 'd', b: 4, c: 'some text 4', g: 'g1', f: 12, j: '5'}),
+      db.insert({_id: '5', a: 'e', b: 5, c: 'some text 5', g: 'g2', d: 234, f: 2, j: '6'}),
+      db.insert({_id: '6', a: 'f', b: 6, c: 'some text 6', g: 'g2', f: 20, k: {a: 1}, j: ['7', '5']}),
+      db.insert({_id: '7', a: 'g', b: 7, c: 'some text 7', g: 'g2', f: 21, j: [{_id: '1'}, {_id: '2'}]}),
     ]);
   });
 
@@ -402,6 +402,16 @@ describe('Cursor', () => {
       });
     });
 
+    it('should joinObj for object value', function () {
+      sinon.spy(db, 'find');
+      sinon.spy(db, 'findOne');
+      return db.findOne('1').join({j: db}).then(res => {
+        db.find.should.be.calledOnce;
+        db.findOne.should.be.calledOnce;
+        res.j._id.should.be.equal('2');
+      });
+    });
+
     it('should throw an error if join is not a function', function () {
       const cursor = new Cursor(db);
       (() => cursor.join(123)).should.throw(Error);
@@ -432,6 +442,50 @@ describe('Cursor', () => {
         cursorJoined_1.exec.should.have.callCount(7);
         cursorJoined_2.exec.should.have.callCount(7);
       })
+    });
+  });
+
+  describe('#joinObj', function () {
+    it('should join for all docs only by one query call', function () {
+      sinon.spy(db, 'find');
+      return db.find().sort(['_id']).joinObj({j: db}).then(res => {
+        db.find.should.be.calledTwice;
+        res[0].j._id.should.be.equal('2');
+        res[1].j._id.should.be.equal('3');
+        res[2].j._id.should.be.equal('4');
+        res[3].j._id.should.be.equal('5');
+        res[4].j._id.should.be.equal('6');
+        res[5].j.should.have.length(2);
+        res[5].j[0]._id.should.be.equal('5');
+        res[5].j[1]._id.should.be.equal('7');
+        expect(res[6].j).to.be.null;
+      });
+    });
+
+    it('should join for findOne', function () {
+      sinon.spy(db, 'find');
+      sinon.spy(db, 'findOne');
+      return db.findOne('1').joinObj({j: db}).then(res => {
+        db.find.should.be.calledOnce;
+        db.findOne.should.be.calledOnce;
+        res.j._id.should.be.equal('2');
+      });
+    });
+
+    it('should join with nested object', function () {
+      sinon.spy(db, 'find');
+      return db.find().sort(['_id']).joinObj({'j._id': db}).then(res => {
+        db.find.should.be.calledTwice;
+        expect(res[0].j).to.be.null;
+        expect(res[1].j).to.be.null;
+        expect(res[2].j).to.be.null;
+        expect(res[3].j).to.be.null;
+        expect(res[4].j).to.be.null;
+        expect(res[5].j).to.be.null;
+        res[6].j.should.have.length(2);
+        res[6].j[0]._id.should.be.equal('1');
+        res[6].j[1]._id.should.be.equal('2');
+      });
     });
   });
 
