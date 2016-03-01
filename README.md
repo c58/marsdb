@@ -168,6 +168,9 @@ posts.find()
       updated();
     }, 10);
   })
+  // Or just pass join spec object for fast joining
+  // (only one `find` will be produced for all posts)
+  .join({ authorId: users }) // posts[i].authorId will be user object
   .observe((posts) => {
     // do something with posts with authors
     // invoked any time when posts changed
