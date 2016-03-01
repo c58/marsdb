@@ -6,6 +6,8 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _PIPELINE_PROCESSORS;
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
@@ -51,6 +53,8 @@ var _invariant = require('invariant');
 
 var _invariant2 = _interopRequireDefault(_invariant);
 
+var _Document = require('./Document');
+
 var _DocumentRetriver = require('./DocumentRetriver');
 
 var _DocumentRetriver2 = _interopRequireDefault(_DocumentRetriver);
@@ -81,6 +85,8 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 // UUID counter for all cursors
 var _currentCursorId = 0;
 
@@ -97,6 +103,7 @@ var PIPELINE_TYPE = exports.PIPELINE_TYPE = {
   Join: 'Join',
   JoinEach: 'JoinEach',
   JoinAll: 'JoinAll',
+  JoinObj: 'JoinObj',
   IfNotEmpty: 'IfNotEmpty'
 };
 
@@ -111,7 +118,9 @@ var PIPELINE_PROCESSORS = exports.PIPELINE_PROCESSORS = (_PIPELINE_PROCESSORS = 
 }), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.Reduce, function (docs, pipeObj) {
   return (0, _reduce3.default)(docs, pipeObj.value, pipeObj.args[0]);
 }), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.Join, function (docs, pipeObj, cursor) {
-  if (_checkTypes2.default.array(docs)) {
+  if (_checkTypes2.default.object(pipeObj.value)) {
+    return PIPELINE_PROCESSORS[PIPELINE_TYPE.JoinObj](docs, pipeObj, cursor);
+  } else if (_checkTypes2.default.array(docs)) {
     return PIPELINE_PROCESSORS[PIPELINE_TYPE.JoinEach](docs, pipeObj, cursor);
   } else {
     return PIPELINE_PROCESSORS[PIPELINE_TYPE.JoinAll](docs, pipeObj, cursor);
@@ -145,6 +154,73 @@ var PIPELINE_PROCESSORS = exports.PIPELINE_PROCESSORS = (_PIPELINE_PROCESSORS = 
 
   return Promise.all(res).then(function () {
     return docs;
+  });
+}), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.JoinObj, function (docs, pipeObj, cursor) {
+  var joinObj = pipeObj.value;
+  var isObj = !_checkTypes2.default.array(docs);
+  docs = !isObj ? docs : [docs];
+
+  var joinerFn = function joinerFn(dcs) {
+    return (0, _map3.default)((0, _keys3.default)(joinObj), function (k) {
+      var joinKey = k.split('.')[0];
+      var model = joinObj[k];
+      var lookupFn = (0, _DocumentMatcher.makeLookupFunction)(k);
+      var childToRootMap = {};
+      var docsById = {};
+      var allIds = [];
+
+      (0, _forEach2.default)(dcs, function (d) {
+        docsById[d._id] = { d: d, isArray: false };
+
+        var val = lookupFn(d);
+        var singleJoin = !val[0] || !val[0].arrayIndices;
+        var joinIds = (0, _filter3.default)((0, _reduce3.default)((0, _map3.default)(val, function (x) {
+          return x.value;
+        }), function (a, b) {
+          if (_checkTypes2.default.array(b)) {
+            singleJoin = false;
+            return [].concat(_toConsumableArray(a), _toConsumableArray(b));
+          } else {
+            return [].concat(_toConsumableArray(a), [b]);
+          }
+        }, []), function (x) {
+          return (0, _Document.selectorIsId)(x);
+        });
+
+        allIds = allIds.concat(joinIds);
+        docsById[d._id].isArray = !singleJoin;
+        d[joinKey] = null;
+
+        (0, _forEach2.default)(joinIds, function (joinId) {
+          var localIdsMap = childToRootMap[joinId] || [];
+          localIdsMap.push(d._id);
+          childToRootMap[joinId] = localIdsMap;
+        });
+      });
+
+      return model.find({ _id: { $in: allIds } }).observe(function (res) {
+        (0, _forEach2.default)(res, function (objToJoin) {
+          var docIdsForJoin = childToRootMap[objToJoin._id];
+          (0, _forEach2.default)(docIdsForJoin, function (docId) {
+            var doc = docsById[docId];
+            if (doc) {
+              var joinedVal = doc.d[joinKey] || (doc.isArray ? [] : null);
+              if (doc.isArray) {
+                joinedVal.push(objToJoin);
+              } else {
+                joinedVal = objToJoin;
+              }
+              doc.d[joinKey] = joinedVal;
+            }
+          });
+        });
+      });
+    });
+  };
+
+  var newPipeObj = _extends({}, pipeObj, { value: joinerFn });
+  return PIPELINE_PROCESSORS[PIPELINE_TYPE.JoinAll](docs, newPipeObj, cursor).then(function (res) {
+    return isObj ? res[0] : res;
   });
 }), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.IfNotEmpty, function (docs) {
   var isEmptyRes = !_checkTypes2.default.assigned(docs) || _checkTypes2.default.array(docs) && _checkTypes2.default.emptyArray(docs) || _checkTypes2.default.object(docs) && _checkTypes2.default.emptyObject(docs);
@@ -266,7 +342,7 @@ var Cursor = function (_AsyncEventEmitter) {
   }, {
     key: 'join',
     value: function join(joinFn) {
-      (0, _invariant2.default)(typeof joinFn === 'function', 'join(...): argument must be a function');
+      (0, _invariant2.default)(typeof joinFn === 'function' || _checkTypes2.default.object(joinFn), 'join(...): argument must be a function');
 
       this._addPipeline(PIPELINE_TYPE.Join, joinFn);
       return this;
@@ -285,6 +361,14 @@ var Cursor = function (_AsyncEventEmitter) {
       (0, _invariant2.default)(typeof joinFn === 'function', 'joinAll(...): argument must be a function');
 
       this._addPipeline(PIPELINE_TYPE.JoinAll, joinFn);
+      return this;
+    }
+  }, {
+    key: 'joinObj',
+    value: function joinObj(obj) {
+      (0, _invariant2.default)(_checkTypes2.default.object(obj), 'joinObj(...): argument must be an object');
+
+      this._addPipeline(PIPELINE_TYPE.JoinObj, obj);
       return this;
     }
   }, {
