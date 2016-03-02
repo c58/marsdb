@@ -458,7 +458,7 @@ describe('Cursor', () => {
         res[5].j.should.have.length(2);
         res[5].j[0]._id.should.be.equal('5');
         res[5].j[1]._id.should.be.equal('7');
-        expect(res[6].j).to.be.null;
+        expect(res[6].j).to.be.an('array');
       });
     });
 
@@ -476,12 +476,12 @@ describe('Cursor', () => {
       sinon.spy(db, 'find');
       return db.find().sort(['_id']).joinObj({'j._id': db}).then(res => {
         db.find.should.be.calledTwice;
-        expect(res[0].j).to.be.null;
-        expect(res[1].j).to.be.null;
-        expect(res[2].j).to.be.null;
-        expect(res[3].j).to.be.null;
-        expect(res[4].j).to.be.null;
-        expect(res[5].j).to.be.null;
+        expect(res[0].j).to.be.an('object');
+        expect(res[1].j).to.be.an('object');
+        expect(res[2].j).to.be.an('object');
+        expect(res[3].j).to.be.an('object');
+        expect(res[4].j).to.be.an('object');
+        expect(res[5].j).to.be.an('object');
         res[6].j.should.have.length(2);
         res[6].j[0]._id.should.be.equal('1');
         res[6].j[1]._id.should.be.equal('2');
