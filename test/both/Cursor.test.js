@@ -487,6 +487,36 @@ describe('Cursor', () => {
         res[6].j[1]._id.should.be.equal('2');
       });
     });
+
+    it('should observe joined objects', function (done) {
+      return db.findOne('1').joinObj({ j: db }, { observe: true }).then(res => {
+        res.j._id.should.be.equal('2');
+        res.j.b.should.be.equal(2);
+        return db.update('2', {$set: {b: 22}}).then(() => {
+          return new Promise(resolve => {
+            setTimeout(() => {
+              res.j.b.should.be.equal(22);
+              done();
+            }, 100);
+          })
+        });
+      })
+    });
+
+    it('should NOT observe joins by default', function (done) {
+      return db.findOne('1').joinObj({ j: db }).then(res => {
+        res.j._id.should.be.equal('2');
+        res.j.b.should.be.equal(2);
+        return db.update('2', {$set: {b: 22}}).then(() => {
+          return new Promise(resolve => {
+            setTimeout(() => {
+              res.j.b.should.be.equal(2);
+              done();
+            }, 100);
+          })
+        });
+      })
+    });
   });
 
   describe('#joinEach', function () {
