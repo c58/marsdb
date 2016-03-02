@@ -157,6 +157,7 @@ var PIPELINE_PROCESSORS = exports.PIPELINE_PROCESSORS = (_PIPELINE_PROCESSORS = 
   });
 }), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.JoinObj, function (docs, pipeObj, cursor) {
   var joinObj = pipeObj.value;
+  var options = pipeObj.args[0] || {};
   var isObj = !_checkTypes2.default.array(docs);
   docs = !isObj ? docs : [docs];
 
@@ -189,7 +190,7 @@ var PIPELINE_PROCESSORS = exports.PIPELINE_PROCESSORS = (_PIPELINE_PROCESSORS = 
 
         allIds = allIds.concat(joinIds);
         docsById[d._id].isArray = !singleJoin;
-        d[joinKey] = null;
+        d[joinKey] = singleJoin ? null : [];
 
         (0, _forEach2.default)(joinIds, function (joinId) {
           var localIdsMap = childToRootMap[joinId] || [];
@@ -198,19 +199,18 @@ var PIPELINE_PROCESSORS = exports.PIPELINE_PROCESSORS = (_PIPELINE_PROCESSORS = 
         });
       });
 
-      return model.find({ _id: { $in: allIds } }).observe(function (res) {
+      var execFnName = options.observe ? 'observe' : 'then';
+      return model.find({ _id: { $in: allIds } })[execFnName](function (res) {
         (0, _forEach2.default)(res, function (objToJoin) {
           var docIdsForJoin = childToRootMap[objToJoin._id];
           (0, _forEach2.default)(docIdsForJoin, function (docId) {
             var doc = docsById[docId];
             if (doc) {
-              var joinedVal = doc.d[joinKey] || (doc.isArray ? [] : null);
               if (doc.isArray) {
-                joinedVal.push(objToJoin);
+                doc.d[joinKey].push(objToJoin);
               } else {
-                joinedVal = objToJoin;
+                doc.d[joinKey] = objToJoin;
               }
-              doc.d[joinKey] = joinedVal;
             }
           });
         });
@@ -342,9 +342,11 @@ var Cursor = function (_AsyncEventEmitter) {
   }, {
     key: 'join',
     value: function join(joinFn) {
+      var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
       (0, _invariant2.default)(typeof joinFn === 'function' || _checkTypes2.default.object(joinFn), 'join(...): argument must be a function');
 
-      this._addPipeline(PIPELINE_TYPE.Join, joinFn);
+      this._addPipeline(PIPELINE_TYPE.Join, joinFn, options);
       return this;
     }
   }, {
@@ -366,9 +368,11 @@ var Cursor = function (_AsyncEventEmitter) {
   }, {
     key: 'joinObj',
     value: function joinObj(obj) {
+      var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
       (0, _invariant2.default)(_checkTypes2.default.object(obj), 'joinObj(...): argument must be an object');
 
-      this._addPipeline(PIPELINE_TYPE.JoinObj, obj);
+      this._addPipeline(PIPELINE_TYPE.JoinObj, obj, options);
       return this;
     }
   }, {

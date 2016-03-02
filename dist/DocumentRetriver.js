@@ -15,6 +15,10 @@ var _map2 = require('fast.js/map');
 
 var _map3 = _interopRequireDefault(_map2);
 
+var _forEach = require('fast.js/forEach');
+
+var _forEach2 = _interopRequireDefault(_forEach);
+
 var _filter2 = require('fast.js/array/filter');
 
 var _filter3 = _interopRequireDefault(_filter2);
@@ -22,8 +26,6 @@ var _filter3 = _interopRequireDefault(_filter2);
 var _Document = require('./Document');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -115,7 +117,15 @@ var DocumentRetriver = exports.DocumentRetriver = function () {
     value: function retriveIds(ids) {
       var _this2 = this;
 
-      var uniqIds = [].concat(_toConsumableArray(new Set(ids)));
+      var usedIds = {};
+      var uniqIds = [];
+      (0, _forEach2.default)(ids, function (id) {
+        if (!usedIds[id]) {
+          usedIds[id] = true;
+          uniqIds.push(id);
+        }
+      });
+
       var retrPromises = (0, _map3.default)(uniqIds, function (id) {
         return _this2.retriveOne(id);
       });

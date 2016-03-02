@@ -1321,6 +1321,7 @@ var PIPELINE_PROCESSORS = exports.PIPELINE_PROCESSORS = (_PIPELINE_PROCESSORS = 
   });
 }), _defineProperty(_PIPELINE_PROCESSORS, PIPELINE_TYPE.JoinObj, function (docs, pipeObj, cursor) {
   var joinObj = pipeObj.value;
+  var options = pipeObj.args[0] || {};
   var isObj = !_checkTypes2.default.array(docs);
   docs = !isObj ? docs : [docs];
 
@@ -1353,7 +1354,7 @@ var PIPELINE_PROCESSORS = exports.PIPELINE_PROCESSORS = (_PIPELINE_PROCESSORS = 
 
         allIds = allIds.concat(joinIds);
         docsById[d._id].isArray = !singleJoin;
-        d[joinKey] = null;
+        d[joinKey] = singleJoin ? null : [];
 
         (0, _forEach2.default)(joinIds, function (joinId) {
           var localIdsMap = childToRootMap[joinId] || [];
@@ -1362,19 +1363,18 @@ var PIPELINE_PROCESSORS = exports.PIPELINE_PROCESSORS = (_PIPELINE_PROCESSORS = 
         });
       });
 
-      return model.find({ _id: { $in: allIds } }).observe(function (res) {
+      var execFnName = options.observe ? 'observe' : 'then';
+      return model.find({ _id: { $in: allIds } })[execFnName](function (res) {
         (0, _forEach2.default)(res, function (objToJoin) {
           var docIdsForJoin = childToRootMap[objToJoin._id];
           (0, _forEach2.default)(docIdsForJoin, function (docId) {
             var doc = docsById[docId];
             if (doc) {
-              var joinedVal = doc.d[joinKey] || (doc.isArray ? [] : null);
               if (doc.isArray) {
-                joinedVal.push(objToJoin);
+                doc.d[joinKey].push(objToJoin);
               } else {
-                joinedVal = objToJoin;
+                doc.d[joinKey] = objToJoin;
               }
-              doc.d[joinKey] = joinedVal;
             }
           });
         });
@@ -1506,9 +1506,11 @@ var Cursor = function (_AsyncEventEmitter) {
   }, {
     key: 'join',
     value: function join(joinFn) {
+      var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
       (0, _invariant2.default)(typeof joinFn === 'function' || _checkTypes2.default.object(joinFn), 'join(...): argument must be a function');
 
-      this._addPipeline(PIPELINE_TYPE.Join, joinFn);
+      this._addPipeline(PIPELINE_TYPE.Join, joinFn, options);
       return this;
     }
   }, {
@@ -1530,9 +1532,11 @@ var Cursor = function (_AsyncEventEmitter) {
   }, {
     key: 'joinObj',
     value: function joinObj(obj) {
+      var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
       (0, _invariant2.default)(_checkTypes2.default.object(obj), 'joinObj(...): argument must be an object');
 
-      this._addPipeline(PIPELINE_TYPE.JoinObj, obj);
+      this._addPipeline(PIPELINE_TYPE.JoinObj, obj, options);
       return this;
     }
   }, {
@@ -4511,6 +4515,10 @@ var _map2 = require('fast.js/map');
 
 var _map3 = _interopRequireDefault(_map2);
 
+var _forEach = require('fast.js/forEach');
+
+var _forEach2 = _interopRequireDefault(_forEach);
+
 var _filter2 = require('fast.js/array/filter');
 
 var _filter3 = _interopRequireDefault(_filter2);
@@ -4519,16 +4527,6 @@ var _Document = require('./Document');
 
 function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : { default: obj };
-}
-
-function _toConsumableArray(arr) {
-  if (Array.isArray(arr)) {
-    for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) {
-      arr2[i] = arr[i];
-    }return arr2;
-  } else {
-    return Array.from(arr);
-  }
 }
 
 function _classCallCheck(instance, Constructor) {
@@ -4625,7 +4623,15 @@ var DocumentRetriver = exports.DocumentRetriver = function () {
     value: function retriveIds(ids) {
       var _this2 = this;
 
-      var uniqIds = [].concat(_toConsumableArray(new Set(ids)));
+      var usedIds = {};
+      var uniqIds = [];
+      (0, _forEach2.default)(ids, function (id) {
+        if (!usedIds[id]) {
+          usedIds[id] = true;
+          uniqIds.push(id);
+        }
+      });
+
       var retrPromises = (0, _map3.default)(uniqIds, function (id) {
         return _this2.retriveOne(id);
       });
@@ -4661,7 +4667,7 @@ var DocumentRetriver = exports.DocumentRetriver = function () {
 
 exports.default = DocumentRetriver;
 
-},{"./Document":8,"check-types":22,"fast.js/array/filter":26,"fast.js/map":39}],13:[function(require,module,exports){
+},{"./Document":8,"check-types":22,"fast.js/array/filter":26,"fast.js/forEach":32,"fast.js/map":39}],13:[function(require,module,exports){
 'use strict';
 
 var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
