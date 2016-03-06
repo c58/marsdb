@@ -38,39 +38,41 @@ describe('MapIndex', () => {
   describe('#insert', function() {
     let doc;
 
-    it('should throw error when try to insert document without indexed field', function () {
+    it('should do nothing when try to insert a document without indexed field', function () {
       mapIndex = new MapIndex('data');
       doc = {_id: 0, name: 'test'};
-      (() => mapIndex.insert(doc)).should.throw(Error);
+      mapIndex.getMatching().should.be.deep.equal([]);
+      mapIndex.insert(doc);
+      mapIndex.getMatching().should.be.deep.equal([]);
     });
 
-    it('should throw error when try to insert document with null/undefined indexed field', function () {
+    it('should throw an error when try to insert a document with null/undefined indexed field', function () {
       doc = {_id: null, name: 'test'};
       (() => mapIndex.insert(doc)).should.throw(Error);
       doc = {_id: undefined, name: 'test'};
       (() => mapIndex.insert(doc)).should.throw(Error);
     });
 
-    it('should insert document with indexed field type String', function () {
+    it('should insert a document with indexed field type String', function () {
       doc = {_id: 'testId', name: 'test'};
       (() => mapIndex.insert(doc)).should.not.throw(Error);
       mapIndex.getMatching('test').should.be.deep.equal(['testId']);
     });
 
-    it('should insert document with indexed field type Number', function () {
+    it('should insert a document with indexed field type Number', function () {
       doc = {_id: 123, name: 'test'};
       (() => mapIndex.insert(doc)).should.not.throw(Error);
       mapIndex.getMatching('test').should.be.deep.equal([123]);
     });
 
-    it('should insert document with indexed field type Date', function () {
+    it('should insert a document with indexed field type Date', function () {
       // Insert Date must be successfully
       doc = {_id: new Date(10), name: 'test'};
       (() => mapIndex.insert(doc)).should.not.throw(Error);
       mapIndex.getMatching('test').should.be.deep.equal([new Date(10)]);
     });
 
-    it(`should throw an error when try to insert document with
+    it(`should throw an error when try to insert a document with
       indexed field type different from String, Number, Date`, function () {
       doc = {_id: [1,2], name: 'test'};
       (() => mapIndex.insert(doc)).should.throw(Error);
@@ -78,7 +80,7 @@ describe('MapIndex', () => {
       (() => mapIndex.insert(doc)).should.throw(Error);
     });
 
-    it(`should insert document with indexed field value already existed
+    it(`should insert a document with indexed field value already existed
       in index and index was created without unique option`, function () {
       doc = {_id: '123', name: 'test'};
       let doc1 = {_id: '456', name: 'test'};
@@ -110,7 +112,7 @@ describe('MapIndex', () => {
     let doc1 = {_id: '123', name: 'test'};
     let doc2 = {_id: '456', name: 'test'};
 
-    it('should remove document from index if document has indexed field and index was defined as unique', function () {
+    it('should remove a document from index if document has indexed field and index was defined as unique', function () {
       mapIndex = new MapIndex('name', {unique: true});
 
       mapIndex.insert(doc1);
@@ -120,7 +122,7 @@ describe('MapIndex', () => {
       mapIndex.getMatching('test').should.be.deep.equal([]);
     });
 
-    it('should remove document from index if document has indexed field and index was not defined as unique', function () {
+    it('should remove a document from index if document has indexed field and index was not defined as unique', function () {
       mapIndex = new MapIndex('name');
 
       mapIndex.insert(doc1);
@@ -132,9 +134,14 @@ describe('MapIndex', () => {
       mapIndex.getMatching('test').should.be.deep.equal([]);
     });
 
-    it('should throw an error when try to remove document from index if document has no indexed field', function () {
-      mapIndex = new MapIndex('data');
-      (() => mapIndex.remove(doc1)).should.throw(Error);
+    it('should do nothing when try to remove document from index if document has no indexed field', function () {
+      let doc = {_id: 0, data: 'test'};
+      mapIndex = new MapIndex('name');
+      mapIndex.insert(doc1);
+      mapIndex.insert(doc2);
+      mapIndex.getMatching('test').should.be.deep.equal(['123', '456']);
+      (() => mapIndex.remove(doc)).should.not.throw(Error);
+      mapIndex.getMatching('test').should.be.deep.equal(['123', '456']);
     });
   });
 
@@ -143,7 +150,7 @@ describe('MapIndex', () => {
     let doc1 = {_id: '123', name: 'test1'};
     let doc2 = {_id: '456', name: 'test1'};
 
-    it('should update document in index collection if: old is exist and new is not exist (do just update)', function () {
+    it('should update a document in index collection if: old is exist and new is not exist (do just update)', function () {
       mapIndex = new MapIndex('name');
       mapIndex.insert(doc1);
       mapIndex.insert(doc2);
@@ -154,7 +161,7 @@ describe('MapIndex', () => {
       mapIndex.getMatching('test1').should.be.deep.equal(['456']);
     });
 
-    it('should update document in index collection if: old and new are not exist (do just insert new)', function () {
+    it('should update a document in index collection if: old and new are not exist (do just insert new)', function () {
       mapIndex = new MapIndex('name');
       mapIndex.insert(doc2);
       mapIndex.getMatching('test').should.be.deep.equal(['456']); // no field and getAll
@@ -164,7 +171,7 @@ describe('MapIndex', () => {
       mapIndex.getMatching('test1').should.be.deep.equal(['456']);
     });
 
-    it('should update document in index collection if: old is not exist and new exists (do nothing)', function () {
+    it('should update a document in index collection if: old is not exist and new exists (do nothing)', function () {
       mapIndex = new MapIndex('name');
       mapIndex.insert(doc);
       mapIndex.insert(doc2);
@@ -175,7 +182,7 @@ describe('MapIndex', () => {
       mapIndex.getMatching('test1').should.be.deep.equal(['456']);
     });
 
-    it('should update document in index collection if: old and new are exist (just remove old)', function () {
+    it('should update a document in index collection if: old and new are exist (just remove old)', function () {
       mapIndex = new MapIndex('name');
       mapIndex.insert(doc);
       mapIndex.insert(doc1);
@@ -189,7 +196,7 @@ describe('MapIndex', () => {
   });
 
   describe('#revertUpdate', function() {
-    it('should do revert update document in index collection', function() {
+    it('should do revert update a document in index collection', function() {
       let doc = {_id: '0', name: 'test'};
       let doc1 = {_id: '1', name: 'test'};
       let doc2 = {_id: '2', name: 'test'};
