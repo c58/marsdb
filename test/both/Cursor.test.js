@@ -456,8 +456,8 @@ describe('Cursor', () => {
         res[3].j._id.should.be.equal('5');
         res[4].j._id.should.be.equal('6');
         res[5].j.should.have.length(2);
-        res[5].j[0]._id.should.be.equal('5');
-        res[5].j[1]._id.should.be.equal('7');
+        res[5].j[0]._id.should.be.equal('7');
+        res[5].j[1]._id.should.be.equal('5');
         expect(res[6].j).to.be.an('array');
       });
     });
@@ -474,14 +474,14 @@ describe('Cursor', () => {
 
     it('should join with nested object', function () {
       sinon.spy(db, 'find');
-      return db.find().sort(['_id']).joinObj({'j._id': db}).then(res => {
+      return db.find().sort(['_id']).joinObj({'j._id': {model: db, joinPath: 'j.$'}}).then(res => {
         db.find.should.be.calledTwice;
-        expect(res[0].j).to.be.null;
-        expect(res[1].j).to.be.null;
-        expect(res[2].j).to.be.null;
-        expect(res[3].j).to.be.null;
-        expect(res[4].j).to.be.null;
-        expect(res[5].j).to.be.null;
+        expect(res[0].j).to.be.equal('2');
+        expect(res[1].j).to.be.equal('3');
+        expect(res[2].j).to.be.equal('4');
+        expect(res[3].j).to.be.equal('5');
+        expect(res[4].j).to.be.equal('6');
+        expect(res[5].j).to.be.deep.equal(['7', '5']);
         res[6].j.should.have.length(2);
         res[6].j[0]._id.should.be.equal('1');
         res[6].j[1]._id.should.be.equal('2');
