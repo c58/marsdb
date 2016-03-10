@@ -72,19 +72,22 @@ var _defaultIdGenerator = _ShortIdGenerator2.default;
 // the second execution cycle
 var _startedUp = false;
 var _startUpQueue = [];
-var _startUpTimeout = 0;
+var _startUpId = 0;
 
 // Internals
 function _resetStartup() {
-  clearTimeout(_startUpTimeout);
+  _startUpId += 1;
   _startUpQueue = [];
   _startedUp = false;
-  _startUpTimeout = setTimeout(function () {
-    _startedUp = true;
-    (0, _forEach2.default)(_startUpQueue, function (fn) {
-      return fn();
-    });
-    _startUpQueue = [];
+  var currStartId = _startUpId;
+  setTimeout(function () {
+    if (currStartId === _startUpId) {
+      _startedUp = true;
+      (0, _forEach2.default)(_startUpQueue, function (fn) {
+        return fn();
+      });
+      _startUpQueue = [];
+    }
   }, 0);
 }
 

@@ -258,7 +258,6 @@ var CursorObservable = function (_Cursor) {
       var insertedInResult = updatedInResult || newDoc && !oldDoc && this._matcher.documentMatches(newDoc).result;
 
       if (insertedInResult) {
-        this.emit('cursorChanged');
         return this.update();
       }
     }
@@ -306,6 +305,10 @@ var CursorObservable = function (_Cursor) {
       var _this3 = this;
 
       var firstRun = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
+
+      if (!firstRun) {
+        this.emit('cursorChanged');
+      }
 
       return this.exec().then(function (result) {
         _this3._updateLatestIds();

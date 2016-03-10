@@ -427,19 +427,22 @@ var _defaultIdGenerator = _ShortIdGenerator2.default;
 // the second execution cycle
 var _startedUp = false;
 var _startUpQueue = [];
-var _startUpTimeout = 0;
+var _startUpId = 0;
 
 // Internals
 function _resetStartup() {
-  clearTimeout(_startUpTimeout);
+  _startUpId += 1;
   _startUpQueue = [];
   _startedUp = false;
-  _startUpTimeout = setTimeout(function () {
-    _startedUp = true;
-    (0, _forEach2.default)(_startUpQueue, function (fn) {
-      return fn();
-    });
-    _startUpQueue = [];
+  var currStartId = _startUpId;
+  setTimeout(function () {
+    if (currStartId === _startUpId) {
+      _startedUp = true;
+      (0, _forEach2.default)(_startUpQueue, function (fn) {
+        return fn();
+      });
+      _startUpQueue = [];
+    }
   }, 0);
 }
 
@@ -1763,7 +1766,6 @@ var CursorObservable = function (_Cursor) {
       var insertedInResult = updatedInResult || newDoc && !oldDoc && this._matcher.documentMatches(newDoc).result;
 
       if (insertedInResult) {
-        this.emit('cursorChanged');
         return this.update();
       }
     }
@@ -1811,6 +1813,10 @@ var CursorObservable = function (_Cursor) {
       var _this3 = this;
 
       var firstRun = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
+
+      if (!firstRun) {
+        this.emit('cursorChanged');
+      }
 
       return this.exec().then(function (result) {
         _this3._updateLatestIds();
