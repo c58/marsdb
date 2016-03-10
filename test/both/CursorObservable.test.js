@@ -7,21 +7,35 @@ chai.use(require('sinon-chai'));
 chai.should();
 
 
+function resolvePromises(count) {
+  const resolver = () => {
+    return Promise.resolve().then(() => {
+      count -= 1;
+      if (count > 0) {
+        return resolver();
+      }
+    })
+  };
+  return resolver();
+}
+
+
 describe('CursorObservable', () => {
-  let db;
+  let db, dbDocs;
 
   beforeEach(function () {
     db = new Collection('test');
+    dbDocs = [
+      {_id: '1', a: 'a', b: 1, c: 'some text 1', g: 'g1', f: 1, j: '2'},
+      {_id: '2', a: 'b', b: 2, c: 'some text 2', g: 'g1', f: 10, j: '3'},
+      {_id: '3', a: 'c', b: 3, c: 'some text 3', g: 'g1', f: 11, j: '4'},
+      {_id: '4', a: 'd', b: 4, c: 'some text 4', g: 'g1', f: 12, j: '5'},
+      {_id: '5', a: 'e', b: 5, c: 'some text 5', g: 'g2', d: 234, f: 2, j: '6'},
+      {_id: '6', a: 'f', b: 6, c: 'some text 6', g: 'g2', f: 20, k: {a: 1}, j: ['7', '5']},
+      {_id: '7', a: 'g', b: 7, c: 'some text 7', g: 'g2', f: 21, j: [{_id: '1'}, {_id: '2'}]},
+    ];
 
-    return Promise.all([
-      db.insert({a: 'a', b: 1, c: 'some text 1', g: 'g1', f: 1}),
-      db.insert({a: 'b', b: 2, c: 'some text 2', g: 'g1', f: 10}),
-      db.insert({a: 'c', b: 3, c: 'some text 3', g: 'g1', f: 11}),
-      db.insert({a: 'd', b: 4, c: 'some text 4', g: 'g1', f: 12}),
-      db.insert({a: 'e', b: 5, c: 'some text 5', g: 'g2', d: 234, f: 2}),
-      db.insert({a: 'f', b: 6, c: 'some text 6', g: 'g2', f: 20}),
-      db.insert({a: 'g', b: 7, c: 'some text 7', g: 'g2', f: 21}),
-    ]);
+    return db.insertAll(dbDocs);
   });
 
   describe('#defaultDebounce', function () {
@@ -368,6 +382,20 @@ describe('CursorObservable', () => {
       }).then(() => {
         db.insert({b: 8});
       });
+    });
+
+    it('should stop previous execution with observed joins if cursor is updated', function () {
+      const obspy = sinon.spy();
+      const cursor = db.find().join({j: db}, {observe: true});
+      cursor.observe(obspy);
+
+      return resolvePromises(4).then(() => {
+        return cursor.maybeUpdate(null, null);
+      }).then(() => {
+        obspy.should.have.callCount(2);
+        obspy.getCall(0).args[0][0].j.should.be.deep.equal(dbDocs[1]);
+        obspy.getCall(1).args[0][0].j.should.be.deep.equal(dbDocs[1]);
+      })
     });
   });
 
