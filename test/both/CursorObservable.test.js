@@ -467,16 +467,15 @@ describe('CursorObservable', () => {
         beforeUpdateCall.should.have.callCount(1);
         return initUpd.then(() => {
           beforeUpdateCall.should.have.callCount(1);
-          return upd3;
+          return resolvePromises(1);
+        }).then(() => {
+          cursor.update();
+          cursor.update();
+          return upd4;
         })
         .then(() => {
           beforeUpdateCall.should.have.callCount(2);
           doUpdateCall.should.have.callCount(2);
-          return upd4;
-        })
-        .then(() => {
-          beforeUpdateCall.should.have.callCount(4);
-          doUpdateCall.should.have.callCount(4);
         });
       })
     });
