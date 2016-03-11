@@ -188,9 +188,6 @@ var CursorObservable = function (_Cursor) {
     /**
      * Executes an update. It is guarantee that
      * one `_doUpdate` will be executed at one time.
-     *
-     * TODO it's a bit hacky implementation, but it works well.
-     * 			I can't imagine more clearly impl for now.
      * @return {Promise}
      */
 
@@ -202,20 +199,28 @@ var CursorObservable = function (_Cursor) {
       var firstRun = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
       var immidiatelly = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
 
-      this._updatePromise = this._updateQueue.add(function () {
-        _this2._updatePromise = immidiatelly ? _this2._doUpdate.func(firstRun) : _this2._doUpdate(firstRun);
-
-        if (immidiatelly) {
-          return _this2._updatePromise;
+      if (!immidiatelly) {
+        if (this._updateDebPromise && !this._updateDebPromise.debouncePassed) {
+          this._doUpdate(firstRun);
+          return this._updatePromise;
+        } else if (this._updateDebAdded && (!this._updateDebPromise || !this._updateDebPromise.debouncePassed)) {
+          return this._updatePromise;
         } else {
-          if (_this2._updatePromise.debouncePassed) {
-            return _this2._updatePromise;
-          } else {
-            return Promise.resolve('__debounced__');
-          }
+          this._updateDebAdded = true;
         }
-      }).then(function (res) {
-        return res === '__debounced__' ? _this2._updatePromise : res;
+      }
+
+      this._updatePromise = this._updateQueue.add(function () {
+        if (immidiatelly) {
+          return _this2._doUpdate.func(firstRun);
+        } else {
+          _this2._updateDebAdded = true;
+          _this2._updateDebPromise = _this2._doUpdate(firstRun);
+          return _this2._updateDebPromise.then(function () {
+            _this2._updateDebAdded = false;
+            _this2._updateDebPromise = null;
+          });
+        }
       });
 
       return this._updatePromise;

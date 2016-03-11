@@ -76,6 +76,8 @@ var _startUpId = 0;
 
 // Internals
 function _resetStartup() {
+  var waitMs = arguments.length <= 0 || arguments[0] === undefined ? 0 : arguments[0];
+
   _startUpId += 1;
   _startUpQueue = [];
   _startedUp = false;
@@ -88,7 +90,7 @@ function _resetStartup() {
       });
       _startUpQueue = [];
     }
-  }, 0);
+  }, waitMs);
 }
 
 function _warnIfAlreadyStarted() {
