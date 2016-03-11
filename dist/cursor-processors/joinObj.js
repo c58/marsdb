@@ -1,5 +1,7 @@
 'use strict';
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 Object.defineProperty(exports, "__esModule", {
@@ -155,33 +157,43 @@ var joinObj = exports.joinObj = {
   },
 
   process: function process(docs, pipeObj, cursor) {
-    var obj = pipeObj.value;
-    var options = pipeObj.args[0] || {};
-    var isObj = !_checkTypes2.default.array(docs);
-    docs = !isObj ? docs : [docs];
+    if (!docs) {
+      return Promise.resolve(docs);
+    } else {
+      var _ret = function () {
+        var obj = pipeObj.value;
+        var options = pipeObj.args[0] || {};
+        var isObj = !_checkTypes2.default.array(docs);
+        docs = !isObj ? docs : [docs];
 
-    var joinerFn = function joinerFn(dcs) {
-      return (0, _map3.default)((0, _keys3.default)(obj), function (k) {
-        var _getJoinOptions2 = _getJoinOptions(k, obj[k]);
+        var joinerFn = function joinerFn(dcs) {
+          return (0, _map3.default)((0, _keys3.default)(obj), function (k) {
+            var _getJoinOptions2 = _getJoinOptions(k, obj[k]);
 
-        var model = _getJoinOptions2.model;
-        var joinPath = _getJoinOptions2.joinPath;
+            var model = _getJoinOptions2.model;
+            var joinPath = _getJoinOptions2.joinPath;
 
-        var _decomposeDocuments2 = _decomposeDocuments(docs, k);
+            var _decomposeDocuments2 = _decomposeDocuments(docs, k);
 
-        var allIds = _decomposeDocuments2.allIds;
-        var docsWrapped = _decomposeDocuments2.docsWrapped;
+            var allIds = _decomposeDocuments2.allIds;
+            var docsWrapped = _decomposeDocuments2.docsWrapped;
 
-        var execFnName = options.observe ? 'observe' : 'then';
-        return model.find({ _id: { $in: allIds } })[execFnName](function (res) {
-          _joinDocsWithResult(joinPath, res, docsWrapped);
-        });
-      });
-    };
+            var execFnName = options.observe ? 'observe' : 'then';
+            return model.find({ _id: { $in: allIds } })[execFnName](function (res) {
+              _joinDocsWithResult(joinPath, res, docsWrapped);
+            });
+          });
+        };
 
-    var newPipeObj = _extends({}, pipeObj, { value: joinerFn });
-    return _joinAll.joinAll.process(docs, newPipeObj, cursor).then(function (res) {
-      return isObj ? res[0] : res;
-    });
+        var newPipeObj = _extends({}, pipeObj, { value: joinerFn });
+        return {
+          v: _joinAll.joinAll.process(docs, newPipeObj, cursor).then(function (res) {
+            return isObj ? res[0] : res;
+          })
+        };
+      }();
+
+      if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
+    }
   }
 };
