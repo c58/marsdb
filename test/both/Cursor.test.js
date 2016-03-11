@@ -472,6 +472,15 @@ describe('Cursor', () => {
       });
     });
 
+    it('should join for findOne with undefined result', function () {
+      sinon.spy(db, 'find');
+      sinon.spy(db, 'findOne');
+      return db.findOne('111').joinObj({j: db}).then(res => {
+        db.find.should.be.have.callCount(0);
+        db.findOne.should.be.calledOnce;
+      });
+    });
+
     it('should join with nested object', function () {
       sinon.spy(db, 'find');
       return db.find().sort(['_id']).joinObj({'j._id': {model: db, joinPath: 'j.$'}}).then(res => {
@@ -533,6 +542,15 @@ describe('Cursor', () => {
         docs[0].groupObjs.should.have.length(4);
         docs[1].groupObjs.should.have.length(4);
         docs[6].groupObjs.should.have.length(3);
+      });
+    });
+
+    it('should join for findOne with undefined result', function () {
+      sinon.spy(db, 'find');
+      sinon.spy(db, 'findOne');
+      return db.findOne('111').joinEach(d => db.find()).then(res => {
+        db.find.should.be.have.callCount(0);
+        db.findOne.should.be.calledOnce;
       });
     });
 
