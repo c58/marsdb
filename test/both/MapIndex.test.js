@@ -54,19 +54,21 @@ describe('MapIndex', () => {
     });
 
     it('should insert a document with indexed field type String', function () {
+      mapIndex = new MapIndex('name');
       doc = {_id: 'testId', name: 'test'};
       (() => mapIndex.insert(doc)).should.not.throw(Error);
       mapIndex.getMatching('test').should.be.deep.equal(['testId']);
     });
 
     it('should insert a document with indexed field type Number', function () {
+      mapIndex = new MapIndex('name');
       doc = {_id: 123, name: 'test'};
       (() => mapIndex.insert(doc)).should.not.throw(Error);
       mapIndex.getMatching('test').should.be.deep.equal([123]);
     });
 
     it('should insert a document with indexed field type Date', function () {
-      // Insert Date must be successfully
+      mapIndex = new MapIndex('name');
       doc = {_id: new Date(10), name: 'test'};
       (() => mapIndex.insert(doc)).should.not.throw(Error);
       mapIndex.getMatching('test').should.be.deep.equal([new Date(10)]);
@@ -224,13 +226,13 @@ describe('MapIndex', () => {
     it('should reset index collection', function () {
       let doc1 = {_id: '123', name: 'test'};
       let doc2 = {_id: '456', name: 'test'};
+      const res = new Map([['123', '123'], ['456','456']]);
 
       mapIndex.insert(doc1);
       mapIndex.insert(doc2);
-
-      mapIndex.mapIndex.should.be.deep.equal({'123': ['123'], '456': ['456']});
+      mapIndex.mapIndex.should.be.deep.equal(res);
       mapIndex.reset();
-      mapIndex.mapIndex.should.be.deep.equal({});
+      mapIndex.mapIndex.should.be.deep.equal(new Map());
     });
   });
 
