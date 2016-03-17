@@ -46,6 +46,18 @@ describe('MapIndex', () => {
       mapIndex.getMatching().should.be.deep.equal([]);
     });
 
+    it('should insert when try to insert a document with null/undefined indexed field which is not _id field', function () {
+      mapIndex = new MapIndex('name');
+      doc = {_id: 0, name: null};
+      (() => mapIndex.insert(doc)).should.not.throw(Error);
+      // console.log(mapIndex.mapIndex);
+      mapIndex.getMatching(null).should.be.deep.equal([0]);
+      doc = {_id: 1, name: undefined};
+      (() => mapIndex.insert(doc)).should.not.throw(Error);
+      // console.log(mapIndex.mapIndex);
+      mapIndex.getMatching(undefined).should.be.deep.equal([1]);
+    });
+
     it('should throw an error when try to insert a document with null/undefined indexed field', function () {
       doc = {_id: null, name: 'test'};
       (() => mapIndex.insert(doc)).should.throw(Error);
