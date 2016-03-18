@@ -7,9 +7,9 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.StorageManager = undefined;
 
-var _forEach = require('fast.js/forEach');
+var _keys2 = require('fast.js/object/keys');
 
-var _forEach2 = _interopRequireDefault(_forEach);
+var _keys3 = _interopRequireDefault(_keys2);
 
 var _eventemitter = require('eventemitter3');
 
@@ -107,13 +107,26 @@ var StorageManager = exports.StorageManager = function () {
     value: function createReadStream() {
       var _this6 = this;
 
+      var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+      // Very limited subset of ReadableStream
+      var paused = false;
       var emitter = new _eventemitter2.default();
+      emitter.pause = function () {
+        return paused = true;
+      };
+
       this.loaded().then(function () {
-        (0, _forEach2.default)(_this6._storage, function (v, k) {
-          emitter.emit('data', { value: v });
-        });
+        var keys = (0, _keys3.default)(_this6._storage);
+        for (var i = 0; i < keys.length; i++) {
+          emitter.emit('data', { value: _this6._storage[keys[i]] });
+          if (paused) {
+            return;
+          }
+        }
         emitter.emit('end');
       });
+
       return emitter;
     }
   }, {

@@ -237,20 +237,13 @@ var Cursor = function (_BasicCursor) {
     value: function _matchObjects() {
       var _this6 = this;
 
-      return new _DocumentRetriver2.default(this.db).retriveForQeury(this._query).then(function (docs) {
-        var results = [];
-        var withFastLimit = _this6._limit && !_this6._skip && !_this6._sorter;
+      var withFastLimit = this._limit && !this._skip && !this._sorter;
+      var retrOpts = withFastLimit ? { limit: this._limit } : {};
+      var queryFilter = function queryFilter(doc) {
+        return doc && _this6._matcher.documentMatches(doc).result;
+      };
 
-        (0, _forEach2.default)(docs, function (d) {
-          var match = _this6._matcher.documentMatches(d);
-          if (match.result) {
-            results.push(d);
-          }
-          if (withFastLimit && results.length === _this6._limit) {
-            return false;
-          }
-        });
-
+      return new _DocumentRetriver2.default(this.db).retriveForQeury(this._query, queryFilter, retrOpts).then(function (results) {
         if (withFastLimit) {
           return results;
         }

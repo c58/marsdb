@@ -1392,20 +1392,13 @@ var Cursor = function (_BasicCursor) {
     value: function _matchObjects() {
       var _this6 = this;
 
-      return new _DocumentRetriver2.default(this.db).retriveForQeury(this._query).then(function (docs) {
-        var results = [];
-        var withFastLimit = _this6._limit && !_this6._skip && !_this6._sorter;
+      var withFastLimit = this._limit && !this._skip && !this._sorter;
+      var retrOpts = withFastLimit ? { limit: this._limit } : {};
+      var queryFilter = function queryFilter(doc) {
+        return doc && _this6._matcher.documentMatches(doc).result;
+      };
 
-        (0, _forEach2.default)(docs, function (d) {
-          var match = _this6._matcher.documentMatches(d);
-          if (match.result) {
-            results.push(d);
-          }
-          if (withFastLimit && results.length === _this6._limit) {
-            return false;
-          }
-        });
-
+      return new _DocumentRetriver2.default(this.db).retriveForQeury(this._query, queryFilter, retrOpts).then(function (results) {
         if (withFastLimit) {
           return results;
         }
@@ -4292,10 +4285,6 @@ var _map2 = require('fast.js/map');
 
 var _map3 = _interopRequireDefault(_map2);
 
-var _forEach = require('fast.js/forEach');
-
-var _forEach2 = _interopRequireDefault(_forEach);
-
 var _filter2 = require('fast.js/array/filter');
 
 var _filter3 = _interopRequireDefault(_filter2);
@@ -4311,6 +4300,11 @@ function _classCallCheck(instance, Constructor) {
     throw new TypeError("Cannot call a class as a function");
   }
 }
+
+// Internals
+var DEFAULT_QUERY_FILTER = function DEFAULT_QUERY_FILTER() {
+  return true;
+};
 
 /**
  * Class for getting data objects by given list of ids.
@@ -4340,6 +4334,9 @@ var DocumentRetriver = exports.DocumentRetriver = function () {
   _createClass(DocumentRetriver, [{
     key: 'retriveForQeury',
     value: function retriveForQeury(query) {
+      var queryFilter = arguments.length <= 1 || arguments[1] === undefined ? DEFAULT_QUERY_FILTER : arguments[1];
+      var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
       // Try to get list of ids
       var selectorIds = undefined;
       if ((0, _Document.selectorIsId)(query)) {
@@ -4356,15 +4353,16 @@ var DocumentRetriver = exports.DocumentRetriver = function () {
 
       // Retrive optimally
       if (_checkTypes2.default.array(selectorIds) && selectorIds.length > 0) {
-        return this.retriveIds(selectorIds);
+        return this.retriveIds(queryFilter, selectorIds, options);
       } else {
-        return this.retriveAll();
+        return this.retriveAll(queryFilter, options);
       }
     }
 
     /**
-     * Retrive all documents in the storage of
-     * the collection
+     * Rterive all ids given in constructor.
+     * If some id is not retrived (retrived qith error),
+     * then returned promise will be rejected with that error.
      * @return {Promise}
      */
 
@@ -4373,17 +4371,34 @@ var DocumentRetriver = exports.DocumentRetriver = function () {
     value: function retriveAll() {
       var _this = this;
 
+      var queryFilter = arguments.length <= 0 || arguments[0] === undefined ? DEFAULT_QUERY_FILTER : arguments[0];
+      var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+      var limit = options.limit || +Infinity;
+      var result = [];
+      var stopped = false;
+
       return new Promise(function (resolve, reject) {
-        var result = [];
-        _this.db.storage.createReadStream().on('data', function (data) {
+        var stream = _this.db.storage.createReadStream();
+
+        stream.on('data', function (data) {
           // After deleting of an item some storages
           // may return an undefined for a few times.
           // We need to check it there.
-          if (data.value) {
-            result.push(_this.db.create(data.value));
+          if (!stopped && data.value) {
+            var doc = _this.db.create(data.value);
+            if (result.length < limit && queryFilter(doc)) {
+              result.push(doc);
+            }
+            // Limit the result if storage supports it
+            if (result.length === limit && stream.pause) {
+              stream.pause();
+              resolve(result);
+              stopped = true;
+            }
           }
         }).on('end', function () {
-          return resolve(result);
+          return !stopped && resolve(result);
         });
       });
     }
@@ -4397,25 +4412,36 @@ var DocumentRetriver = exports.DocumentRetriver = function () {
 
   }, {
     key: 'retriveIds',
-    value: function retriveIds(ids) {
+    value: function retriveIds() {
+      var queryFilter = arguments.length <= 0 || arguments[0] === undefined ? DEFAULT_QUERY_FILTER : arguments[0];
+
       var _this2 = this;
 
-      var usedIds = {};
-      var uniqIds = [];
-      (0, _forEach2.default)(ids, function (id) {
-        if (!usedIds[id]) {
-          usedIds[id] = true;
-          uniqIds.push(id);
-        }
-      });
+      var ids = arguments.length <= 1 || arguments[1] === undefined ? [] : arguments[1];
+      var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
+      var uniqIds = (0, _filter3.default)(ids, function (id, i) {
+        return ids.indexOf(id) === i;
+      });
       var retrPromises = (0, _map3.default)(uniqIds, function (id) {
         return _this2.retriveOne(id);
       });
-      return Promise.all(retrPromises).then(function (docs) {
-        return (0, _filter3.default)(docs, function (d) {
-          return d;
-        });
+      var limit = options.limit || +Infinity;
+
+      return Promise.all(retrPromises).then(function (res) {
+        var filteredRes = [];
+
+        for (var i = 0; i < res.length; i++) {
+          var doc = res[i];
+          if (doc && queryFilter(doc)) {
+            filteredRes.push(doc);
+            if (filteredRes.length === limit) {
+              break;
+            }
+          }
+        }
+
+        return filteredRes;
       });
     }
 
@@ -4431,10 +4457,7 @@ var DocumentRetriver = exports.DocumentRetriver = function () {
       var _this3 = this;
 
       return this.db.storage.get(id).then(function (buf) {
-        // Accepted only non-undefined documents
-        if (buf) {
-          return _this3.db.create(buf);
-        }
+        return _this3.db.create(buf);
       });
     }
   }]);
@@ -4444,7 +4467,7 @@ var DocumentRetriver = exports.DocumentRetriver = function () {
 
 exports.default = DocumentRetriver;
 
-},{"./Document":8,"check-types":32,"fast.js/array/filter":36,"fast.js/forEach":42,"fast.js/map":49}],13:[function(require,module,exports){
+},{"./Document":8,"check-types":32,"fast.js/array/filter":36,"fast.js/map":49}],13:[function(require,module,exports){
 'use strict';
 
 var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
@@ -6322,9 +6345,9 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.StorageManager = undefined;
 
-var _forEach = require('fast.js/forEach');
+var _keys2 = require('fast.js/object/keys');
 
-var _forEach2 = _interopRequireDefault(_forEach);
+var _keys3 = _interopRequireDefault(_keys2);
 
 var _eventemitter = require('eventemitter3');
 
@@ -6428,13 +6451,26 @@ var StorageManager = exports.StorageManager = function () {
     value: function createReadStream() {
       var _this6 = this;
 
+      var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+      // Very limited subset of ReadableStream
+      var paused = false;
       var emitter = new _eventemitter2.default();
+      emitter.pause = function () {
+        return paused = true;
+      };
+
       this.loaded().then(function () {
-        (0, _forEach2.default)(_this6._storage, function (v, k) {
-          emitter.emit('data', { value: v });
-        });
+        var keys = (0, _keys3.default)(_this6._storage);
+        for (var i = 0; i < keys.length; i++) {
+          emitter.emit('data', { value: _this6._storage[keys[i]] });
+          if (paused) {
+            return;
+          }
+        }
         emitter.emit('end');
       });
+
       return emitter;
     }
   }, {
@@ -6450,7 +6486,7 @@ var StorageManager = exports.StorageManager = function () {
 
 exports.default = StorageManager;
 
-},{"./EJSON":14,"./PromiseQueue":16,"eventemitter3":34,"fast.js/forEach":42}],20:[function(require,module,exports){
+},{"./EJSON":14,"./PromiseQueue":16,"eventemitter3":34,"fast.js/object/keys":52}],20:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
