@@ -21,17 +21,15 @@ describe('MapIndex', () => {
       (typeof mapIndex.lookupFunction).should.be.equal('function');
     });
 
-    it('should save keyName and without options unique, sparse are false by default', function () {
+    it('should save keyName and without unique option are false by default', function () {
       mapIndex.keyName.should.be.equal('_id');
       mapIndex.unique.should.be.equal(false);
-      mapIndex.sparse.should.be.equal(false);
     });
 
-    it('should save keyName with options unique, sparse', function () {
-      mapIndex = new MapIndex('_id', {unique: true, sparse: true});
+    it('should save keyName with unique option', function () {
+      mapIndex = new MapIndex('_id', {unique: true});
       mapIndex.keyName.should.be.equal('_id');
       mapIndex.unique.should.be.equal(true);
-      mapIndex.sparse.should.be.equal(true);
     });
   });
 
