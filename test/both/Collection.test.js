@@ -18,7 +18,7 @@ describe('Collection', () => {
   const _defaultIndexManager = Collection.defaultIndexManager();
   const _defaultCursor = Collection.defaultCursor();
   beforeEach(function () {
-    _resetStartup();
+    _resetStartup(10);
     Collection.defaultCursor(_defaultCursor);
     Collection.defaultDelegate(_defaultDelegate);
     Collection.defaultStorageManager(_defaultStorageManager);

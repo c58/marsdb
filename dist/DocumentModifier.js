@@ -7,7 +7,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.DocumentModifier = undefined;
+exports.findModTarget = exports.DocumentModifier = undefined;
 
 var _checkTypes = require('check-types');
 
@@ -223,7 +223,7 @@ var documentBySelector = function documentBySelector(selector) {
 //
 // if options.arrayIndices is set, use its first element for the (first) '$' in
 // the path.
-var findModTarget = function findModTarget(doc, keyparts, options) {
+var findModTarget = exports.findModTarget = function findModTarget(doc, keyparts, options) {
   options = options || {};
   var usedArrayIndex = false;
   for (var i = 0; i < keyparts.length; i++) {

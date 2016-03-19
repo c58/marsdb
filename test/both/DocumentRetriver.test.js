@@ -54,14 +54,18 @@ describe('DocumentRetriver', () => {
         retr.retriveForQeury({_id: {$in: []}}).should.eventually.have.length(3),
       ]);
     });
+
+    it('should use queryFilter for filtering documents', function () {
+      retr.retriveForQeury({}, (d) => d._id === '1').should.eventually.have.length(1);
+    });
   });
 
   describe('#retriveIds', function () {
     it('should retrive only documents by id', function () {
       return Promise.all([
-        retr.retriveIds([]).should.eventually.be.deep.equal([]),
-        retr.retriveIds(['1']).should.eventually.be.deep.equal([{a: 1, _id: '1'}]),
-        retr.retriveIds(['2', '1']).should.eventually
+        retr.retriveIds(undefined, []).should.eventually.be.deep.equal([]),
+        retr.retriveIds(undefined, ['1']).should.eventually.be.deep.equal([{a: 1, _id: '1'}]),
+        retr.retriveIds(undefined, ['2', '1']).should.eventually
           .be.deep.equal([{a: 2, _id: '2'}, {a: 1, _id: '1'}]),
       ]);
     });
@@ -86,6 +90,43 @@ describe('DocumentRetriver', () => {
           {_id: '4', a: 4},
           {_id: '5', a: 5},
           {_id: '6', a: 6},
+        ]);
+      });
+    });
+
+    it('should filter documents by queryFilter', function () {
+      const db = new Collection('test');
+      return Promise.all([
+        db.storage.persist('1', {_id: '1', a: 1}),
+        db.storage.persist('2', {_id: '2', a: 2}),
+        db.storage.persist('3', {_id: '3', a: 3}),
+        db.storage.persist('4', {_id: '4', a: 4}),
+        db.storage.persist('5', {_id: '5', a: 5}),
+        db.storage.persist('6', {_id: '6', a: 6})
+      ]).then(() => {
+        const retr = new DocumentRetriver(db);
+        const qf = (d) => d._id === '1' || d._id === '2';
+        return retr.retriveAll(qf).should.eventually.deep.equal([
+          {_id: '1', a: 1},
+          {_id: '2', a: 2},
+        ]);
+      });
+    });
+
+    it('should limit the result of passed docs', function () {
+      const db = new Collection('test');
+      return Promise.all([
+        db.storage.persist('1', {_id: '1', a: 1}),
+        db.storage.persist('2', {_id: '2', a: 2}),
+        db.storage.persist('3', {_id: '3', a: 3}),
+        db.storage.persist('4', {_id: '4', a: 4}),
+        db.storage.persist('5', {_id: '5', a: 5}),
+        db.storage.persist('6', {_id: '6', a: 6})
+      ]).then(() => {
+        const retr = new DocumentRetriver(db);
+        const qf = (d) => d._id === '1' || d._id === '2';
+        return retr.retriveAll(qf, {limit: 1}).should.eventually.deep.equal([
+          {_id: '1', a: 1},
         ]);
       });
     });
