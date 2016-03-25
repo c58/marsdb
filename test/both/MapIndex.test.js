@@ -205,6 +205,27 @@ describe('MapIndex', () => {
       mapIndex.getMatching('test').should.be.deep.equal([]); // has field but empty
       mapIndex.getMatching('test1').should.be.deep.equal(['123', '456']);
     });
+    it('should insert a document in index collection if: old is null and new is not null', function () {
+      mapIndex = new MapIndex('name');
+      mapIndex.insert(doc);
+      mapIndex.insert(doc1);
+      mapIndex.getMatching('test').should.be.deep.equal(['123']);
+      mapIndex.getMatching('test1').should.be.deep.equal(['123']);
+      mapIndex.update(null, doc2);
+      mapIndex.getMatching('test').should.be.deep.equal(['123']);
+      mapIndex.getMatching('test1').should.be.deep.equal(['123', '456']);
+    });
+    it('should remove a document in index collection if: old is not null and new is null', function () {
+      mapIndex = new MapIndex('name');
+      mapIndex.insert(doc);
+      mapIndex.insert(doc1);
+      mapIndex.insert(doc2);
+      mapIndex.getMatching('test').should.be.deep.equal(['123']);
+      mapIndex.getMatching('test1').should.be.deep.equal(['123', '456']);
+      mapIndex.update(doc1, null);
+      mapIndex.getMatching('test').should.be.deep.equal(['123']);
+      mapIndex.getMatching('test1').should.be.deep.equal(['456']);
+    });
   });
 
   describe('#revertUpdate', function() {
@@ -229,6 +250,40 @@ describe('MapIndex', () => {
       mapIndex.getMatching('test').should.be.deep.equal(['0','2', '1']);
       mapIndex.getMatching('test3').should.be.deep.equal(['3']);
 
+    });
+
+    it('should do revert update a document in index collection with null old document', function() {
+      let doc = {_id: '0', name: 'test'};
+      let doc1 = {_id: '1', name: 'test'};
+      let doc2 = {_id: '2', name: 'test'};
+      let doc3 = {_id: '3', name: 'test3'};
+      let doc4 = {_id: '1', name: 'test3'};
+
+      mapIndex = new MapIndex('name');
+      mapIndex.insert(doc);
+      mapIndex.insert(doc1);
+      mapIndex.insert(doc2);
+      mapIndex.insert(doc3);
+      mapIndex.getMatching('test').should.be.deep.equal(['0', '1', '2']);
+      mapIndex.getMatching('test3').should.be.deep.equal(['3']);
+      mapIndex.update(null, doc4);
+      mapIndex.getMatching('test').should.be.deep.equal(['0','1', '2']);
+      mapIndex.getMatching('test3').should.be.deep.equal(['3', '1']);
+      mapIndex.revertUpdate(null, doc4);
+      mapIndex.getMatching('test').should.be.deep.equal(['0','1', '2']);
+      mapIndex.getMatching('test3').should.be.deep.equal(['3']);
+      mapIndex.update(null, doc1);
+      mapIndex.getMatching('test').should.be.deep.equal(['0','1', '2']);
+      mapIndex.getMatching('test3').should.be.deep.equal(['3']);
+      mapIndex.revertUpdate(null, doc1);
+      mapIndex.getMatching('test').should.be.deep.equal(['0', '2']);
+      mapIndex.getMatching('test3').should.be.deep.equal(['3']);
+      mapIndex.update(doc1, doc4);
+      mapIndex.getMatching('test').should.be.deep.equal(['0','2']);
+      mapIndex.getMatching('test3').should.be.deep.equal(['3', '1']);
+      mapIndex.revertUpdate(doc1, doc4);
+      mapIndex.getMatching('test').should.be.deep.equal(['0', '2', '1']);
+      mapIndex.getMatching('test3').should.be.deep.equal(['3']);
     });
   });
 
