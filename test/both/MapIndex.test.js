@@ -202,7 +202,7 @@ describe('MapIndex', () => {
       mapIndex.getMatching('test').should.be.deep.equal(['123']);
       mapIndex.getMatching('test1').should.be.deep.equal(['123', '456']);
       mapIndex.update(doc, doc1);
-      mapIndex.getMatching('test').should.be.deep.equal([]); // has field but empty
+      mapIndex.getMatching('test').should.be.deep.equal(['123', '456']); // no field and getAll
       mapIndex.getMatching('test1').should.be.deep.equal(['123', '456']);
     });
     it('should insert a document in index collection if: old is null and new is not null', function () {

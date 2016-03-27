@@ -74,8 +74,6 @@ describe('IndexManager', () => {
 
         return idxMan.buildAllIndexes();
       }).then(() => {
-        idxMan.indexes.a.getMatching('1').should.be.deep.equal([1]);
-        idxMan.indexes.a.getMatching('5').should.be.deep.equal([5]);
         idxMan.indexes.b.getMatching(2).should.be.deep.equal([1]);
         idxMan.indexes.b.getMatching(6).should.be.deep.equal([5]);
         idxMan.indexes._id.getMatching(1).should.be.deep.equal([1]);
@@ -191,9 +189,9 @@ describe('IndexManager', () => {
       }).then(null, (err) => {
         err.should.not.be.equal(undefined);
         idxMan.indexes._id.getMatching(4)
-        .should.be.deep.equal([]);
+        .should.be.deep.equal([5]);
         idxMan.indexes.a.getMatching('7')
-        .should.be.deep.equal([]);
+        .should.be.deep.equal([5]);
         idxMan.indexes.b.getMatching(6)
         .should.be.deep.equal([5]);
       });
@@ -220,9 +218,9 @@ describe('IndexManager', () => {
         idxMan.indexes.a.getMatching('6')
         .should.be.deep.equal([5]);
         idxMan.indexes.b.getMatching(6)
-        .should.be.deep.equal([]);
+        .should.be.deep.equal([5]);
         idxMan.indexes.a.getMatching('5')
-        .should.be.deep.equal([]);
+        .should.be.deep.equal([5]);
       });
     });
 
@@ -244,7 +242,7 @@ describe('IndexManager', () => {
         idxMan.indexes.a.getMatching('10')
         .should.be.deep.equal([10]);
         idxMan.indexes.a.getMatching('7')
-        .should.be.deep.equal([]);
+        .should.be.deep.equal([5, 10]);
         idxMan.indexes.b.getMatching(5)
         .should.be.deep.equal([10]);
         idxMan.indexes.b.getMatching(6)
