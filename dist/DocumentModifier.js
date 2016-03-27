@@ -1,13 +1,13 @@
 'use strict';
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.findModTarget = exports.DocumentModifier = undefined;
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _checkTypes = require('check-types');
 
@@ -328,9 +328,9 @@ var MODIFIERS = {
       throw e;
     }
     if (target === null) {
-      var e = new Error('Cannot set property on null');
-      e.setPropertyError = true;
-      throw e;
+      var _e = new Error('Cannot set property on null');
+      _e.setPropertyError = true;
+      throw _e;
     }
     target[field] = arg;
   },
@@ -419,8 +419,8 @@ var MODIFIERS = {
       }
     } else {
       var spliceArguments = [position, 0];
-      for (var j = 0; j < toPush.length; j++) {
-        spliceArguments.push(toPush[j]);
+      for (var _j = 0; _j < toPush.length; _j++) {
+        spliceArguments.push(toPush[_j]);
       }
       Array.prototype.splice.apply(target[field], spliceArguments);
     }
@@ -527,9 +527,9 @@ var MODIFIERS = {
           }
         }
       } else {
-        for (var i = 0; i < x.length; i++) {
-          if (!_Document.MongoTypeComp._equal(x[i], arg)) {
-            out.push(x[i]);
+        for (var _i = 0; _i < x.length; _i++) {
+          if (!_Document.MongoTypeComp._equal(x[_i], arg)) {
+            out.push(x[_i]);
           }
         }
       }

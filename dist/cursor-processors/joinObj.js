@@ -1,13 +1,13 @@
 'use strict';
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
-
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.joinObj = undefined;
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 var _checkTypes = require('check-types');
 
@@ -177,6 +177,7 @@ var joinObj = exports.joinObj = {
 
             var allIds = _decomposeDocuments2.allIds;
             var docsWrapped = _decomposeDocuments2.docsWrapped;
+
 
             var execFnName = options.observe ? 'observe' : 'then';
             return model.find({ _id: { $in: allIds } })[execFnName](function (res) {

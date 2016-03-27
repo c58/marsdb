@@ -14,7 +14,7 @@ describe('MapIndex', () => {
 
   describe('#constructor', function () {
     it('should create empty map index', function () {
-      Object.keys(mapIndex.mapIndex).length.should.be.equal(0);
+      mapIndex.mapIndex.should.be.deep.equal(new Map());
     });
 
     it('should create lookup function', function () {
@@ -291,13 +291,12 @@ describe('MapIndex', () => {
     it('should reset index collection', function () {
       let doc1 = {_id: '123', name: 'test'};
       let doc2 = {_id: '456', name: 'test'};
-      const res = new Map([['123', '123'], ['456','456']]);
 
       mapIndex.insert(doc1);
       mapIndex.insert(doc2);
-      mapIndex.mapIndex.should.be.deep.equal(res);
+      mapIndex.getMatching('d').should.be.deep.equal(['123', '456']);
       mapIndex.reset();
-      mapIndex.mapIndex.should.be.deep.equal(new Map());
+      mapIndex.getMatching('d').should.be.deep.equal([]);
     });
   });
 
