@@ -93,20 +93,17 @@ var CollectionDelegate = exports.CollectionDelegate = function () {
         var original = _ref3.original;
         var updated = _ref3.updated;
 
-        var updateIndexPromises = (0, _map3.default)(updated, function (d, i) {
-          return _this3.db.indexManager.reindexDocument(original[i], d);
-        });
-        return Promise.all(updateIndexPromises).then(function () {
-          var updateStorgePromises = (0, _map3.default)(updated, function (d) {
+        var updatePromises = (0, _map3.default)(updated, function (d, i) {
+          return _this3.db.indexManager.reindexDocument(original[i], d).then(function () {
             return _this3.db.storageManager.persist(d._id, d);
           });
-          return Promise.all(updateStorgePromises).then(function () {
-            return {
-              modified: updated.length,
-              original: original,
-              updated: updated
-            };
-          });
+        });
+        return Promise.all(updatePromises).then(function () {
+          return {
+            modified: updated.length,
+            original: original,
+            updated: updated
+          };
         });
       });
     }
