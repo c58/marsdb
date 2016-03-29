@@ -17,8 +17,6 @@ var _DocumentModifier2 = _interopRequireDefault(_DocumentModifier);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 /**
@@ -61,13 +59,12 @@ var CollectionDelegate = exports.CollectionDelegate = function () {
         if (docs.length > 1 && !multi) {
           docs = [docs[0]];
         }
-        var removeStorgePromises = (0, _map3.default)(docs, function (d) {
-          return _this2.db.storageManager.delete(d._id);
+        var removePromises = (0, _map3.default)(docs, function (d) {
+          return _this2.db.storageManager.delete(d._id).then(function () {
+            return _this2.db.indexManager.deindexDocument(d);
+          });
         });
-        var removeIndexPromises = (0, _map3.default)(docs, function (d) {
-          return _this2.db.indexManager.deindexDocument(d);
-        });
-        return Promise.all([].concat(_toConsumableArray(removeStorgePromises), _toConsumableArray(removeIndexPromises))).then(function () {
+        return Promise.all(removePromises).then(function () {
           return docs;
         });
       });
