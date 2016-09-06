@@ -29,10 +29,6 @@ var _IndexManager = require('./IndexManager');
 
 var _IndexManager2 = _interopRequireDefault(_IndexManager);
 
-var _PromiseQueue = require('./PromiseQueue');
-
-var _PromiseQueue2 = _interopRequireDefault(_PromiseQueue);
-
 var _StorageManager = require('./StorageManager');
 
 var _StorageManager2 = _interopRequireDefault(_StorageManager);
@@ -120,7 +116,6 @@ var Collection = exports.Collection = function (_EventEmitter) {
 
     _this.options = options;
     _this._modelName = name;
-    _this._writeQueue = new _PromiseQueue2.default(1);
 
     // Shorthand for defining in-memory collection
     if (options.inMemory) {
@@ -170,15 +165,13 @@ var Collection = exports.Collection = function (_EventEmitter) {
       doc = this.create(doc);
       doc._id = doc._id || randomId.value;
 
-      return this._writeQueue.add(function () {
-        _this2.emit('beforeInsert', doc, randomId);
-        if (!options.quiet) {
-          _this2.emit('sync:insert', doc, randomId);
-        }
-        return _this2.delegate.insert(doc, options, randomId).then(function (docId) {
-          _this2.emit('insert', doc, null, randomId);
-          return docId;
-        });
+      this.emit('beforeInsert', doc, randomId);
+      if (!options.quiet) {
+        this.emit('sync:insert', doc, randomId);
+      }
+      return this.delegate.insert(doc, options, randomId).then(function (docId) {
+        _this2.emit('insert', doc, null, randomId);
+        return docId;
       });
     }
 
@@ -219,17 +212,16 @@ var Collection = exports.Collection = function (_EventEmitter) {
       var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
       this._lazyInitCollection();
-      return this._writeQueue.add(function () {
-        _this4.emit('beforeRemove', query, options);
-        if (!options.quiet) {
-          _this4.emit('sync:remove', query, options);
-        }
-        return _this4.delegate.remove(query, options).then(function (removedDocs) {
-          (0, _forEach2.default)(removedDocs, function (d) {
-            return _this4.emit('remove', null, d);
-          });
-          return removedDocs;
+
+      this.emit('beforeRemove', query, options);
+      if (!options.quiet) {
+        this.emit('sync:remove', query, options);
+      }
+      return this.delegate.remove(query, options).then(function (removedDocs) {
+        (0, _forEach2.default)(removedDocs, function (d) {
+          return _this4.emit('remove', null, d);
         });
+        return removedDocs;
       });
     }
 
@@ -251,17 +243,16 @@ var Collection = exports.Collection = function (_EventEmitter) {
       var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
       this._lazyInitCollection();
-      return this._writeQueue.add(function () {
-        _this5.emit('beforeUpdate', query, modifier, options);
-        if (!options.quiet) {
-          _this5.emit('sync:update', query, modifier, options);
-        }
-        return _this5.delegate.update(query, modifier, options).then(function (res) {
-          (0, _forEach2.default)(res.updated, function (d, i) {
-            _this5.emit('update', d, res.original[i]);
-          });
-          return res;
+
+      this.emit('beforeUpdate', query, modifier, options);
+      if (!options.quiet) {
+        this.emit('sync:update', query, modifier, options);
+      }
+      return this.delegate.update(query, modifier, options).then(function (res) {
+        (0, _forEach2.default)(res.updated, function (d, i) {
+          _this5.emit('update', d, res.original[i]);
         });
+        return res;
       });
     }
 
