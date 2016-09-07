@@ -253,4 +253,3 @@ var Random = function () {
 }();
 
 exports.default = Random;
-exports.default = Random;

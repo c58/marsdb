@@ -118,21 +118,23 @@ function _getJoinOptions(key, value) {
  */
 function _joinDocsWithResult(joinPath, res, docsWrapped) {
   var resIdMap = {};
+  var initKeyparts = joinPath.split('.');
+
   (0, _forEach2.default)(res, function (v) {
     return resIdMap[v._id] = v;
   });
-
-  var keyparts = joinPath.split('.');
-  var field = keyparts[keyparts.length - 1];
-
   (0, _forEach2.default)(docsWrapped, function (wrap) {
     (0, _forEach2.default)(wrap.lookupResult, function (branch) {
       if (branch.value) {
+        // `findModTarget` will modify `keyparts`. So, it should
+        // be copied each time.
+        var keyparts = initKeyparts.slice();
         var target = (0, _DocumentModifier.findModTarget)(wrap.doc, keyparts, {
           noCreate: false,
           forbidArray: false,
           arrayIndices: branch.arrayIndices
         });
+        var field = keyparts[keyparts.length - 1];
 
         if (_checkTypes2.default.array(branch.value)) {
           target[field] = (0, _map3.default)(branch.value, function (id) {
