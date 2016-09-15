@@ -40,7 +40,7 @@ var joinAll = exports.joinAll = {
     var res = pipeObj.value(docs, updatedFn, i, len);
     res = _checkTypes2.default.array(res) ? res : [res];
     res = (0, _map3.default)(res, function (val) {
-      var cursorPromise = undefined;
+      var cursorPromise = void 0;
       if (val && val.joinAll) {
         // instanceof Cursor
         cursorPromise = val.exec();

@@ -1,10 +1,10 @@
 'use strict';
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _eventemitter = require('eventemitter3');
 
@@ -37,6 +37,7 @@ var AsyncEventEmitter = function (_EventEmitter) {
   _createClass(AsyncEventEmitter, [{
     key: 'emitAsync',
 
+
     /**
      * Emit an event and return a Promise that will be resolved
      * when all listeren's Promises will be resolved.
@@ -51,10 +52,10 @@ var AsyncEventEmitter = function (_EventEmitter) {
         return Promise.resolve();
       }
 
-      var i = undefined;
+      var i = void 0;
       var listeners = this._events[evt];
       var len = arguments.length;
-      var args = undefined;
+      var args = void 0;
 
       if ('function' === typeof listeners.fn) {
         if (listeners.once) {
@@ -84,7 +85,7 @@ var AsyncEventEmitter = function (_EventEmitter) {
       } else {
         var promises = [];
         var length = listeners.length;
-        var j = undefined;
+        var j = void 0;
 
         for (i = 0; i < length; i++) {
           if (listeners[i].once) {

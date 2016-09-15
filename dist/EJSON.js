@@ -1,5 +1,10 @@
 'use strict';
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.EJSON = undefined;
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; }; /**
@@ -8,10 +13,6 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
                                                                                                                                                                                                                                                    * linter
                                                                                                                                                                                                                                                    */
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.EJSON = undefined;
 
 var _Base = require('./Base64');
 
@@ -77,6 +78,7 @@ var EJSON = exports.EJSON = function () {
    * @param {String} name A tag for your custom type; must be unique among custom data types defined in your project, and must match the result of your type's `typeName` method.
    * @param {Function} factory A function that deserializes a JSON-compatible value into an instance of your type.  This should match the serialization performed by your type's `toJSONValue` method.
    */
+
 
   _createClass(EJSON, [{
     key: 'addType',
@@ -309,8 +311,8 @@ var EJSON = exports.EJSON = function () {
 
       if (_checkTypes2.default.array(v) || _isArguments(v)) {
         ret = [];
-        for (var i = 0; i < v.length; i++) {
-          ret[i] = this.clone(v[i]);
+        for (var _i = 0; _i < v.length; _i++) {
+          ret[_i] = this.clone(v[_i]);
         }
         return ret;
       }

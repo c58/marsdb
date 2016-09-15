@@ -1,11 +1,11 @@
 'use strict';
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.IndexManager = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _bind2 = require('fast.js/function/bind');
 
@@ -23,6 +23,14 @@ var _map2 = require('fast.js/map');
 
 var _map3 = _interopRequireDefault(_map2);
 
+var _values2 = require('fast.js/object/values');
+
+var _values3 = _interopRequireDefault(_values2);
+
+var _try2 = require('fast.js/function/try');
+
+var _try3 = _interopRequireDefault(_try2);
+
 var _invariant = require('invariant');
 
 var _invariant2 = _interopRequireDefault(_invariant);
@@ -31,9 +39,9 @@ var _PromiseQueue = require('./PromiseQueue');
 
 var _PromiseQueue2 = _interopRequireDefault(_PromiseQueue);
 
-var _CollectionIndex = require('./CollectionIndex');
+var _MapIndex = require('./MapIndex');
 
-var _CollectionIndex2 = _interopRequireDefault(_CollectionIndex);
+var _MapIndex2 = _interopRequireDefault(_MapIndex);
 
 var _DocumentRetriver = require('./DocumentRetriver');
 
@@ -61,11 +69,8 @@ var IndexManager = exports.IndexManager = function () {
     this.indexes = {};
     this._queue = new _PromiseQueue2.default(options.concurrency || 2);
 
-    // By default ensure index by _id field
-    this.ensureIndex({
-      fieldName: '_id',
-      unique: true
-    });
+    // By default create index by _id field
+    this.createIndex('_id', { unique: true });
   }
 
   /**
@@ -77,19 +82,19 @@ var IndexManager = exports.IndexManager = function () {
    * existing index will be rebuilt, otherwise existing index
    * don't touched.
    *
-   * @param  {Object} options.fieldName     name of the field for indexing
+   * @param  {Object} key  name of the field for indexing
    * @param  {Object} options.forceRebuild  rebuild index if it exists
    * @return {Promise}
    */
 
-  _createClass(IndexManager, [{
-    key: 'ensureIndex',
-    value: function ensureIndex(options) {
-      (0, _invariant2.default)(options && options.fieldName, 'You must specify a fieldName in options object');
 
-      var key = options.fieldName;
+  _createClass(IndexManager, [{
+    key: 'createIndex',
+    value: function createIndex(key, options) {
+      (0, _invariant2.default)(key && (!options || options && !options.key), 'You must specify a key out of options object, as a first argument');
+
       if (!this.indexes[key]) {
-        this.indexes[key] = new _CollectionIndex2.default(options);
+        this.indexes[key] = new _MapIndex2.default(key, options);
         return this.buildIndex(key);
       } else if (this.indexes[key].buildPromise) {
         return this.indexes[key].buildPromise;
@@ -101,7 +106,7 @@ var IndexManager = exports.IndexManager = function () {
     }
 
     /**
-     * Buld an existing index (ensured) and return a
+     * Buld an existing index (created) and return a
      * promise that will be resolved only when index successfully
      * built for all documents in the storage.
      * @param  {String} key
@@ -113,7 +118,7 @@ var IndexManager = exports.IndexManager = function () {
     value: function buildIndex(key) {
       var _this = this;
 
-      (0, _invariant2.default)(this.indexes[key], 'Index with key `%s` does not ensured yet', key);
+      (0, _invariant2.default)(this.indexes[key], 'Index with key `%s` does not created yet', key);
 
       var cleanup = function cleanup() {
         return _this.indexes[key].buildPromise = null;
@@ -136,12 +141,9 @@ var IndexManager = exports.IndexManager = function () {
     value: function buildAllIndexes() {
       var _this2 = this;
 
-      return Promise.all((0, _map3.default)(this.indexes, function (v, k) {
-        return _this2.ensureIndex({
-          fieldName: k,
-          forceRebuild: true
-        });
-      }));
+      return Promise.all((0, _values3.default)((0, _map3.default)(this.indexes, function (v, k) {
+        return _this2.createIndex(k, { forceRebuild: true });
+      })));
     }
 
     /**
@@ -174,16 +176,17 @@ var IndexManager = exports.IndexManager = function () {
       return this._queue.add(function () {
         var keys = (0, _keys3.default)(_this4.indexes);
         var failingIndex = null;
-        try {
+        var res = (0, _try3.default)(function () {
           (0, _forEach2.default)(keys, function (k, i) {
             failingIndex = i;
             _this4.indexes[k].insert(doc);
           });
-        } catch (e) {
+        });
+        if (res instanceof Error) {
           (0, _forEach2.default)(keys.slice(0, failingIndex), function (k) {
             _this4.indexes[k].remove(doc);
           });
-          throw e;
+          throw res;
         }
       });
     }
@@ -204,13 +207,14 @@ var IndexManager = exports.IndexManager = function () {
       return this._queue.add(function () {
         var keys = (0, _keys3.default)(_this5.indexes);
         var failingIndex = null;
-        try {
+        var res = (0, _try3.default)(function () {
           (0, _forEach2.default)(keys, function (k, i) {
             failingIndex = i;
             _this5.indexes[k].update(oldDoc, newDoc);
           });
-        } catch (e) {
-          (0, _forEach2.default)(keys.slice(0, failingIndex), function (k) {
+        });
+        if (res instanceof Error) {
+          (0, _forEach2.default)(keys.slice(0, failingIndex + 1), function (k) {
             _this5.indexes[k].revertUpdate(oldDoc, newDoc);
           });
           throw e;
@@ -254,10 +258,11 @@ var IndexManager = exports.IndexManager = function () {
       var errors = [];
       return new _DocumentRetriver2.default(this.db).retriveAll().then(function (docs) {
         (0, _forEach2.default)(docs, function (doc) {
-          try {
+          var res = (0, _try3.default)(function () {
             index.insert(doc);
-          } catch (e) {
-            errors.push([e, doc]);
+          });
+          if (res instanceof Error) {
+            errors.push([res, doc]);
           }
         });
 

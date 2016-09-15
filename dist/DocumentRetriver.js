@@ -1,11 +1,11 @@
 'use strict';
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.DocumentRetriver = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _checkTypes = require('check-types');
 
@@ -55,6 +55,7 @@ var DocumentRetriver = exports.DocumentRetriver = function () {
    * @return {Promise}
    */
 
+
   _createClass(DocumentRetriver, [{
     key: 'retriveForQeury',
     value: function retriveForQeury(query) {
@@ -62,7 +63,7 @@ var DocumentRetriver = exports.DocumentRetriver = function () {
       var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
       // Try to get list of ids
-      var selectorIds = undefined;
+      var selectorIds = void 0;
       if ((0, _Document.selectorIsId)(query)) {
         // fast path for scalar query
         selectorIds = [query];

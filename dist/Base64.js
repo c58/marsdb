@@ -1,10 +1,10 @@
 'use strict';
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -60,19 +60,19 @@ var Base64 = exports.Base64 = function () {
       var b = null;
       var c = null;
       var d = null;
-      for (var i = 0; i < array.length; i++) {
-        switch (i % 3) {
+      for (var _i = 0; _i < array.length; _i++) {
+        switch (_i % 3) {
           case 0:
-            a = array[i] >> 2 & 0x3F;
-            b = (array[i] & 0x03) << 4;
+            a = array[_i] >> 2 & 0x3F;
+            b = (array[_i] & 0x03) << 4;
             break;
           case 1:
-            b |= array[i] >> 4 & 0xF;
-            c = (array[i] & 0xF) << 2;
+            b |= array[_i] >> 4 & 0xF;
+            c = (array[_i] & 0xF) << 2;
             break;
           case 2:
-            c |= array[i] >> 6 & 0x03;
-            d = array[i] & 0x3F;
+            c |= array[_i] >> 6 & 0x03;
+            d = array[_i] & 0x3F;
             answer.push(getChar(a));
             answer.push(getChar(b));
             answer.push(getChar(c));
